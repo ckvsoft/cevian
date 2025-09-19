@@ -1,0 +1,9 @@
+{
+    "database": {
+        "type": "mysql",
+        "host": "localhost",
+        "name": "databse_name",
+        "user": "user_name",
+        "pass": "_Passw0rd!_"
+    }
+}
