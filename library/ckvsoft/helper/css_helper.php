@@ -2,25 +2,38 @@
 
 namespace ckvsoft\Helper;
 
-/**
- * Description of csshelper
- *
- * @author chris
- *
- * Example call from Controller
- * $params = [
- *           'method' => 'getCss',
- *           'args' => ['inc/css/mbv.css']
- *       ];
- * $css = $this->loadHelper("css", $params);
- */
 class Css_Helper extends \ckvsoft\mvc\Helper
 {
-
+    /**
+     * Load and minify CSS file from module or core_module fallback
+     *
+     * @param string $css relative path, e.g. 'inc/css/mbv.css'
+     * @return string minified CSS
+     * @throws \Exception if file not found
+     */
     public function getCss($css)
     {
-        $path = getcwd() . '/' . MODULES_URI . $this->baseController . "/view/" . $css;
-        $style = preg_replace('/\s+/', ' ', file_get_contents($path));
-        return str_replace(["\r", "\n"], '', preg_replace('/\/\*[\s\S]*?\*\//', '', $style));
+        $pathsToCheck = [
+            getcwd() . '/' . MODULES_URI . $this->baseController . '/view/' . $css,
+            getcwd() . '/' . CORE_MODULES_URI . $this->baseController . '/view/' . $css,
+        ];
+
+        $found = false;
+        foreach ($pathsToCheck as $path) {
+            if (file_exists($path)) {
+                $style = file_get_contents($path);
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            throw new \Exception("CSS file not found in module or core_modules: $css");
+        }
+
+        // Minify
+        $style = preg_replace('/\s+/', ' ', $style);
+        $style = preg_replace('/\/\*[\s\S]*?\*\//', '', $style);
+        return str_replace(["\r", "\n"], '', $style);
     }
 }

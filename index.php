@@ -22,6 +22,7 @@ $defaultConfig = [
     'paths' => [
         'base_uri' => '/',
         'modules_uri' => 'modules/',
+        'core_modules_uri' => 'core_modules/',
     ],
     'app' => [
         'debug' => false,
@@ -64,7 +65,9 @@ $app = $configData['app'];
 $session = $configData['session'];
 
 define('BASE_URI', $paths['base_uri']);
-define('MODULES_URI', $paths['modules_uri']);
+
+define('MODULES_URI', rtrim($paths['modules_uri'], '/') . '/');
+define('CORE_MODULES_URI', rtrim($paths['core_modules_uri'], '/') . '/');
 define('APP_DEBUG', $app['debug']);
 define('CSS_JS_DEBUG', $app['css_js_debug']);
 define('HASH_KEY', $app['hash_key']);

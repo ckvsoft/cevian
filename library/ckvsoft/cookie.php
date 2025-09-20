@@ -5,63 +5,93 @@ namespace ckvsoft;
 class Cookie
 {
 
+    private array $storage = [];
+    private array $deleted = [];
+
     /**
-     * Set a Cookie
+     * Set a cookie
      *
-     * @param string $name Name of Cookie
-     * @param mixed $data String or Array
-     * @param integer $time Default is 1 day, use seconds
-     *          86400 = 1 day
-     *          604800 = 1 week
-     *          2419200 = 1 month
-     *
-     *
-     * @return boolean Was the set successful?
+     * @param string $name
+     * @param string|array $data
+     * @param int $time Lifetime in seconds (default 1 day)
+     * @return bool
      */
-    public static function set($name, $data, $time = 86400)
+    public function set(string $name, string|array $data, int $time = 86400): bool
     {
-        if (is_string($data)) {
-            setcookie($name, $data, $time);
-            return true;
-        } elseif (is_array($data)) {
-            setcookie($name, json_encode($data), $time);
-            return true;
+        $value = is_array($data) ? json_encode($data) : $data;
+
+        $success = setcookie(
+                $name,
+                $value,
+                [
+                    'expires' => time() + $time,
+                    'secure' => true, // nur HTTPS
+                    'httponly' => true, // JS kann nicht zugreifen
+                    'path' => '/', // gilt für gesamte Domain
+                    'samesite' => 'Lax', // verhindert CSRF bei Drittseiten
+                ]
+        );
+
+        if ($success) {
+            $this->storage[$name] = $value;
+            unset($this->deleted[$name]);
         }
 
-        return false;
+        return $success;
     }
 
     /**
-     * Returns cookie data
+     * Fetch a cookie
      *
-     * @param string $name Name of the cookie
-     * @param boolean $is_json Unserialize if it is JSON
-     *
-     * @return mixed
+     * @param string $name
+     * @return string|array|false
      */
-    public static function fetch($name, $is_json = false)
+    public function fetch(string $name): string|array|false
     {
-
-        if (isset($_COOKIE[$name])) {
-            if ($is_json == true)
-                return json_decode($_COOKIE[$name], true);
-            else
-                return $_COOKIE[$name];
+        if (isset($this->deleted[$name])) {
+            return false;
         }
 
-        return false;
+        if (!isset($this->storage[$name])) {
+            return false;
+        }
+
+        $value = $this->storage[$name];
+
+        // automatisch JSON erkennen
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        return $value;
     }
 
     /**
      * Destroy a cookie
      *
      * @param string $name
+     * @return bool
      */
-    public static function destroy($name)
+    public function destroy(string $name): bool
     {
-        setcookie($name, '', time() - 36000);
+        $success = setcookie(
+                $name,
+                '',
+                [
+                    'expires' => time() - 3600,
+                    'secure' => true,
+                    'httponly' => true,
+                    'path' => '/',
+                    'samesite' => 'Lax',
+                ]
+        );
 
-        if (isset($_COOKIE[$name]))
-            unset($_COOKIE[$name]);
+        if ($success) {
+            unset($this->storage[$name]);
+            $this->deleted[$name] = true;
+        }
+
+        return $success;
     }
 }

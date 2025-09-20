@@ -87,15 +87,13 @@ class Bootstrap extends \stdClass
      */
     public function __construct()
     {
-        if (isset($_GET['uri'])) {
-            /** Prevent the slash from breaking the array below */
-            $uri = rtrim($_GET['uri'], '/');
+        $uri = filter_input(INPUT_GET, 'uri', FILTER_SANITIZE_URL);
 
-            /** Prevent a null-byte from going through */
-            $uri = filter_var($uri, FILTER_SANITIZE_URL);
+        if ($uri !== null && $uri !== false) {
+            $uri = rtrim($uri, '/');
         }
-        /** Set the string URI */
-        $this->uri = (isset($uri)) ? $uri : '';
+
+        $this->uri = $uri ?: '';
     }
 
     /**
@@ -169,10 +167,10 @@ class Bootstrap extends \stdClass
         /**
          * Set the default paths afterwards
          */
-        $this->_pathController = $this->_pathRoot . 'modules/';
-        $this->_pathModel = $this->_pathRoot . 'modules/';
-        $this->_pathView = $this->_pathRoot . 'modules/';
-        $this->_pathHelper = $this->_pathRoot . 'modules/';
+        $this->_pathController = $this->_pathRoot . MODULES_URI;
+        $this->_pathModel = $this->_pathRoot . MODULES_URI;
+        $this->_pathView = $this->_pathRoot . MODULES_URI;
+        $this->_pathHelper = $this->_pathRoot . MODULES_URI;
         $this->_pathConfig = $this->_pathRoot . 'config/';
     }
 
@@ -244,22 +242,20 @@ class Bootstrap extends \stdClass
 
     /**
      * _initController - Load the controller based on the URL
+     *
+     * This method determines whether the controller exists in the user's
+     * modules folder or in core_modules, loads it, initializes paths,
+     * sets up the view, and calls the requested method with parameters.
      */
     private function _initController()
     {
         $lastSegment = $this->_uriValue[array_key_last($this->_uriValue)] ?? null;
-        if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot)$/i', $lastSegment)) {
-            // Filtered $_SERVER Inputs
-            $docRoot = strip_tags((string) filter_input(INPUT_SERVER, 'DOCUMENT_ROOT'));
-            $referrer = filter_input(INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL);
-            $userAgent = strip_tags((string) filter_input(INPUT_SERVER, 'HTTP_USER_AGENT'));
-            $requestUri = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
 
-            // $logDir = $docRoot . BASE_URI . 'var/log/';
+        // --- Asset Request Logging (CSS, JS, images, fonts, etc.) ---
+        if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot)$/i', $lastSegment)) {
             $logDir = dirname(__DIR__, 3) . '/var/log/';
             $timestamp = date('Y-m-d H:i:s');
 
-            // Debug backtrace für Aufruf-Herkunft
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $traceLines = [];
             foreach ($trace as $t) {
@@ -271,76 +267,89 @@ class Bootstrap extends \stdClass
             }
             $traceString = implode(" | ", $traceLines);
 
-            // Log-Nachricht
             $msg = sprintf(
                     "[%s] Misrouted asset request: %s | Referrer: %s | Agent: %s | URI: %s | Trace: %s\n",
                     $timestamp,
                     $this->uri,
-                    $referrer,
-                    $userAgent,
-                    $requestUri,
+                    filter_input(INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL),
+                    strip_tags((string) filter_input(INPUT_SERVER, 'HTTP_USER_AGENT')),
+                    filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL),
                     $traceString
             );
-
             error_log($msg, 3, $logDir . 'bootstrap_assets.log');
-            // kein exit → erstmal nur beobachten
         }
 
-        /** The user must create this class */
+        // --- Require custom user configuration ---
         $this->_requireCustomConfig();
 
-        /** Make sure the actual controller exists */
         $module = rtrim(strtolower($this->_uriController), '/') . '/';
         $baseController = $this->_uriController;
+
         if ($this->_uriSubController)
             $this->_uriController = $this->_uriSubController;
 
-        if (file_exists($this->_pathController . $module . "controller/" . strtolower($this->_uriController) . '.php')) {
-            /** Include the controller and instantiate it */
-            require $this->_pathController . $module . "controller/" . strtolower($this->_uriController) . '.php';
+        // --- Determine whether controller exists in modules or core_modules ---
+        $controllerFile = $this->_pathController . $module . "controller/" . strtolower($this->_uriController) . '.php';
+        $isCoreModule = false;
 
-            $moduleAutoloadPath = $this->_pathController . strtolower($baseController) . '/';
-            $autoloadFile = $moduleAutoloadPath . 'modulautoload.php';
+        if (!file_exists($controllerFile)) {
+            // fallback to core_modules
+            $controllerFile = str_replace(MODULES_URI, CORE_MODULES_URI, $controllerFile);
 
-            if (file_exists($autoloadFile)) {
-                require_once $autoloadFile;
+            if (!file_exists($controllerFile)) {
+                die(__CLASS__ . ': error (non-existent controller): ' . $this->_uriController);
             }
+            $isCoreModule = true;
+        }
 
-            $controller = $this->_uriController;
+        // --- Include controller ---
+        require $controllerFile;
 
-            $this->controller = new $controller();
+        // --- Optional module autoload ---
+        $moduleAutoloadPath = $controllerFile ? dirname($controllerFile) . '/' : '';
+        $autoloadFile = $moduleAutoloadPath . 'modulautoload.php';
+        if (file_exists($autoloadFile)) {
+            require_once $autoloadFile;
+        }
 
-            /** Controller Pfade */
-            $this->controller->pathModel = $this->_pathModel;
-            $this->controller->pathHelper = $this->_pathHelper;
-            $this->controller->pathClass = $this->_pathController . $module;
-            $this->controller->baseController = strtolower($baseController);
-            $this->controller->view = new View(defined('CSS_JS_DEBUG') && CSS_JS_DEBUG === true);
-            $this->controller->view->setPath($this->_pathView);
+        $controllerClass = $this->_uriController;
+        $this->controller = new $controllerClass();
 
-            /** Methode aufrufen */
-            if (isset($this->_uriMethod)) {
-                if (!empty($this->_uriValue)) {
-                    switch (count($this->_uriValue)) {
-                        case 1: $this->controller->{$this->_uriMethod}($this->_uriValue[0]);
-                            break;
-                        case 2: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1]);
-                            break;
-                        case 3: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2]);
-                            break;
-                        case 4: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2], $this->_uriValue[3]);
-                            break;
-                        case 5: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2], $this->_uriValue[3], $this->_uriValue[4]);
-                            break;
-                    }
-                } else {
-                    $this->controller->{$this->_uriMethod}();
+        // --- Set controller paths ---
+        $this->controller->pathModel = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathModel) : $this->_pathModel;
+
+        $this->controller->pathHelper = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathHelper) : $this->_pathHelper;
+
+        $this->controller->pathClass = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathController) . $module : $this->_pathController . $module;
+
+        $this->controller->baseController = strtolower($baseController);
+        $this->controller->coreModulePath = $this->_pathRoot . CORE_MODULES_URI;
+
+        // --- Initialize the view object ---
+        $this->controller->view = new View(defined('CSS_JS_DEBUG') && CSS_JS_DEBUG === true);
+        $this->controller->view->setPath($this->_pathView); // Modulpfad
+        $this->controller->view->setCoreModulePath($this->_pathRoot . CORE_MODULES_URI); // Core-Fallback
+        // --- Call the requested method with parameters ---
+        if (isset($this->_uriMethod)) {
+            if (!empty($this->_uriValue)) {
+                switch (count($this->_uriValue)) {
+                    case 1: $this->controller->{$this->_uriMethod}($this->_uriValue[0]);
+                        break;
+                    case 2: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1]);
+                        break;
+                    case 3: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2]);
+                        break;
+                    case 4: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2], $this->_uriValue[3]);
+                        break;
+                    case 5: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2], $this->_uriValue[3], $this->_uriValue[4]);
+                        break;
+                    default: call_user_func_array([$this->controller, $this->_uriMethod], $this->_uriValue);
                 }
             } else {
-                $this->controller->index();
+                $this->controller->{$this->_uriMethod}();
             }
         } else {
-            die(__CLASS__ . ': error (non-existant controller): ' . $this->_uriController);
+            $this->controller->index();
         }
     }
 
@@ -348,14 +357,10 @@ class Bootstrap extends \stdClass
     {
         if (!file_exists($this->_pathConfig . '/config.json')) {
             die(__CLASS__ . ": error (missing config)\n
-                You must create your base config model here: {$this->_pathConfig}/config.json\n
+                You must create your config json here: {$this->_pathConfig}/config.json\n
                 <pre>
-                &lt;?php\n
-                class Model {}
                 </pre>
             ");
         }
-
-        // require $this->_pathConfig . 'config.php';
     }
 }

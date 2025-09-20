@@ -15,6 +15,7 @@ class Controller extends \stdClass
     public $pathClass;
     public $mobile = false;
     public $baseController;
+    public $coreModulePath;
 
     /**
      * __construct - Required
@@ -26,39 +27,6 @@ class Controller extends \stdClass
         if (strpos($user_agent, 'Mobile') !== false)
             $this->mobile = true;
     }
-
-    /**
-     *
-     * @param string $model
-     * @return \ckvsoft\MVC\model
-     */
-    /*
-      public function loadModel($model)
-      {
-      return \ModelLoader_helper::loadModel($this->pathModel, $this->pathClass , $model);
-      }
-     */
-
-    /*
-      public function loadModel($model, $module = null)
-      {
-      if ($module === null) {
-      // Aktuelles Modul aus pathClass ableiten
-      $parts = explode('/', rtrim($this->pathClass, '/'));
-      $module = end($parts);
-      }
-
-      $modelFile = $this->pathModel . $module . '/model/' . $model . '_model.php';
-      if (!file_exists($modelFile)) {
-      throw new \Exception("Model file not found: $modelFile");
-      }
-
-      require_once $modelFile;
-      $modelClass = $model . '_Model';
-      return new $modelClass();
-      }
-     * 
-     */
 
     public function loadModel($model, $module = null, ...$params)
     {
@@ -83,31 +51,55 @@ class Controller extends \stdClass
         return new $modelClass(...$params);
     }
 
+    /**
+     * loadHelper - Load a helper from module folder or core_modules fallback
+     *
+     * @param string $helper Helper name, either "module/helper" or just core helper name
+     * @param array $params Optional parameters for method call
+     * @return object|mixed The helper object or the method call result
+     * @throws \ckvsoft\CkvException if helper cannot be found
+     */
     public function loadHelper($helper, $params = [])
     {
         try {
-            if (strpos($helper, '/') !== false) {
-                $helper_parts = explode('/', $helper);
-                $module_name = $helper_parts[0];
-                $helper_file = $helper_parts[1] . '_helper.php';
-                $helper_path = $this->pathHelper . $module_name . '/helper/' . $helper_file;
-                require_once($helper_path);
+            $helperFile = '';
+            $helperClass = '';
 
-                $helper_name = $helper_parts[1] . '_helper';
+            if (strpos($helper, '/') !== false) {
+                // Module-specific helper requested
+                [$moduleName, $helperName] = explode('/', $helper);
+
+                // Look first in module folder
+                $helperFile = $this->pathHelper . $moduleName . '/helper/' . $helperName . '_helper.php';
+                if (!file_exists($helperFile)) {
+                    // fallback to core_modules
+                    $helperFile = str_replace(MODULES_URI, CORE_MODULES_URI, $helperFile);
+                    if (!file_exists($helperFile)) {
+                        throw new \Exception("Helper file not found in module or core_modules: $helper");
+                    }
+                }
+
+                require_once($helperFile);
+                $helperClass = $helperName . '_helper';
             } else {
-                // Framework-Helper: Namespace + _helper anhängen
-                $helper_name = 'ckvsoft\\helper\\' . $helper . '_helper';
+                // Core helper only: namespace ckvsoft\helper
+                $helperClass = 'ckvsoft\\helper\\' . $helper . '_helper';
+                if (!class_exists($helperClass)) {
+                    throw new \Exception("Core helper class not found: $helperClass");
+                }
             }
 
-            $helperObject = new $helper_name($this->baseController);
+            // Instantiate helper
+            $helperObject = new $helperClass($this->baseController);
 
+            // Call method directly if provided
             if (isset($params['method']) && is_callable([$helperObject, $params['method']])) {
-                return call_user_func_array([$helperObject, $params['method']], $params['args']);
+                return call_user_func_array([$helperObject, $params['method']], $params['args'] ?? []);
             }
 
             return $helperObject;
         } catch (\Exception $e) {
-            throw new ckvsoft\CkvException($e->getMessage());
+            throw new \ckvsoft\CkvException($e->getMessage());
         }
     }
 
@@ -129,39 +121,45 @@ class Controller extends \stdClass
 
     /**
      * Load a JavaScript file either from the current module's view folder 
-     * or from the general 'modules' directory.
+     * or from the general 'modules' directory, with fallback to core_modules.
      *
      * Usage:
      * 1. Relative path (within current module view):
      *      loadScript("js/script.js") 
      *      -> modules/<current_module>/view/js/script.js
      *
-     * 2. Absolute path (within general modules folder):
+     * 2. Absolute path (starting with '/') for modules root:
      *      loadScript("/inc/js/another_script.js") 
      *      -> modules/inc/js/another_script.js
      *
      * @param string $script Path to the script, relative or starting with '/' for modules root
      * @return string The content of the script file
-     * @throws \ckvsoft\CkvException if the file does not exist
+     * @throws \ckvsoft\CkvException if the file does not exist in both module and core_modules
      */
     public function loadScript(string $script)
     {
         if (substr($script, 0, 1) === '/') {
-            // Absolute path in general modules folder
-            $fullpath = rtrim($this->pathModel, '/') . '/' . $script;
+            // Absoluter Pfad → zuerst Module, dann Core
+            $paths = [
+                rtrim($this->pathClass, '/') . $script, // Module
+                rtrim($this->coreModulePath ?? '', '/') . $script // Core fallback
+            ];
         } else {
-            // Relative path in current module view folder
-            $fullpath = rtrim($this->pathClass, '/') . '/view/' . $script;
+            // Relativer Pfad im View des aktuellen Moduls
+            $paths = [
+                rtrim($this->pathClass, '/') . '/view/' . $script,
+                rtrim($this->coreModulePath ?? '', '/') . '/view/' . $script
+            ];
         }
 
-        // Normalize double slashes
-        $fullpath = preg_replace('#/+#', '/', $fullpath);
-
-        if (file_exists($fullpath)) {
-            return file_get_contents($fullpath);
+        foreach ($paths as $fullpath) {
+            $fullpath = preg_replace('#/+#', '/', $fullpath);
+            if (file_exists($fullpath)) {
+                return file_get_contents($fullpath);
+            }
         }
 
-        throw new \ckvsoft\CkvException("Script not found: $fullpath");
+        throw new \ckvsoft\CkvException("Script not found: " . implode(" | ", $paths));
     }
 
     /**

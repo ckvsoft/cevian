@@ -110,62 +110,51 @@ class Input
      */
     private function _handle_input($name, $required)
     {
-        /**
-         * Sanitize the post data (Only allow ASCII up to 127 for now)
-         */
-        if (is_array($this->_mimicPost) && isset($this->_mimicPost[$name])) {
-            if (isset($this->_mimicPost[$name]))
-                $input = $this->_mimicPost[$name];
-            else
-                throw new \ckvsoft\CkvException('Mimic value not found in your POST/GET/REQUEST');
-        } else {
+        $input = null;
 
+        // Use mimic post if available
+        if (is_array($this->_mimicPost) && array_key_exists($name, $this->_mimicPost)) {
+            $input = $this->_mimicPost[$name];
+        } else {
             switch ($this->_mode) {
                 case 'POST':
-                    /**
-                     * Make sure checkboxes are always passed, and set them as strings
-                     */
                     if ($required === 'checkbox') {
-                        $input = isset($_POST[$name]) && ($_POST[$name] == 'on' || $_POST[$name] == 'true') ? (string) 1 : (string) 0;
+                        $input = filter_input(INPUT_POST, $name, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                        $input = $input ? '1' : '0';
                     } else {
-                        $input = isset($_POST[$name]) ? $_POST[$name] : null;
+                        $input = filter_input(INPUT_POST, $name, FILTER_DEFAULT);
                     }
                     break;
+
                 case 'GET':
-                    $input = isset($_GET[$name]) ? urldecode($_GET[$name]) : null;
+                    $input = filter_input(INPUT_GET, $name, FILTER_DEFAULT);
                     break;
+
                 case 'REQUEST':
-                    $input = isset($_REQUEST[$name]) ? urldecode($_REQUEST[$name]) : null;
+                    // $_REQUEST cannot be fully replaced by filter_input
+                    $input = filter_input(INPUT_POST, $name, FILTER_DEFAULT);
+                    if ($input === null) {
+                        $input = filter_input(INPUT_GET, $name, FILTER_DEFAULT);
+                    }
                     break;
             }
         }
 
-        /**
-         * If this is not required, we skip it when the value is null
-         * This is so something can post and someone can EDIT on a few fields at a time
-         */
-        if ($required == false && $input == null) {
-            /** An internal flag to prevent the validator from running */
+        // Skip optional null values
+        if ($required == false && $input === null) {
             $this->_currentRecord = null;
             return $this;
         }
 
-        /**
-         * If the field is required and empty
-         * Mark the error field is required
-         */
-        if ($required == true && $input == null) {
+        // Required field missing
+        if ($required === true && $input === null) {
             $this->_errorData[$name] = 'is required';
         }
 
-        /**
-         * Set a new record in this object
-         */
+        // Store the value internally
         $this->_inputData[$name] = $input;
 
-        /**
-         * Hold on to the immediate record incase validation is called next
-         */
+        // Keep a reference for chaining
         $this->_currentRecord['key'] = &$name;
         $this->_currentRecord['value'] = &$this->_inputData[$name];
 
@@ -300,9 +289,9 @@ class Input
         }
 
         /*
-        if (count($this->_errorData) > 0) {
-            throw new \ckvsoft\CkvException("There are errors in the form. Please wrap the form in a try/catch and call \$form->fetchErrors() in the catch.\n" . implode(", ", $this->_errorData));
-        }
+          if (count($this->_errorData) > 0) {
+          throw new \ckvsoft\CkvException("There are errors in the form. Please wrap the form in a try/catch and call \$form->fetchErrors() in the catch.\n" . implode(", ", $this->_errorData));
+          }
          * 
          */
     }
