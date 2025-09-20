@@ -15,12 +15,26 @@ class Menu extends ckvsoft\mvc\Controller
     public function index()
     {
 
-        $this->model = $this->loadModel('menu');
-        $menuhelper = $this->loadHelper("menu/menu");
-        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js") . '</script>';
-        $this->view->title = 'Main Menu';
+        $params = [
+            'method' => 'getCss',
+            'args' => ['/inc/css/style.css']
+        ];
 
-        $this->view->render('dashboard/inc/header', ['menuitems' => $menuhelper->getMenu(0, 10)]);
+        if ($this->mobile) {
+            $params = [
+                'method' => 'getCss',
+                'args' => ['/inc/css/mobile.css']
+            ];
+        }
+
+        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
+
+        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
+        $script .= $this->loadScript("/inc/js/menuscript.js");
+        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
+
+        $menuhelper = $this->loadHelper("menu/menu");
+        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
         $this->view->render('menu/index', ['menu_script' => $script]);
         $this->view->render('inc/footer');
     }
@@ -59,11 +73,11 @@ class Menu extends ckvsoft\mvc\Controller
         $input = new \ckvsoft\Input();
         try {
             $input->post('label', true)
-                ->post('link', true)
-                ->post('parent', false)
-                ->post('sort', false)
-                ->post('role', false)
-                ->post('is_public', false);
+                    ->post('link', true)
+                    ->post('parent', false)
+                    ->post('sort', false)
+                    ->post('role', false)
+                    ->post('is_public', false);
             $input->submit();
 
             // If the form has no errors, lets try the.
@@ -89,9 +103,27 @@ class Menu extends ckvsoft\mvc\Controller
         $this->model = $this->loadModel("menu");
         $this->view->menuList = $this->model->menuSingleList($id);
         $menuhelper = $this->loadHelper("menu/menu");
-        $script = '<script>' . $this->loadScript("js/edit.js") . '</script>';
+        $params = [
+            'method' => 'getCss',
+            'args' => ['/inc/css/style.css']
+        ];
 
-        $this->view->render('dashboard/inc/header', ['menuitems' => $menuhelper->getMenu(0, 10)]);
+        if ($this->mobile) {
+            $params = [
+                'method' => 'getCss',
+                'args' => ['/inc/css/mobile.css']
+            ];
+        }
+
+        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
+
+        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
+        $script .= $this->loadScript("/inc/js/menuscript.js");
+        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
+
+        $menuhelper = $this->loadHelper("menu/menu");
+        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
+
         $this->view->render('menu/edit', ['script' => $script]);
         $this->view->render('inc/footer');
     }
@@ -101,11 +133,11 @@ class Menu extends ckvsoft\mvc\Controller
         $input = new \ckvsoft\Input();
         try {
             $input->post('label', true)
-                ->post('link', true)
-                ->post('parent', false)
-                ->post('sort', false)
-                ->post('role', false)
-                ->post('is_public', false);
+                    ->post('link', true)
+                    ->post('parent', false)
+                    ->post('sort', false)
+                    ->post('role', false)
+                    ->post('is_public', false);
             $input->submit();
 
             // If the form has no errors, lets try the.
@@ -131,5 +163,4 @@ class Menu extends ckvsoft\mvc\Controller
         $this->model->delete($id);
         header('location: ' . BASE_URI . 'menu');
     }
-
 }

@@ -5,9 +5,11 @@ echo "<html lang=\"de\">";
 echo "<head>";
 echo "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
 echo "<script> var BASE_URI = \"" . BASE_URI . "\"</script>";
-echo "<script src=\"" . BASE_URI . "public/js/menuscript.js\"></script>";
-echo "<script src=\"" . BASE_URI . "public/js/x-notify.js\"></script>";
-echo "<script src=\"" . BASE_URI . "public/js/highslide/highslide-full.js\"></script>";
+
+if (!empty($this->base_scripts)) {
+    echo $this->base_scripts;
+}
+
 echo "<link rel=\"shortcut icon\" href=\"" . BASE_URI . "favicon.ico\" type=\"image/x-icon\">";
 echo "<link rel=\"icon\" href=\"" . BASE_URI . "favicon.ico\" type=\"image/x-icon\">";
 
@@ -45,10 +47,8 @@ echo "    return Array.from(form).some(el => 'origValue' in el.dataset && el.dat
 echo "  }";
 echo "</script>";
 
-if ($this->mobile) {
-    echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"" . BASE_URI . "public/css/mobile.css\">\n";
-} else {
-    echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"" . BASE_URI . "public/css/style.css\">\n";
+if (!empty($this->base_css)) {
+    echo $this->base_css;
 }
 
 echo "</head>";

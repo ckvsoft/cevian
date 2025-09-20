@@ -13,11 +13,27 @@ class User extends ckvsoft\mvc\Controller
 
     public function index()
     {
+        $this->view->title = 'Users';
+        $params = [
+            'method' => 'getCss',
+            'args' => ['/inc/css/style.css']
+        ];
+
+        if ($this->mobile) {
+            $params = [
+                'method' => 'getCss',
+                'args' => ['/inc/css/mobile.css']
+            ];
+        }
+
+        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
+
+        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
+        $script .= $this->loadScript("/inc/js/menuscript.js");
+        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
 
         $menuhelper = $this->loadHelper("menu/menu");
-        $script = "<script>" . $this->loadScript("/inc/js/ajax-list-pagination.js") . "</script>";
-        $this->view->title = 'Users';
-        $this->view->render('dashboard/inc/header', ['menuitems' => $menuhelper->getMenu(0)]);
+        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
         $this->view->render('user/index', ['user_script' => $script]);
         $this->view->render('inc/footer');
     }
@@ -69,9 +85,28 @@ class User extends ckvsoft\mvc\Controller
     {
         $this->model = $this->loadModel('user');
         $menuhelper = $this->loadHelper("menu/menu");
-        $script = "<script>" . $this->loadScript("js/useredit.js") . "</script>";
         $this->view->title = 'Edit User';
-        $this->view->render('dashboard/inc/header', ['menuitems' => $menuhelper->getMenu(0), 'script' => $script]);
+        $params = [
+            'method' => 'getCss',
+            'args' => ['/inc/css/style.css']
+        ];
+
+        if ($this->mobile) {
+            $params = [
+                'method' => 'getCss',
+                'args' => ['/inc/css/mobile.css']
+            ];
+        }
+
+        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
+
+        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
+        $script .= $this->loadScript("/inc/js/menuscript.js");
+//        $script .= $this->loadScript("js/useredit.js");
+
+        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
+
+        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
         $this->view->render('user/edit', ['user' => $this->model->userSingleList($id)]);
         $this->view->render('inc/footer');
     }

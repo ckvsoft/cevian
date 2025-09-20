@@ -18,7 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await resp.json();
 
                 if (data.success === 1) {
-                    await loadList(listUrl, listContainerId);
+                    const redirectUrl = form.dataset.redirect;
+                    if (redirectUrl) {
+                        // Edit-Form: Redirect
+                        displayMessage("success", "Edit", "Modify was successful");
+                        setTimeout(() => window.location.href = BASE_URI + redirectUrl, 2000);
+                    } else {
+                        // Add-Form: AJAX-Liste neu laden
+                        await loadList(listUrl, listContainerId);
+                    }
                 } else {
                     const statusEl = document.getElementById('status');
                     if (statusEl) {
@@ -43,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const html = await resp.text();
             const container = document.getElementById(containerId);
             container.innerHTML = html;
-
             setupPagination(container);
         } catch (err) {
             console.error('Error loading the list:', err);
@@ -60,20 +67,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const rowsPerPage = 15;
         let currentPage = 1;
-        const totalPages = Math.ceil((table.rows.length - 1) / rowsPerPage); // -1 wegen Header
+        const totalPages = Math.ceil((table.rows.length - 1) / rowsPerPage);
 
-        // Alte Pagination entfernen, falls vorhanden
         const oldPagination = container.querySelector('.pagination');
         if (oldPagination)
             oldPagination.remove();
 
-        // Pagination-Container erstellen
         const pagination = document.createElement('div');
         pagination.className = 'pagination';
         pagination.style.marginTop = '10px';
         pagination.style.textAlign = 'left';
 
-        // Prev/Next Buttons
         const prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
         prevButton.style.minWidth = '100px';
@@ -85,16 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
         nextButton.style.minWidth = '100px';
         nextButton.style.padding = '6px 12px';
 
-        // Status-Element
         const pageStatus = document.createElement('span');
         pageStatus.style.marginLeft = '10px';
         pageStatus.style.fontWeight = 'bold';
 
-        // Button Events
         prevButton.onclick = () => showPage(currentPage - 1);
         nextButton.onclick = () => showPage(currentPage + 1);
 
-        // Pagination zusammensetzen
         pagination.appendChild(prevButton);
         pagination.appendChild(nextButton);
         pagination.appendChild(pageStatus);
@@ -108,17 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 page = totalPages;
             currentPage = page;
 
-            const start = (page - 1) * rowsPerPage + 1; // +1 wegen Header
+            const start = (page - 1) * rowsPerPage + 1;
             const end = start + rowsPerPage;
 
             for (let i = 0; i < table.rows.length; i++) {
                 table.rows[i].style.display = (i === 0 || (i >= start && i < end)) ? '' : 'none';
             }
 
-            // Status aktualisieren
             pageStatus.textContent = `Seite ${currentPage} von ${totalPages}`;
-
-            // Buttons deaktivieren, falls nötig
             prevButton.disabled = currentPage === 1;
             nextButton.disabled = currentPage === totalPages;
         }
@@ -127,20 +125,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------
-    // Alle AJAX-Listen initialisieren
+    // Initialisierung aller Formulare und Listen
     // ----------------------------
-    document.querySelectorAll('.ajax-list').forEach(container => {
+    document.querySelectorAll('[data-form]').forEach(container => {
         const formId = container.dataset.form;
         const listUrl = container.dataset.url;
         const containerId = container.id;
 
         setupAjaxForm(formId, listUrl, containerId);
-        loadList(listUrl, containerId);
+
+        if (container.classList.contains('ajax-list')) {
+            loadList(listUrl, containerId);
+        }
     });
 
     // ----------------------------
     // Alle statischen Tabellen mit Pagination initialisieren
-    // ----------------------------
+    // ---------------------------- 
     document.querySelectorAll('.paginated').forEach(container => {
         setupPagination(container);
     });

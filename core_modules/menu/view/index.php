@@ -27,4 +27,3 @@
 </fieldset>
 <hr />
 <div id="menulist" class="ajax-list" data-form="menuForm" data-url="menu/menuList" style="position: relative;"></div>
-<?= $this->menu_script; ?>

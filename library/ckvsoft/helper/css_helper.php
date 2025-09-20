@@ -4,6 +4,7 @@ namespace ckvsoft\Helper;
 
 class Css_Helper extends \ckvsoft\mvc\Helper
 {
+
     /**
      * Load and minify CSS file from module or core_module fallback
      *
@@ -13,10 +14,20 @@ class Css_Helper extends \ckvsoft\mvc\Helper
      */
     public function getCss($css)
     {
-        $pathsToCheck = [
-            getcwd() . '/' . MODULES_URI . $this->baseController . '/view/' . $css,
-            getcwd() . '/' . CORE_MODULES_URI . $this->baseController . '/view/' . $css,
-        ];
+        // Prüfen, ob $css mit einem / beginnt
+        if (strpos($css, '/') === 0) {
+            // Suche direkt in MODULES oder CORE_MODULES
+            $pathsToCheck = [
+                getcwd() . '/' . MODULES_URI . ltrim($css, '/'),
+                getcwd() . '/' . CORE_MODULES_URI . ltrim($css, '/'),
+            ];
+        } else {
+            // Standard-Suche im Modul/view-Ordner
+            $pathsToCheck = [
+                getcwd() . '/' . MODULES_URI . $this->baseController . '/view/' . $css,
+                getcwd() . '/' . CORE_MODULES_URI . $this->baseController . '/view/' . $css,
+            ];
+        }
 
         $found = false;
         foreach ($pathsToCheck as $path) {

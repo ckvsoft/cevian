@@ -18,5 +18,3 @@
 </fieldset>
 <hr />
 <div id="userlist" class="ajax-list" data-form="userForm" data-url="user/userList"></div>
-<?= $this->user_script; ?>
-
