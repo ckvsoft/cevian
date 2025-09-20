@@ -46,7 +46,7 @@ class Version
      */
     private static function getGitVersion()
     {
-        $gitDir = __DIR__ . '/.git';
+        $gitDir = __DIR__ . '/../../.git';
 
         if (!is_dir($gitDir)) {
             return null;
