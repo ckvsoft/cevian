@@ -1,2 +1,3 @@
 config/app.json
 config/config.json
+var/backup/*
