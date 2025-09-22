@@ -160,7 +160,7 @@ class Controller extends \stdClass
 
             $paths = [
                 $baseFs . trim(MODULES_URI, '/') . '/' . $module . '/view/' . $script,
-                $baseFs . trim(CORE_MODULE_URI, '/') . '/' . $module . '/view/' . $script,
+                $baseFs . trim(CORE_MODULES_URI, '/') . '/' . $module . '/view/' . $script,
             ];
         }
 
