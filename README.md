@@ -12,24 +12,21 @@ CKVSoft MVC ist ein leichtgewichtiges, modulares PHP-Framework, das die klassisc
 - **Asset-Management:** Logging von fehlgeleiteten Asset-Anfragen (CSS/JS/Bilder).
 - **CSS/JS-Analyse:** Automatische Überprüfung ungenutzter CSS-Selektoren und JS-Verwendung pro View.
 - **Mobile-Erkennung:** Zugriff über `$controller->mobile` und `$view->mobile`.
-- **Flexible Konfiguration:** JSON-basierte Konfigurationsdateien für Datenbank- und App-Einstellungen.
+- **Flexible Konfiguration:** Alle App- und Datenbank-Einstellungen werden automatisch vom Installer erstellt.
 
 ## Installation
 
 1. Repository in das Projekt klonen.
-2. `config/config.json` und `config/app.json` erstellen.
-3. Root- und Modulpfade in der `Bootstrap`-Klasse definieren.
+2. Installer automatisch starten:
+   - Wenn `config/config.json` oder `config/app.json` fehlen, wird beim ersten Aufruf automatisch der Installer gestartet.
+   - Der Installer erstellt die Konfigurationsdateien, initialisiert die Datenbank und legt den ersten Admin-User an.
+   - Ein `hash_key` wird automatisch generiert und in `config/app.json` gespeichert.
+3. Root- und Modulpfade werden automatisch vom Framework gesetzt.
 
 ## Nutzung
 
 ### Bootstrap
-Die `Bootstrap`-Klasse analysiert die URI, wählt Controller und Methode aus, übergibt Parameter und initialisiert Controller und Views.
-
-```php
-$bootstrap = new \ckvsoft\mvc\Bootstrap();
-$bootstrap->setPathRoot('/path/to/your/modules');
-$bootstrap->init();
-```
+Das Framework initialisiert automatisch alle Controller, Views und Module. **Es sind keine manuellen Anpassungen nötig**, auch nicht bei Updates.
 
 ### Controller
 Controller erweitern die `Controller`-Klasse und können Modelle, Helfer und Views laden.
@@ -72,8 +69,9 @@ $helper->validate($data);
 
 ## Konfiguration
 
-- **config/config.json**: Datenbankkonfiguration.
-- **config/app.json**: App-weite Einstellungen.
+- Alle wichtigen Einstellungen (App, Datenbank) werden automatisch vom Installer in `config/config.json` und `config/app.json` angelegt.
+- Manuelles Erstellen von Konfigurationsdateien ist nicht notwendig.
+- Der Installer erzeugt auch den ersten Admin-User und den `hash_key`.
 
 ## Lizenz
 
@@ -93,24 +91,21 @@ CKVSoft MVC is a lightweight, modular PHP framework implementing the classic **M
 - **Asset Management:** Logging of misrouted asset requests (CSS/JS/images).
 - **CSS/JS Analysis:** Automatic checking of unused CSS selectors and JS usage per view.
 - **Mobile Detection:** Access via `$controller->mobile` and `$view->mobile`.
-- **Flexible Configuration:** JSON-based configuration files for database and app settings.
+- **Flexible Configuration:** All app and database settings are automatically created by the installer.
 
 ## Installation
 
 1. Clone the repository into your project.
-2. Set up `config/config.json` and `config/app.json`.
-3. Define the root path and module paths in the `Bootstrap` class.
+2. Installer starts automatically:
+   - If `config/config.json` or `config/app.json` are missing, the installer runs automatically on first access.
+   - The installer creates the configuration files, initializes the database, and creates the first admin user.
+   - A `hash_key` is automatically generated and stored in `config/app.json`.
+3. Root and module paths are set automatically by the framework.
 
 ## Usage
 
 ### Bootstrap
-The `Bootstrap` class parses the URI, selects controller and method, passes parameters, and initializes controllers and views.
-
-```php
-$bootstrap = new \ckvsoft\mvc\Bootstrap();
-$bootstrap->setPathRoot('/path/to/your/modules');
-$bootstrap->init();
-```
+The framework automatically initializes all controllers, views, and modules. **No manual modifications are necessary**, even during updates.
 
 ### Controllers
 Controllers extend the `Controller` class and can load models, helpers, and views.
@@ -153,8 +148,9 @@ $helper->validate($data);
 
 ## Configuration
 
-- **config/config.json**: Database configuration.
-- **config/app.json**: Application-wide settings.
+- All important settings (app, database) are automatically created by the installer in `config/config.json` and `config/app.json`.
+- Manual creation of configuration files is not required.
+- The installer also creates the first admin user and the `hash_key`.
 
 ## License
 
