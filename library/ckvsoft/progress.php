@@ -46,7 +46,6 @@ class Progress
         $percent = round($this->current / $this->total * 100);
         if ($percent > 100)
             $percent = 100;
-        error_log("percent: $percent");
         $data = array('percent' => $percent, 'id' => $this->progress_id);
         $this->db->insertUpdate($this->table, $data);
     }
