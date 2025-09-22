@@ -280,7 +280,7 @@ class Bootstrap extends \stdClass
         }
 
         // --- Require custom user configuration ---
-        $this->_requireCustomConfig();
+        // $this->_requireCustomConfig();
 
         $module = rtrim(strtolower($this->_uriController), '/') . '/';
         $baseController = $this->_uriController;
@@ -355,12 +355,25 @@ class Bootstrap extends \stdClass
 
     private function _requireCustomConfig()
     {
-        if (!file_exists($this->_pathConfig . '/config.json')) {
-            die(__CLASS__ . ": error (missing config)\n
-                You must create your config json here: {$this->_pathConfig}/config.json\n
-                <pre>
-                </pre>
-            ");
+        // Check if the config file does not exist
+        if (!file_exists($this->_pathConfig . 'config.json')) {
+            // If the config file is missing, we need to handle it.
+            // We set the controller and method to the installer.
+            $this->_uriController = 'Installer';
+            $this->_uriMethod = 'index';
+            $this->_uriValue = [];
+
+            // Now, we need to "re-route" the internal state of the application.
+            // This is a direct approach, but it changes the state before the main
+            // controller initialization. A cleaner way would be to return a flag
+            // and handle the logic in the init() method.
+            // To make it work with the current _initController() logic,
+            // we can simply exit the current method and let _initController()
+            // proceed with the new URI values.
+            return;
         }
+
+        // Existing logic for when the config file exists
+        // (e.g., loading config data, etc.)
     }
 }

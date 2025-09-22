@@ -53,7 +53,6 @@ if (!empty($this->base_css)) {
 
 echo "</head>";
 echo "<body>";
-echo "<body>";
 echo " <div class=\"fixed-header\">";
 echo "  <div class=\"container\">";
 echo "   <img class=\"logo\" src=\"" . BASE_URI . "public/images/logo.png\" alt=\"LOGO\" />";

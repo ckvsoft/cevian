@@ -40,7 +40,15 @@ $configData = array_replace_recursive($defaultConfig, $customConfigData);
 
 // --- Critical Checks ---
 if (empty($configData['app']['hash_key'])) {
-    throw new \RuntimeException("Critical config missing: 'app.hash_key' must be set in app.json");
+
+    define('MODULES_URI', 'modules/');
+    define('CORE_MODULES_URI', 'core_modules/');
+
+    $bootstrap = new ckvsoft\mvc\Bootstrap();
+    $bootstrap->setPathRoot(getcwd() . '/');
+    $bootstrap->setControllerDefault('installer');
+    $bootstrap->init();
+    exit;
 }
 
 // --- PHP Settings ---

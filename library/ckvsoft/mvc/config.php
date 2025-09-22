@@ -4,13 +4,20 @@ namespace ckvsoft\mvc;
 
 class Config
 {
+
     protected static $sharedDb = null;
     protected static $appConfig = null;
     protected $db;
 
     public function __construct()
     {
-        $this->db = self::db();
+        // DB nur initialisieren, wenn config.json existiert
+        if (file_exists(__DIR__ . '/../../../config/config.json')) {
+            $this->db = self::db();
+        } else {
+            $this->db = null; // Installer Mode
+        }
+
         self::getAppConfig();
     }
 
@@ -20,23 +27,30 @@ class Config
         if (self::$appConfig === null) {
             $configPath = __DIR__ . '/../../../config/app.json';
             if (!file_exists($configPath)) {
-                die("Error: Global App-Configurationfile '$configPath' not found!");
+                return [];
+                // die("Error: Global App-Configurationfile '$configPath' not found!");
             }
             self::$appConfig = json_decode(file_get_contents($configPath), true);
         }
         return self::$appConfig;
     }
 
-    // ... (deine bestehende initDb-Methode)
-
     protected static function initDb()
     {
-        // JSON-Konfigurationsdatei lesen (oder eine separate db.json verwenden)
         $configPath = __DIR__ . '/../../../config/config.json';
+
         if (!file_exists($configPath)) {
-                die("Error: Database-Configurationfile '$configPath' not found!");
+            // Kein config → Installer-Mode aktiv
+            self::$sharedDb = null;
+            return;
         }
+
         $configData = json_decode(file_get_contents($configPath), true);
+
+        if (!isset($configData['database'])) {
+            die("Error: 'database' section missing in config.json");
+        }
+
         $dbConfig = $configData['database'];
 
         self::$sharedDb = new \ckvsoft\Database([
