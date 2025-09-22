@@ -1,5 +1,7 @@
 <?php
 
+ini_set('display_errors', 1);
+
 require_once 'library/ckvsoft/autoload.php';
 
 $autoload = new \ckvsoft\Autoload([
@@ -40,7 +42,7 @@ $configData = array_replace_recursive($defaultConfig, $customConfigData);
 
 // --- Critical Checks ---
 if (empty($configData['app']['hash_key'])) {
-
+    define('BASE_URI', rtrim(dirname(filter_input(INPUT_SERVER, 'SCRIPT_NAME', FILTER_SANITIZE_URL)), '/\\') . '/');
     define('MODULES_URI', 'modules/');
     define('CORE_MODULES_URI', 'core_modules/');
 
@@ -72,7 +74,8 @@ $paths = $configData['paths'];
 $app = $configData['app'];
 $session = $configData['session'];
 
-define('BASE_URI', $paths['base_uri']);
+// define('BASE_URI', $paths['base_uri']);
+define('BASE_URI', rtrim(dirname(filter_input(INPUT_SERVER, 'SCRIPT_NAME', FILTER_SANITIZE_URL)), '/\\') . '/');
 
 define('MODULES_URI', rtrim($paths['modules_uri'], '/') . '/');
 define('CORE_MODULES_URI', rtrim($paths['core_modules_uri'], '/') . '/');

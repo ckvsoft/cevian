@@ -1,18 +1,14 @@
 RewriteEngine On
 
-RewriteBase /simple_php_framework
+RewriteBase /simple_php_framework/
 
 RewriteCond %{HTTPS} off
-# First rewrite to HTTPS:
-# Don't put www. here. If it is already there it will be included, if not
-# the subsequent rule will catch it.
 RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-# Now, rewrite any request to the wrong domain to use www.
-RewriteCond %{HTTP_HOST} !^service\.
-RewriteRule .* https://service.%{HTTP_HOST}%{REQUEST_URI} [QSA,L]
+
+# RewriteCond %{HTTP_HOST} !^service\.
+# RewriteRule .* https://service.%{HTTP_HOST}%{REQUEST_URI} [QSA,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-
 
 RewriteRule ^(.+)$ index.php?uri=$1 [QSA,L]
