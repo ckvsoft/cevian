@@ -15,6 +15,7 @@ class Controller extends \stdClass
     public $pathClass;
     public $mobile = false;
     public $baseController;
+    public $modulePath;
     public $coreModulePath;
 
     /**
@@ -138,17 +139,28 @@ class Controller extends \stdClass
      */
     public function loadScript(string $script)
     {
-        if (substr($script, 0, 1) === '/') {
-            // Absoluter Pfad → zuerst Module, dann Core
+        // absoluter Basis-Pfad = Arbeitsverzeichnis + BASE_URI
+        // $baseFs = rtrim(getcwd(), '/') . '/' . ltrim(BASE_URI, '/');
+        $baseFs = rtrim(getcwd(), '/') . '/';
+
+
+        $paths = [];
+
+        if ($script[0] === '/') {
+            // Absoluter Modulpfad → Module + Core
+            $scriptRel = ltrim($script, '/');
             $paths = [
-                rtrim($this->pathClass, '/') . $script, // Module
-                rtrim($this->coreModulePath ?? '', '/') . $script // Core fallback
+                $baseFs . trim(MODULES_URI, '/') . '/' . $scriptRel,
+                $baseFs . trim(CORE_MODULES_URI, '/') . '/' . $scriptRel,
             ];
         } else {
-            // Relativer Pfad im View des aktuellen Moduls
+            // Relativer Pfad → Modulname ermitteln
+            $parts = explode('/', trim($this->pathClass, '/'));
+            $module = $parts[0] ?? '';
+
             $paths = [
-                rtrim($this->pathClass, '/') . '/view/' . $script,
-                rtrim($this->coreModulePath ?? '', '/') . '/view/' . $script
+                $baseFs . trim(MODULES_URI, '/') . '/' . $module . '/view/' . $script,
+                $baseFs . trim(CORE_MODULE_URI, '/') . '/' . $module . '/view/' . $script,
             ];
         }
 
