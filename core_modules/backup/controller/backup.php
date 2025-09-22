@@ -40,7 +40,7 @@ class Backup extends ckvsoft\mvc\Controller
             'images' => isset($imagesBackup[0]['modified']) ? $imagesBackup[0]['modified'] : null,
             'database' => isset($databaseBackup[0]['modified']) ? $databaseBackup[0]['modified'] : null,
         ]);
-        $this->view->render('dashboard/inc/footer');
+        $this->view->render('/inc/footer');
     }
 
     public function lastBackup($id)
