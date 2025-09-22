@@ -35,7 +35,7 @@ class CkvException extends \Exception
         if ($docRoot === null || $docRoot === false) {
             $docRoot = __DIR__ . '/../../'; // Fallback relativ zum Code
         }
-        $log_directory = rtrim($docRoot, DIRECTORY_SEPARATOR) . BASE_URI . 'var/log/';
+        $log_directory = rtrim($docRoot, DIRECTORY_SEPARATOR) . 'var/log/';
         $timestamp = date('Y-m-d H:i:s');
 
         $logMessage = sprintf(
