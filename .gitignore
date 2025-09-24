@@ -1,6 +1,10 @@
-.htaccess
-config/app.json
-config/config.json
-var/backup/*.json
-var/log/*.log
-modules/*
+/.htaccess
+/config/app.json
+/config/config.json
+/var/backup/*.json
+/var/log/*.log
+/modules/*
+
+# Aber direkt im modules/ die Ausnahmen behalten
+!/modules/.htaccess
+!/modules/index.php
