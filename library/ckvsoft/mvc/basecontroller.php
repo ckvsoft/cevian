@@ -83,22 +83,20 @@ class BaseController extends \ckvsoft\mvc\Controller
             $viewFile = $v['view'] ?? null;
             $viewData = $v['data'] ?? [];
 
-            if ($viewFile !== null) {
-                // Prüfen, ob Header
-                if (str_contains($viewFile, 'header')) {
-                    // Menü nur einmal hinzufügen
-                    if (!$headerRendered) {
-                        $viewData['menuitems'] = $this->menuHelper->getMenu(0);
-                        $headerRendered = true;
-                    }
-
-                    // CSS/JS immer hinzufügen
-                    $viewData['base_css'] = $this->baseCss;
-                    $viewData['base_scripts'] = $this->baseScripts;
-                }
-
-                $this->view->render($viewFile, $viewData);
+            if ($viewFile === null) {
+                continue;
             }
+
+            // Prüfen, ob Header
+            if (str_contains($viewFile, 'header') && !$headerRendered) {
+                $viewData['menuitems'] = $this->menuHelper->getMenu(0);
+                $viewData['base_css'] = $this->baseCss;
+                $viewData['base_scripts'] = $this->baseScripts;
+
+                $headerRendered = true;
+            }
+
+            $this->view->render($viewFile, $viewData);
         }
     }
 }
