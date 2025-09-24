@@ -20,8 +20,8 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-tag: true          # keine Tags erstellen
-          git-push: false         # nichts pushen
+          skip-tag: true
+          git-push: true
           skip-on-empty: false    # Changelog immer erstellen
           skip-version-file: true # KEINE Version-Datei bearbeiten
           config-file-path: ".changelogrc.json"
