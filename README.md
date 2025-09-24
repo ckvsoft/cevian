@@ -68,21 +68,25 @@ server {
     root /var/www/cevian/public;
     index index.php;
 
+    # Optional HTTPS-Redirect
     if ($scheme = http) {
         return 301 https://$host$request_uri;
     }
 
+    # Optional www-Redirect
     if ($host !~* ^www\.) {
-        return 301 301 https://www.$host$request_uri;
+        return 301 https://www.$host$request_uri;
     }
 
+    # Alle Anfragen an index.php weiterleiten
     location / {
-        try_files $uri $uri/ /index.php?uri=$uri&$args;
+        try_files $uri $uri/ /index.php$is_args$args;
     }
 
+    # PHP-FPM
     location ~ \.php$ {
         include fastcgi_params;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;  # anpassen falls andere Version
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
@@ -225,21 +229,25 @@ server {
     root /var/www/cevian/public;
     index index.php;
 
+    # Optional HTTPS-Redirect
     if ($scheme = http) {
         return 301 https://$host$request_uri;
     }
 
+    # Optional www-Redirect
     if ($host !~* ^www\.) {
-        return 301 301 https://www.$host$request_uri;
+        return 301 https://www.$host$request_uri;
     }
 
+    # Alle Anfragen an index.php weiterleiten
     location / {
-        try_files $uri $uri/ /index.php?uri=$uri&$args;
+        try_files $uri $uri/ /index.php$is_args$args;
     }
 
+    # PHP-FPM
     location ~ \.php$ {
         include fastcgi_params;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;  # anpassen falls andere Version
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
