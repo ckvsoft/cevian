@@ -21,7 +21,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-tag: true
-          git-push: true
-          skip-on-empty: false    # Changelog immer erstellen
-          skip-version-file: true # KEINE Version-Datei bearbeiten
+          git-push: false
+          skip-on-empty: false
+          skip-version-file: true
+          fallback-version: "${GITHUB_REF#refs/tags/}"
           config-file-path: ".changelogrc.json"
