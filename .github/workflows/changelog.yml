@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*' # Löst die Action aus, wenn ein neuer Tag wie "v1.0.0" gepusht wird
+  workflow_dispatch: # Fügt einen "Run workflow" Button hinzu
 
 jobs:
   build:
