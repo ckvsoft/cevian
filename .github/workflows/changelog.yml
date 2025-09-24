@@ -3,27 +3,21 @@ name: Automatic Changelog Generation
 on:
   push:
     tags:
-      - 'v*'          # Workflow startet nur bei Tag-Push
-  workflow_dispatch:   # manuelles Ausführen möglich
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   changelog:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # volle Git-Historie für Tag-Vergleich
+          fetch-depth: 0
 
       - name: Generate Changelog
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-tag: true
-          git-push: false
-          skip-git-pull: true
-          skip-on-empty: false
-          skip-version-file: true
-          fallback-version: "${GITHUB_REF#refs/tags/}"
-          config-file-path: ".changelogrc.json"
+          git-push: true   # wichtig: sonst bleibt das Changelog nur im Runner
