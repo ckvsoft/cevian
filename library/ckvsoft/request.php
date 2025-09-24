@@ -38,11 +38,11 @@ class Request
 
     public function getBaseUri(): string
     {
-        if (PHP_SAPI === 'cli')
-            return '/';
-        $scriptName = $this->getServerVar('SCRIPT_NAME', '/');
-        $dir = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
-        return $dir === '' ? '/' : $dir . '/';
+        // Server-Pfad zum Webroot
+        $frontControllerDir = dirname($_SERVER['SCRIPT_FILENAME']); // z. B. /home/.../web/mbv
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/');           // z. B. /home/.../web
+        $baseUri = '/' . trim(str_replace($docRoot, '', $frontControllerDir), '/') . '/';
+        return $baseUri === '//' ? '/' : $baseUri;
     }
 
     public function isMobile(): bool
