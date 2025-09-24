@@ -3,14 +3,14 @@ name: Automatic Changelog Generation
 on:
   push:
     tags:
-      - 'v*' # Löst die Action aus, wenn ein neuer Tag wie "v1.0.0" gepusht wird
-  workflow_dispatch: # Fügt einen "Run workflow" Button hinzu
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
-  build:
+  changelog:
     name: Generate Changelog and Release
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate Changelog and Create Release
-        uses: conventional-changelog/github-action@v3 # Korrigierter Name der Action
+        uses: TriPSs/conventional-changelog-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           git-tag: false
