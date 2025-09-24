@@ -17,12 +17,12 @@ jobs:
           fetch-depth: 0   # volle Git-Historie für Tag-Vergleich
 
       - name: Generate Changelog
+      - name: Generate Changelog
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-tag: true           # keine neuen Tags erstellen
-          git-push: false          # nichts pushen
-          skip-on-empty: false     # erzwingt Changelog, auch wenn leer
-          version-file: ""         # kein package.json nötig
-          fallback-version: "0.1.0"
+          skip-tag: true          # keine Tags erstellen
+          git-push: false         # nichts pushen
+          skip-on-empty: false    # Changelog immer erstellen
+          skip-version-file: true # KEINE Version-Datei bearbeiten
           config-file-path: ".changelogrc.json"
