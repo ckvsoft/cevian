@@ -7,7 +7,7 @@ use ckvsoft\mvc\Config;
 
 class BaseController extends \ckvsoft\mvc\Controller
 {
-    
+
     protected Request $request;
     protected string $baseCss;
     protected string $baseScripts;
@@ -77,17 +77,24 @@ class BaseController extends \ckvsoft\mvc\Controller
 
         $this->menuHelper = $this->loadHelper("menu/menu");
 
+        $headerRendered = false;
+
         foreach ($views as $v) {
             $viewFile = $v['view'] ?? null;
             $viewData = $v['data'] ?? [];
 
             if ($viewFile !== null) {
+                // Prüfen, ob Header
                 if (str_contains($viewFile, 'header')) {
-                    $viewData = array_merge($viewData, [
-                        'base_css' => $this->baseCss,
-                        'base_scripts' => $this->baseScripts,
-                        'menuitems' => $this->menuHelper->getMenu(0),
-                    ]);
+                    // Menü nur einmal hinzufügen
+                    if (!$headerRendered) {
+                        $viewData['menuitems'] = $this->menuHelper->getMenu(0);
+                        $headerRendered = true;
+                    }
+
+                    // CSS/JS immer hinzufügen
+                    $viewData['base_css'] = $this->baseCss;
+                    $viewData['base_scripts'] = $this->baseScripts;
                 }
 
                 $this->view->render($viewFile, $viewData);

@@ -25,17 +25,8 @@ class CkvException extends \Exception
         $this->log();
     }
 
-    public function log($logfile = 'error.log')
+    public function log()
     {
-        // Log the error to a file
-        $docRoot = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT');
-        if (!$docRoot) {
-            $docRoot = __DIR__ . '/../../';
-        }
-        if ($docRoot === null || $docRoot === false) {
-            $docRoot = __DIR__ . '/../../'; // Fallback relativ zum Code
-        }
-        $log_directory = rtrim($docRoot, DIRECTORY_SEPARATOR) . 'var/log/';
         $timestamp = date('Y-m-d H:i:s');
 
         $logMessage = sprintf(
@@ -45,7 +36,7 @@ class CkvException extends \Exception
                 $this->traceback
         );
 
-        error_log($logMessage, 3, $log_directory . $logfile);
+        error_log($logMessage);
 
         if (ini_get('display_errors') && !defined('ERROR_DISPLAYED')) {
             define('ERROR_DISPLAYED', true);

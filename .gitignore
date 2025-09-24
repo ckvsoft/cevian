@@ -8,3 +8,4 @@
 # Aber direkt im modules/ die Ausnahmen behalten
 !/modules/.htaccess
 !/modules/index.php
+/public/*
