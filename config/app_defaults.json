@@ -1,0 +1,35 @@
+{
+    "app": {
+        "debug": false,
+        "css_js_debug": false,
+        "hash_key": null,
+        "controller_default": "home"
+    },
+    "paths": {
+        "base_uri": "/",
+        "modules_uri": "modules/",
+        "core_modules_uri": "core_modules/"        
+    },
+    "php_settings": {
+        "error_reporting": "E_ALL",
+        "display_errors": 1,
+        "display_startup_errors": 1,
+        "log_errors": 1,
+        "error_log_path": "/var/log/error.log"
+    },
+    "session": {
+        "timeout": 1800
+    },
+    "assets": {
+        "css": {
+            "default": ["/inc/css/style.css"],
+            "mobile": ["/inc/css/mobile.css"]
+        },
+        "js": [
+            "/inc/js/ajax-list-pagination.js",
+            "/inc/js/menuscript.js",
+            "/inc/js/x-notify.js",
+            "/inc/js/theme-js-vanilla.js"
+        ]
+    }
+}
