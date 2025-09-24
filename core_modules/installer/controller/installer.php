@@ -1,6 +1,6 @@
 <?php
 
-class Installer extends ckvsoft\mvc\BaseController
+class Installer extends ckvsoft\mvc\Controller
 {
 
     private string $stateFile;
@@ -26,8 +26,7 @@ class Installer extends ckvsoft\mvc\BaseController
         if (file_exists($this->stateFile)) {
             // Datei existiert schon → nur laden
             $this->state = json_decode(file_get_contents($this->stateFile), true);
-            $this->securityFile = $this->state['step1']['securityFile'] 
-                                  ?? 'install_' . bin2hex(random_bytes(8)) . '.txt';
+            $this->securityFile = $this->state['step1']['securityFile'] ?? 'install_' . bin2hex(random_bytes(8)) . '.txt';
         } else {
             // Datei existiert noch nicht → anlegen
             $this->securityFile = 'install_' . bin2hex(random_bytes(8)) . '.txt';
@@ -109,33 +108,37 @@ class Installer extends ckvsoft\mvc\BaseController
 
     public function setupAdmin()
     {
-        // POST-Daten sicher abrufen
-        $postData = filter_input_array(INPUT_POST, [
-            'username' => FILTER_SANITIZE_STRING,
-            'password' => FILTER_SANITIZE_STRING,
-            'email' => FILTER_VALIDATE_EMAIL
-        ]);
+        $input = new \ckvsoft\Input();
+        $input->post('username', true)
+                ->post('email', true)
+                ->validate('email')
+                ->post('password', true);
+        $input->submit();
+
+        $postData = $input->fetch();
 
         if ($postData) {
-            $username = trim($postData['username'] ?? '');
-            $password = trim($postData['password'] ?? '');
-            $email = trim($postData['email'] ?? '');
-
-            if (!$username || !$password || !$email) {
+            if ($input->fetchErrors()) {
                 $error = "Bitte alle Felder ausfüllen!";
             } else {
-                // State aktualisieren
-                $this->state['step3']['admin'] = [
-                    'username' => $username,
-                    'password' => $password,
-                    'email' => $email
-                ];
-                $this->state['step3']['done'] = true;
-                $this->saveState();
+                $username = trim($postData['username'] ?? '');
+                $password = trim($postData['password'] ?? '');
+                $email = trim($postData['email'] ?? '');
 
-                // Weiter zu Step4
-                $this->location('databaseSetup');
-                return;
+                if (!$username || !$password || !$email) {
+                    $error = "Bitte alle Felder ausfüllen!";
+                } else {
+                    $this->state['step3']['admin'] = [
+                        'username' => $username,
+                        'password' => $password,
+                        'email' => $email
+                    ];
+                    $this->state['step3']['done'] = true;
+                    $this->saveState();
+
+                    $this->location('databaseSetup');
+                    return;
+                }
             }
         }
 
@@ -147,13 +150,14 @@ class Installer extends ckvsoft\mvc\BaseController
 
     public function databaseSetup()
     {
-        // POST-Daten sicher abrufen
-        $postData = filter_input_array(INPUT_POST, [
-            'db_host' => FILTER_SANITIZE_STRING,
-            'db_name' => FILTER_SANITIZE_STRING,
-            'db_user' => FILTER_SANITIZE_STRING,
-            'db_pass' => FILTER_SANITIZE_STRING
-        ]);
+        $input = new \ckvsoft\Input();
+        $input->post('db_host', true)
+                ->post('db_name', true)
+                ->post('db_user', true)
+                ->post('db_pass', true);
+        $input->submit();
+
+        $postData = $input->fetch();
 
         if ($postData) {
             $model = $this->loadModel('installer');

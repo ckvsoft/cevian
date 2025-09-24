@@ -323,7 +323,8 @@ class Input
             /**
              * Make sure no empty items get placed
              */
-            return array_filter($this->_inputData, 'strlen');
+            return array_filter($this->_inputData, fn($v) => $v !== null && strlen($v) > 0);
+
         }
     }
 
