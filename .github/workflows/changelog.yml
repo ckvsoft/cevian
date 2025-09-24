@@ -18,7 +18,8 @@ jobs:
           fetch-depth: 0
 
       - name: Generate Changelog and Create Release
-        uses: TriPSs/conventional-changelog-action@v1
+      - name: Generate Changelog and Create Release
+        uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           git-tag: false
