@@ -1,6 +1,6 @@
 <?php
 
-class Login extends \ckvsoft\mvc\Controller
+class Login extends \ckvsoft\mvc\BaseController
 {
 
     public function __construct()
@@ -14,28 +14,11 @@ class Login extends \ckvsoft\mvc\Controller
      */
     public function index()
     {
-        $params = [
-            'method' => 'getCss',
-            'args' => ['/inc/css/style.css']
-        ];
-
-        if ($this->mobile) {
-            $params = [
-                'method' => 'getCss',
-                'args' => ['/inc/css/mobile.css']
-            ];
-        }
-
-        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
-
-        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
-        $script .= $this->loadScript("/inc/js/menuscript.js");
-        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
-
-        $menuhelper = $this->loadHelper("menu/menu");
-        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
-        $this->view->render('login/login');
-        $this->view->render('inc/footer');
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'Login']],
+            ['view' => 'login/login'],
+            ['view' => '/inc/footer'],
+        ]);
     }
 
     public static function isValid()

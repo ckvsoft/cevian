@@ -1,158 +1,314 @@
-# simple_php_framework
-Simple PHP Framework
-# CKVSoft MVC Framework
+# Cevian: Ein Einfaches & Elegantes PHP Framework
 
-CKVSoft MVC ist ein leichtgewichtiges, modulares PHP-Framework, das die klassische **Model-View-Controller (MVC)**-Architektur implementiert. Es legt den Fokus auf Modularität, einfache Konfiguration und eine klare Trennung von Logik, Darstellung und Datenzugriff. Das Framework bietet außerdem Utilities für CSS/JS-Analyse, Mobile-Erkennung und flexible Helper-Integration.
+## Deutsch
 
-## Features
+Cevian ist ein leichtgewichtiges und robustes Model-View-Controller (MVC) Framework, das die Webentwicklung vereinfacht. Es legt den Fokus auf Einfachheit, Sicherheit und eine saubere Struktur, die es erlaubt, leistungsstarke Anwendungen ohne unnötige Komplexität zu erstellen.
 
-- **Modularität:** Trennung zwischen Modul-Controllern, Subcontrollern, Views, Modellen und Core-Modulen.
-- **Dynamisches Laden:** Automatisches Laden von Controllern, Modellen, Helfern und Views basierend auf der URI.
-- **Fehlerbehandlung:** Detaillierte Fehlermeldungen im Debug-Modus, zentrale Exceptions im Produktionsmodus.
-- **Asset-Management:** Logging von fehlgeleiteten Asset-Anfragen (CSS/JS/Bilder).
-- **CSS/JS-Analyse:** Automatische Überprüfung ungenutzter CSS-Selektoren und JS-Verwendung pro View.
-- **Mobile-Erkennung:** Zugriff über `$controller->mobile` und `$view->mobile`.
-- **Flexible Konfiguration:** Alle App- und Datenbank-Einstellungen werden automatisch vom Installer erstellt.
+Der Name "Cevian" stammt aus der Geometrie, wo ein Cevian eine Linie ist, die einen Eckpunkt eines Dreiecks mit einem Punkt auf der gegenüberliegenden Seite verbindet. Dies spiegelt die Kernphilosophie des Frameworks wider: einen direkten und effizienten Pfad für die Verbindung von Logik, Daten und Views der Anwendung bereitzustellen.
 
-## Installation
+### Wichtige Funktionen
 
-1. Repository in das Projekt klonen.
-2. Installer automatisch starten:
-   - Wenn `config/config.json` oder `config/app.json` fehlen, wird beim ersten Aufruf automatisch der Installer gestartet.
-   - Der Installer erstellt die Konfigurationsdateien, initialisiert die Datenbank und legt den ersten Admin-User an.
-   - Ein `hash_key` wird automatisch generiert und in `config/app.json` gespeichert.
-3. Root- und Modulpfade werden automatisch vom Framework gesetzt.
+- **Saubere MVC Architektur:** Klare Trennung von Modellen, Views und Controllern.
+- **Modulbasierte Struktur:** Erweiterung oder Überschreibung von Kernfunktionen durch Module, ohne das Framework-Kernsystem zu verändern.
+- **Sicheres Datenbank-Layer:** Einfacher Zugriff auf Daten über PDO, Schutz vor SQL-Injection.
+- **Intuitive Konfiguration:** Alle Einstellungen werden automatisch vom Installer in `config/config.json` und `config/app.json` erstellt. Nachträgliche Anpassungen sind optional.
+- **Entwickler-Tools:** CSS/JS-Analyzer erkennt ungenutzten Code und hält Projekte schlank.
 
-## Nutzung
+### Erste Schritte
 
-### Bootstrap
-Das Framework initialisiert automatisch alle Controller, Views und Module. **Es sind keine manuellen Anpassungen nötig**, auch nicht bei Updates.
+Repository klonen:
 
-### Controller
-Controller erweitern die `Controller`-Klasse und können Modelle, Helfer und Views laden.
+```bash
+git clone https://github.com/ckvsoft/cevian.git
+cd cevian
+```
 
-```php
-class Index extends \ckvsoft\mvc\Controller {
-    public function index() {
-        $this->view->render('index', ['message' => 'Hallo Welt']);
+Nach dem Clonen und Einrichten der Webserver-Konfiguration (`.htaccess` oder Nginx) wird der Installer **einmalig automatisch** ausgeführt, falls Konfigurationsdateien fehlen.  
+Der Installer erstellt:
+
+- `config/config.json` und `config/app.json`
+- Datenbankschema
+- ersten **Admin-User**
+- `hash_key` für sichere Nutzung
+
+Nach Abschluss des Installers ist das Framework sofort einsatzbereit.  
+Die Konfigurationsdateien können nachträglich optional angepasst werden.
+
+### Webserver-Konfiguration
+
+Cevian benötigt URL-Rewriting, um alle Anfragen über `index.php` zu leiten.
+
+#### Apache (.htaccess)
+
+```apache
+RewriteEngine On
+
+RewriteBase /
+
+RewriteCond %{HTTPS} off
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteCond %{HTTP_HOST} !^www\.
+RewriteRule .* https://www.%{HTTP_HOST}%{REQUEST_URI} [QSA,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ index.php?uri=$1 [QSA,L]
+```
+
+> **Hinweis:** Wenn Cevian in einem Unterverzeichnis installiert wird (z. B. `/cevian`), muss `RewriteBase /` auf `RewriteBase /cevian/` angepasst werden.
+
+#### Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    root /var/www/cevian/public;
+    index index.php;
+
+    if ($scheme = http) {
+        return 301 https://$host$request_uri;
+    }
+
+    if ($host !~* ^www\.) {
+        return 301 301 https://www.$host$request_uri;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?uri=$uri&$args;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
 }
 ```
 
-### Modelle
-Modelle erweitern die `Model`-Klasse und bieten Zugriff auf die Datenbank.
+> **Hinweis:** Bei Installation in einem Unterverzeichnis den `root`-Pfad anpassen (z. B. `root /var/www/html/cevian/public;`).
+
+### Beispiel
+
+#### Controller erstellen
+
+`modules/users/controller/users.php`:
 
 ```php
-class User_model extends \ckvsoft\mvc\Model {
-    public function getAllUsers() {
-        return $this->db->query('SELECT * FROM users');
+<?php
+
+class Users extends \ckvsoft\mvc\BaseController
+{
+    public function index()
+    {
+        $userModel = $this->loadModel('users');
+        $users = $userModel->getAllUsers();
+        
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'User List']],
+            ['view' => 'users/index', 'data' => ['users' => $users]],
+            ['view' => '/inc/footer']
+        ]);
     }
 }
 ```
 
-### Views
-Views werden über das `View`-Objekt gerendert. CSS- und JS-Nutzung kann automatisch analysiert werden.
+#### Model erstellen
+
+`modules/users/model/users_model.php`:
 
 ```php
-$this->view->render('header');
-$this->view->render('content', ['data' => $data]);
-$this->view->render('footer');
+<?php
+
+class Users_Model extends \ckvsoft\mvc\Model
+{
+    public function getAllUsers()
+    {
+        return $this->db->select("SELECT id, name, email FROM users");
+    }
+}
 ```
 
-### Helper
-Helper können aus Modul- oder Core-Verzeichnissen geladen werden.
+#### View erstellen
+
+`modules/users/view/users/index.php`:
 
 ```php
-$helper = $this->loadHelper('form');
-$helper->validate($data);
+<h2>User List</h2>
+
+<?php if (!empty($this->users)): ?>
+    <ul>
+    <?php foreach ($this->users as $user): ?>
+        <li><?= htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)</li>
+    <?php endforeach; ?>
+    </ul>
+<?php else: ?>
+    <p>Keine Benutzer gefunden.</p>
+<?php endif; ?>
 ```
-
-## Konfiguration
-
-- Alle wichtigen Einstellungen (App, Datenbank) werden automatisch vom Installer in `config/config.json` und `config/app.json` angelegt.
-- Manuelles Erstellen von Konfigurationsdateien ist nicht notwendig.
-- Der Installer erzeugt auch den ersten Admin-User und den `hash_key`.
-
-## Lizenz
-
-CKVSoft MVC steht unter der **MIT-Lizenz**.
 
 ---
 
-# CKVSoft MVC Framework (English)
+## Lizenz
 
-CKVSoft MVC is a lightweight, modular PHP framework implementing the classic **Model-View-Controller (MVC)** architecture. It emphasizes modularity, easy configuration, and a clear separation between logic, presentation, and data access. The framework also provides utilities for CSS/JS analysis, mobile detection, and flexible helper integration.
+Cevian steht unter der **MIT-Lizenz**.
 
-## Features
+# English
 
-- **Modularity:** Separation of module controllers, subcontrollers, views, models, and core modules.
-- **Dynamic Loading:** Automatic loading of controllers, models, helpers, and views based on the URI.
-- **Error Handling:** Detailed error messages in debug mode and centralized exceptions in production mode.
-- **Asset Management:** Logging of misrouted asset requests (CSS/JS/images).
-- **CSS/JS Analysis:** Automatic checking of unused CSS selectors and JS usage per view.
-- **Mobile Detection:** Access via `$controller->mobile` and `$view->mobile`.
-- **Flexible Configuration:** All app and database settings are automatically created by the installer.
+## Cevian: A Simple & Elegant PHP Framework
 
-## Installation
+Cevian is a lightweight and robust Model-View-Controller (MVC) framework designed to streamline web application development. Focused on simplicity and security, it provides a clean and intuitive structure that allows you to build powerful applications without unnecessary complexity.
 
-1. Clone the repository into your project.
-2. Installer starts automatically:
-   - If `config/config.json` or `config/app.json` are missing, the installer runs automatically on first access.
-   - The installer creates the configuration files, initializes the database, and creates the first admin user.
-   - A `hash_key` is automatically generated and stored in `config/app.json`.
-3. Root and module paths are set automatically by the framework.
+The name "Cevian" is inspired by geometry, where a cevian is a line segment connecting a triangle's vertex to a point on the opposite side. This reflects the framework's core philosophy: providing a direct and efficient path for connecting your application's logic, data, and views.
 
-## Usage
+### Key Features
 
-### Bootstrap
-The framework automatically initializes all controllers, views, and modules. **No manual modifications are necessary**, even during updates.
+- **Clean MVC Architecture:** Clear separation of models, views, and controllers.
+- **Module-Based Structure:** Extend or override core functionality through modules without touching the core.
+- **Smart Database Layer:** Simple and secure database access via PDO, protected against SQL injection.
+- **Intuitive Configuration:** All settings are automatically created by the installer in `config/config.json` and `config/app.json`. Optional adjustments can be made afterwards.
+- **Built-in Development Tools:** CSS/JS analyzer detects unused code and keeps projects lean.
 
-### Controllers
-Controllers extend the `Controller` class and can load models, helpers, and views.
+### Getting Started
 
-```php
-class Index extends \ckvsoft\mvc\Controller {
-    public function index() {
-        $this->view->render('index', ['message' => 'Hello World']);
+Clone the repository:
+
+```bash
+git clone https://github.com/ckvsoft/cevian.git
+cd cevian
+```
+
+After cloning and setting up the web server configuration (`.htaccess` or Nginx), the installer runs **once automatically** if configuration files are missing.  
+The installer will create:
+
+- `config/config.json` and `config/app.json`
+- Database schema
+- The first **admin user**
+- `hash_key` for secure usage
+
+After installation, the framework is ready to use. Configuration files can be optionally adjusted afterwards.
+
+### Web Server Configuration
+
+Cevian requires URL rewriting to route all requests through `index.php`.
+
+#### Apache (.htaccess)
+
+```apache
+RewriteEngine On
+
+RewriteBase /
+
+RewriteCond %{HTTPS} off
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteCond %{HTTP_HOST} !^www\.
+RewriteRule .* https://www.%{HTTP_HOST}%{REQUEST_URI} [QSA,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ index.php?uri=$1 [QSA,L]
+```
+
+> **Note:** If Cevian is installed in a subdirectory (e.g., `/cevian`), adjust `RewriteBase /` to `RewriteBase /cevian/`.
+
+#### Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    root /var/www/cevian/public;
+    index index.php;
+
+    if ($scheme = http) {
+        return 301 https://$host$request_uri;
+    }
+
+    if ($host !~* ^www\.) {
+        return 301 301 https://www.$host$request_uri;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?uri=$uri&$args;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
 }
 ```
 
-### Models
-Models extend the `Model` class and provide database access.
+> **Note:** For installation in a subdirectory, adjust the `root` path (e.g., `root /var/www/html/cevian/public;`).
+
+### Example
+
+#### Define Controller
+
+`modules/users/controller/users.php`:
 
 ```php
-class User_model extends \ckvsoft\mvc\Model {
-    public function getAllUsers() {
-        return $this->db->query('SELECT * FROM users');
+<?php
+
+class Users extends \ckvsoft\mvc\BaseController
+{
+    public function index()
+    {
+        $userModel = $this->loadModel('users');
+        $users = $userModel->getAllUsers();
+        
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'User List']],
+            ['view' => 'users/index', 'data' => ['users' => $users]],
+            ['view' => '/inc/footer']
+        ]);
     }
 }
 ```
 
-### Views
-Views are rendered via the `View` object. CSS/JS usage can be automatically analyzed.
+#### Define Model
+
+`modules/users/model/users_model.php`:
 
 ```php
-$this->view->render('header');
-$this->view->render('content', ['data' => $data]);
-$this->view->render('footer');
+<?php
+
+class Users_Model extends \ckvsoft\mvc\Model
+{
+    public function getAllUsers()
+    {
+        return $this->db->select("SELECT id, name, email FROM users");
+    }
+}
 ```
 
-### Helpers
-Helpers can be loaded from module-specific or core directories.
+#### Define View
+
+`modules/users/view/users/index.php`:
 
 ```php
-$helper = $this->loadHelper('form');
-$helper->validate($data);
+<h2>User List</h2>
+
+<?php if (!empty($this->users)): ?>
+    <ul>
+    <?php foreach ($this->users as $user): ?>
+        <li><?= htmlspecialchars($user['name']) ?> (<?= htmlspecialchars($user['email']) ?>)</li>
+    <?php endforeach; ?>
+    </ul>
+<?php else: ?>
+    <p>No users found.</p>
+<?php endif; ?>
 ```
 
-## Configuration
-
-- All important settings (app, database) are automatically created by the installer in `config/config.json` and `config/app.json`.
-- Manual creation of configuration files is not required.
-- The installer also creates the first admin user and the `hash_key`.
+---
 
 ## License
 
-CKVSoft MVC is licensed under the **MIT License**.
-
+Cevian is licensed under the **MIT License**.

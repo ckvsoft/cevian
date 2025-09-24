@@ -1,6 +1,6 @@
 <?php
 
-class Backup extends ckvsoft\mvc\Controller
+class Backup extends ckvsoft\mvc\BaseController
 {
 
     public $model;
@@ -16,31 +16,14 @@ class Backup extends ckvsoft\mvc\Controller
         $imagesBackup = $this->lastBackup(1);
         $databaseBackup = $this->lastBackup(2);
 
-        $params = [
-            'method' => 'getCss',
-            'args' => ['/inc/css/style.css']
-        ];
-
-        if ($this->mobile) {
-            $params = [
-                'method' => 'getCss',
-                'args' => ['/inc/css/mobile.css']
-            ];
-        }
-
-        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
-
-        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
-        $script .= $this->loadScript("/inc/js/menuscript.js");
-        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
-
-        $menuhelper = $this->loadHelper("menu/menu");
-        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
-        $this->view->render('backup/index', [
-            'images' => isset($imagesBackup[0]['modified']) ? $imagesBackup[0]['modified'] : null,
-            'database' => isset($databaseBackup[0]['modified']) ? $databaseBackup[0]['modified'] : null,
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'Backup']],
+            ['view' => 'backup/index', 'data' => [
+                    'images' => isset($imagesBackup[0]['modified']) ? $imagesBackup[0]['modified'] : null,
+                    'database' => isset($databaseBackup[0]['modified']) ? $databaseBackup[0]['modified'] : null,
+                ]],
+            ['view' => '/inc/footer'],
         ]);
-        $this->view->render('/inc/footer');
     }
 
     public function lastBackup($id)

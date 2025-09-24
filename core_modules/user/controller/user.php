@@ -1,6 +1,6 @@
 <?php
 
-class User extends ckvsoft\mvc\Controller
+class User extends ckvsoft\mvc\BaseController
 {
 
     public $model;
@@ -13,29 +13,11 @@ class User extends ckvsoft\mvc\Controller
 
     public function index()
     {
-        $this->view->title = 'Users';
-        $params = [
-            'method' => 'getCss',
-            'args' => ['/inc/css/style.css']
-        ];
-
-        if ($this->mobile) {
-            $params = [
-                'method' => 'getCss',
-                'args' => ['/inc/css/mobile.css']
-            ];
-        }
-
-        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
-
-        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
-        $script .= $this->loadScript("/inc/js/menuscript.js");
-        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
-
-        $menuhelper = $this->loadHelper("menu/menu");
-        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
-        $this->view->render('user/index', ['user_script' => $script]);
-        $this->view->render('inc/footer');
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'User']],
+            ['view' => 'user/index'],
+            ['view' => '/inc/footer'],
+        ]);
     }
 
     public function userList()

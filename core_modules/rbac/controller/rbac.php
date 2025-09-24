@@ -1,6 +1,6 @@
 <?php
 
-class Rbac extends ckvsoft\mvc\Controller
+class Rbac extends ckvsoft\mvc\BaseController
 {
 
     public function __construct()
@@ -14,10 +14,11 @@ class Rbac extends ckvsoft\mvc\Controller
      */
     public function index()
     {
-        $menuhelper = $this->loadHelper("menu/menu");
-        $this->view->render('dashboard/inc/header', ['menuitems' => $menuhelper->getMenu(0, 10)]);
-        $this->view->render('rbac/index', ['roles' => $this->getAllRoles()]);
-        $this->view->render('dashboard/inc/footer');
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'Rbac']],
+            ['view' => 'rbac/index', 'data' => ['roles' => $this->getAllRoles()]],
+            ['view' => '/inc/footer'],
+        ]);
     }
 
     public function getAllRoles()

@@ -5,34 +5,50 @@ namespace ckvsoft\mvc;
 class Config
 {
 
-    protected static $sharedDb = null;
-    protected static $appConfig = null;
+    protected static ?\ckvsoft\Database $sharedDb = null;
+    protected static ?array $appConfig = null;
+    protected static ?array $mergedConfig = null;
     protected $db;
 
     public function __construct()
     {
-        // DB nur initialisieren, wenn config.json existiert
+        // App Config laden & Mergen vorbereiten
+        $this->initMergedConfig();
+
+        // DB initialisieren
         if (file_exists(__DIR__ . '/../../../config/config.json')) {
             $this->db = self::db();
         } else {
             $this->db = null; // Installer Mode
         }
 
-        self::getAppConfig();
     }
 
-    // Neue Methode, um die App-Konfiguration zu laden und zu cachen
-    public static function getAppConfig()
+    public static function getAppConfig(): array
     {
         if (self::$appConfig === null) {
             $configPath = __DIR__ . '/../../../config/app.json';
-            if (!file_exists($configPath)) {
-                return [];
-                // die("Error: Global App-Configurationfile '$configPath' not found!");
-            }
-            self::$appConfig = json_decode(file_get_contents($configPath), true);
+            self::$appConfig = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
         }
         return self::$appConfig;
+    }
+
+    protected static function initMergedConfig(): void
+    {
+        if (self::$mergedConfig === null) {
+            $defaultsPath = __DIR__ . '/../../../config/app_defaults.json';
+            $defaultConfig = file_exists($defaultsPath) ? json_decode(file_get_contents($defaultsPath), true) : [];
+            $customConfig = self::getAppConfig();
+            self::$mergedConfig = array_replace_recursive($defaultConfig, $customConfig);
+        }
+    }
+
+    public static function getMergedConfig(): array
+    {
+        if (self::$mergedConfig === null) {
+            self::initMergedConfig();
+        }
+        return self::$mergedConfig;
     }
 
     protected static function initDb()
@@ -40,7 +56,6 @@ class Config
         $configPath = __DIR__ . '/../../../config/config.json';
 
         if (!file_exists($configPath)) {
-            // Kein config → Installer-Mode aktiv
             self::$sharedDb = null;
             return;
         }
@@ -62,7 +77,7 @@ class Config
         ]);
     }
 
-    public static function db()
+    public static function db(): ?\ckvsoft\Database
     {
         if (self::$sharedDb === null) {
             self::initDb();

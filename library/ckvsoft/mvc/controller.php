@@ -157,6 +157,7 @@ class Controller extends \stdClass
             // Relativer Pfad → Modulname ermitteln
             $parts = explode('/', trim($this->pathClass, '/'));
             $module = $parts[0] ?? '';
+            $module = end($parts) ?? '';
 
             $paths = [
                 $baseFs . trim(MODULES_URI, '/') . '/' . $module . '/view/' . $script,

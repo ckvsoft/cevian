@@ -1,57 +1,15 @@
 <?php
 
-ini_set('display_errors', 1);
-
 require_once 'library/ckvsoft/autoload.php';
 
+// Autoload
 $autoload = new \ckvsoft\Autoload([
     __DIR__ . '/library',
     __DIR__ . '/modules',
-        ]);
+]);
 
 $config = new \ckvsoft\mvc\Config();
-$customConfigData = $config->getAppConfig() ?? [];
-
-// --- Default Config mit Fallbacks ---
-$defaultConfig = [
-    'php_settings' => [
-        'display_errors' => 0,
-        'display_startup_errors' => 0,
-        'log_errors' => 1,
-        'error_log_path' => '/var/log/error.log',
-        'error_reporting' => 'E_ALL',
-    ],
-    'paths' => [
-        'base_uri' => '/',
-        'modules_uri' => 'modules/',
-        'core_modules_uri' => 'core_modules/',
-    ],
-    'app' => [
-        'debug' => false,
-        'css_js_debug' => false,
-        'controller_default' => 'home',
-        'hash_key' => null, // ❌ muss zwingend vorhanden sein
-    ],
-    'session' => [
-        'timeout' => 1800
-    ]
-];
-
-// Merge Config with Default
-$configData = array_replace_recursive($defaultConfig, $customConfigData);
-
-// --- Critical Checks ---
-if (empty($configData['app']['hash_key'])) {
-    define('BASE_URI', rtrim(dirname(filter_input(INPUT_SERVER, 'SCRIPT_NAME', FILTER_SANITIZE_URL)), '/\\') . '/');
-    define('MODULES_URI', 'modules/');
-    define('CORE_MODULES_URI', 'core_modules/');
-
-    $bootstrap = new ckvsoft\mvc\Bootstrap();
-    $bootstrap->setPathRoot(getcwd() . '/');
-    $bootstrap->setControllerDefault('installer');
-    $bootstrap->init();
-    exit;
-}
+$configData = $config->getMergedConfig();
 
 // --- PHP Settings ---
 $phpSettings = $configData['php_settings'];
@@ -69,19 +27,28 @@ $errorReportingLevel = match ($phpSettings['error_reporting']) {
 };
 error_reporting($errorReportingLevel);
 
-// --- Konstanten ---
+// --- Paths & App ---
 $paths = $configData['paths'];
 $app = $configData['app'];
 $session = $configData['session'];
 
-// define('BASE_URI', $paths['base_uri']);
-define('BASE_URI', rtrim(dirname(filter_input(INPUT_SERVER, 'SCRIPT_NAME', FILTER_SANITIZE_URL)), '/\\') . '/');
+$request = new \ckvsoft\Request();
+define('BASE_URI', $request->getBaseUri());
 
 define('MODULES_URI', rtrim($paths['modules_uri'], '/') . '/');
 define('CORE_MODULES_URI', rtrim($paths['core_modules_uri'], '/') . '/');
 define('APP_DEBUG', $app['debug']);
 define('CSS_JS_DEBUG', $app['css_js_debug']);
 define('HASH_KEY', $app['hash_key']);
+
+// --- Critical Checks ---
+if (empty($app['hash_key'])) {
+    $bootstrap = new ckvsoft\mvc\Bootstrap();
+    $bootstrap->setPathRoot(getcwd() . '/');
+    $bootstrap->setControllerDefault('installer');
+    $bootstrap->init();
+    exit;
+}
 
 // --- Session ---
 $timeout = $session['timeout'];
