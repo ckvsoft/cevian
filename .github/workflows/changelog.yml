@@ -17,7 +17,6 @@ jobs:
           fetch-depth: 0   # volle Git-Historie für Tag-Vergleich
 
       - name: Generate Changelog
-      - name: Generate Changelog
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
