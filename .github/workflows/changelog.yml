@@ -22,6 +22,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-tag: true
           git-push: false
+          skip-git-pull: true
           skip-on-empty: false
           skip-version-file: true
           fallback-version: "${GITHUB_REF#refs/tags/}"
