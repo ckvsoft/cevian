@@ -9,3 +9,5 @@
 !/modules/.htaccess
 !/modules/index.php
 /public/*
+/var/backup/*
+/var/log/*
