@@ -20,4 +20,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-tag: true
-          git-push: true   # wichtig: sonst bleibt das Changelog nur im Runner
+          git-push: true
+          skip-version-file: true   # <--- wichtig für Projekte ohne package.json
