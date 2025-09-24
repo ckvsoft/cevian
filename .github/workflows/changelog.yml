@@ -21,5 +21,5 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          git-tag: false
+          skip-tag: true
           git-push: false
