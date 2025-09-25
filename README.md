@@ -61,34 +61,49 @@ RewriteRule ^(.+)$ index.php?uri=$1 [QSA,L]
 #### Nginx
 
 ```nginx
+# HTTP → HTTPS + www Redirect
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    server_name example.com www.example.com;
 
-    root /var/www/cevian/public;
+    # Alles auf HTTPS umleiten
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl;
+    server_name example.com www.example.com;
+
+    # SSL-Zertifikate (Let's Encrypt oder andere)
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+
+    root /var/www/html;
     index index.php;
 
-    # Optional HTTPS-Redirect
-    if ($scheme = http) {
-        return 301 https://$host$request_uri;
+    # non-www → www Redirect
+    if ($host = example.com) {
+        return 301 https://www.example.com$request_uri;
     }
 
-    # Optional www-Redirect
-    if ($host !~* ^www\.) {
-        return 301 https://www.$host$request_uri;
-    }
-
-    # Alle Anfragen an index.php weiterleiten
+    # Alle Requests
     location / {
-        try_files $uri $uri/ /index.php$is_args$args;
+        # Falls die Datei oder das Verzeichnis existiert → direkt ausliefern (Bilder, CSS, JS, etc.)
+        # Falls nicht → an index.php?uri=… weiterleiten (Bootstrap / Router)
+        try_files $uri /index.php?uri=$uri&$args;
     }
 
-    # PHP-FPM
+    # PHP-Files
     location ~ \.php$ {
         include fastcgi_params;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;  # anpassen falls andere Version
-        fastcgi_index index.php;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;  # PHP-FPM Socket oder TCP-Port anpassen
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    # Optional: Zugriff auf versteckte Dateien verhindern (.htaccess, .env, etc.)
+    location ~ /\.(?!well-known).* {
+        deny all;
     }
 }
 ```
@@ -222,34 +237,49 @@ RewriteRule ^(.+)$ index.php?uri=$1 [QSA,L]
 #### Nginx
 
 ```nginx
+# HTTP → HTTPS + www Redirect
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    server_name example.com www.example.com;
 
-    root /var/www/cevian/public;
+    # Redirect all HTTP requests to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl;
+    server_name example.com www.example.com;
+
+    # SSL certificates (Let's Encrypt or other)
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+
+    root /var/www/html;
     index index.php;
 
-    # Optional HTTPS-Redirect
-    if ($scheme = http) {
-        return 301 https://$host$request_uri;
+    # Redirect non-www to www
+    if ($host = example.com) {
+        return 301 https://www.example.com$request_uri;
     }
 
-    # Optional www-Redirect
-    if ($host !~* ^www\.) {
-        return 301 https://www.$host$request_uri;
-    }
-
-    # Alle Anfragen an index.php weiterleiten
+    # Main location block
     location / {
-        try_files $uri $uri/ /index.php$is_args$args;
+        # If the requested file or directory exists, serve it directly (images, CSS, JS, etc.)
+        # Otherwise, pass the request to index.php with the 'uri' parameter for routing
+        try_files $uri /index.php?uri=$uri&$args;
     }
 
-    # PHP-FPM
+    # PHP handling
     location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;  # anpassen falls andere Version
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;  # Load standard FastCGI parameters
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;  # Adjust PHP-FPM socket or TCP port
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;  # Full path to PHP file
+    }
+
+    # Optional: Deny access to hidden files (like .htaccess, .env, etc.)
+    location ~ /\.(?!well-known).* {
+        deny all;
     }
 }
 ```
