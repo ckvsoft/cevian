@@ -1,4 +1,5 @@
 /.htaccess
+/library/ckvsoft/update/update.json
 /config/app.json
 /config/config.json
 /var/backup/*.json
