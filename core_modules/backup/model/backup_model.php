@@ -20,9 +20,14 @@ class Backup_Model extends \ckvsoft\mvc\Model
     private $progress;
     private $count;
 
+    /**
+     * Konstruktor
+     *
+     * @param string $source_folder Quellordner für Images
+     * @param string $destination_folder Zielordner für Backup
+     */
     public function __construct($source_folder = "", $destination_folder = "")
     {
-        // Set the maximum execution time to unlimited
         set_time_limit(0);
         $this->source_folder = rtrim($source_folder, "/") . "/";
         $this->destination_folder = "var/" . rtrim($destination_folder, "/") . "/";
@@ -30,19 +35,40 @@ class Backup_Model extends \ckvsoft\mvc\Model
         parent::__construct();
     }
 
+    /**
+     * Letztes Backup abrufen
+     *
+     * @param int $id Progress-Bar ID
+     * @return string|null Timestamp des letzten Backups
+     */
     public function lastBackup($id)
     {
-        $result = $this->db->select("SELECT modified FROM progress_bars WHERE id=" . $id);
-        return $result;
+        $result = $this->db->select(
+                "SELECT modified FROM progress_bars WHERE id = :id",
+                ['id' => $id]
+        );
+
+        return !empty($result) ? $result[0]['modified'] : null;
     }
 
+    /**
+     * Datenbank sichern
+     *
+     * @param int $progress_id Progress-Bar ID
+     * @return string JSON-Daten aller Tabellen
+     */
     public function backupDatabase($progress_id)
     {
         $tables = $this->db->showTables();
-        $backup = array();
+        $backup = [];
         $rowcount = 0;
+
+        // Gesamtzahl Zeilen für Progress-Bar berechnen
         foreach ($tables as $tableName) {
-            $rowcount += $this->db->select("SELECT COUNT(*) as rowcount FROM $tableName")[0]['rowcount'];
+            $countResult = $this->db->select("SELECT COUNT(*) as rowcount FROM $tableName");
+            if (!empty($countResult) && isset($countResult[0]['rowcount'])) {
+                $rowcount += (int) $countResult[0]['rowcount'];
+            }
         }
 
         $this->progress = new \ckvsoft\Progress($rowcount, $progress_id, $this->db);
@@ -50,150 +76,134 @@ class Backup_Model extends \ckvsoft\mvc\Model
         foreach ($tables as $tableName) {
             $result = $this->db->select("SELECT * FROM $tableName");
 
-            $tableArray = array();
+            $tableArray = [];
             $tableArray['name'] = $tableName;
-            $tableArray['fields'] = array();
+            $tableArray['fields'] = [];
+            $tableArray['rows'] = [];
 
+            // Tabellenstruktur sichern
             $row2 = $this->db->select("SHOW CREATE TABLE $tableName");
-            $tableArray['create_table_sql'] = $row2[0]['Create Table'];
+            $tableArray['create_table_sql'] = (!empty($row2) && isset($row2[0]['Create Table'])) ? $row2[0]['Create Table'] : '';
 
-            foreach ($result[0] as $fieldName) {
-                $tableArray['fields'][] = $fieldName;
+            // Spaltennamen und Daten übernehmen
+            if (!empty($result) && isset($result[0]) && is_array($result[0])) {
+                $tableArray['fields'] = array_keys($result[0]);
+                $tableArray['rows'] = $result;
             }
-
-            $tableArray['rows'] = $result;
 
             $backup[] = $tableArray;
-            // Simulate rows ... Wait for 30ms
-            for ($i = 0; $i <= count($result); $i++) {
-                // $this->progress->addToCurrent(count($result));
-                $this->progress->increment();
-                usleep(30000);
+
+            // Fortschritt hochzählen
+            if (!empty($result)) {
+                foreach ($result as $row) {
+                    $this->progress->increment();
+                    usleep(30000);
+                }
             }
-            // sleep(2);
         }
 
-        $json_data = json_encode($backup);
-        return $json_data;
+        return json_encode($backup, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
-    public function backupImages($progress_id): int
+    /**
+     * Images sichern
+     *
+     * @param int $progress_id Progress-Bar ID
+     * @return bool Erfolg
+     */
+    public function backupImages($progress_id): bool
     {
-
         $total_files = $this->countFilesToCopy();
-        $progress = new \ckvsoft\Progress($total_files, $progress_id, $this->db);
+        $this->progress = new \ckvsoft\Progress($total_files, $progress_id, $this->db);
 
-        return $this->recurseCopy($this->source_folder, $this->destination_folder, $progress);
+        return $this->recurseCopy($this->source_folder, $this->destination_folder, $this->progress);
     }
 
-public function recurseCopy($source_folder, $destination_folder, $progress)
+    /**
+     * Rekursives Kopieren von Dateien
+     *
+     * @param string $source_folder Quellordner
+     * @param string $destination_folder Zielordner
+     * @param object $progress Progress-Objekt
+     * @return bool Erfolg
+     */
+    private function recurseCopy($source_folder, $destination_folder, $progress): bool
     {
         $backup_log = [];
         $logFile = rtrim($destination_folder, "/") . "/" . $this->backup_log_file;
 
-        $logDir = dirname($logFile);
-        if (!is_dir($logDir)) {
-            if (!mkdir($logDir, 0777, true)) {
-                throw new \ckvsoft\CkvException("Failed to create log directory: " . $logDir);
-            }
-        }
-
-        if (file_exists($logFile)) {
+        if (!is_dir(dirname($logFile)))
+            mkdir(dirname($logFile), 0777, true);
+        if (file_exists($logFile))
             $backup_log = json_decode(file_get_contents($logFile), true);
-        }
 
-        $baseDir = realpath($this->source_folder); // Quell-Root merken
-        $dstRoot = realpath($destination_folder);  // Ziel-Root merken
+        $baseDir = realpath($source_folder);
+        $dstRoot = realpath($destination_folder);
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($source_folder, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
+                new RecursiveDirectoryIterator($source_folder, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
         );
 
         foreach ($iterator as $file) {
-            if ($file->isDir()) {
+            if ($file->isDir())
                 continue;
-            }
 
             $srcPath = $file->getPathname();
-
-            // relativer Pfad ab Quell-Root
             $relPath = ltrim(str_replace($baseDir, '', $srcPath), DIRECTORY_SEPARATOR);
+            if (empty($relPath))
+                continue;
 
-            // Zielpfad
             $dstPath = rtrim($destination_folder, '/') . '/' . $relPath;
-
-            // Skip: nicht ins Backup-Ziel kopieren
             $srcReal = realpath($srcPath);
-            if ($srcReal !== false && strpos($srcReal, $dstRoot) === 0) {
+            if ($srcReal !== false && strpos($srcReal, $dstRoot) === 0)
                 continue;
-            }
-
-            // Nur echte Bilder
-            if (!@getimagesize($srcPath)) {
+            if (!@getimagesize($srcPath))
                 continue;
-            }
 
-            // DEBUG: Eine Datei wurde als Bild identifiziert
-            // error_log("Bild gefunden, wird kopiert: " . $srcPath);
-
-            // Nur wenn neuer oder geändert
-            if (isset($backup_log[$relPath]) && filemtime($srcPath) <= $backup_log[$relPath]) {
+            if (isset($backup_log[$relPath]) && filemtime($srcPath) <= $backup_log[$relPath])
                 continue;
-            }
-
-            // Zielordner anlegen
-            if (!file_exists(dirname($dstPath))) {
+            if (!file_exists(dirname($dstPath)))
                 mkdir(dirname($dstPath), 0777, true);
-            }
+            if (!copy($srcPath, $dstPath))
+                throw new \ckvsoft\CkvException("Failed to copy file: $srcPath");
 
-            // Datei kopieren
-            if (!copy($srcPath, $dstPath)) {
-                throw new \ckvsoft\CkvException("Failed to copy file: " . $srcPath);
-            }
-
-            // Log aktualisieren
             $backup_log[$relPath] = filemtime($srcPath);
-
             $progress->increment();
             usleep(3000);
         }
 
-        return file_put_contents($logFile, json_encode($backup_log));
+        file_put_contents($logFile, json_encode($backup_log));
+        return true;
     }
-    
-    private function countFilesInFolder($folder)
+
+    /**
+     * Dateien zählen
+     *
+     * @return int Anzahl Dateien
+     */
+    private function countFilesInFolder($folder): int
     {
-        // Read the backup log (if it exists)
         $backup_log = [];
-        if (file_exists(rtrim($this->destination_folder, "/") . "/" . $this->backup_log_file)) {
-            $backup_log = json_decode(file_get_contents(rtrim($this->destination_folder, "/") . "/" . $this->backup_log_file), true);
-        }
+        $logFile = rtrim($this->destination_folder, "/") . "/" . $this->backup_log_file;
+        if (file_exists($logFile))
+            $backup_log = json_decode(file_get_contents($logFile), true);
 
         $files = scandir($folder);
         $total_files = 0;
 
         foreach ($files as $filename) {
-            if (in_array($filename, ['.', '..'])) {
+            if (in_array($filename, ['.', '..']))
                 continue;
-            }
-
             $filepath = rtrim($folder, "/") . "/" . $filename;
 
             if (is_dir($filepath)) {
-                // Recursively count files in subfolders
                 $total_files += $this->countFilesInFolder($filepath);
             } else {
-                // Nur echte Bilder zählen
-                if (!@getimagesize($filepath)) {
+                if (!@getimagesize($filepath))
                     continue;
-                }
-
-                // Skip files that are already backed up and haven't been modified since
-                if (isset($backup_log[$filename]) && filemtime($filepath) <= $backup_log[$filename]) {
+                if (isset($backup_log[$filename]) && filemtime($filepath) <= $backup_log[$filename])
                     continue;
-                }
-
                 $total_files++;
             }
         }
@@ -201,89 +211,91 @@ public function recurseCopy($source_folder, $destination_folder, $progress)
         return $total_files;
     }
 
-    public function countFilesToCopy()
+    /**
+     * Hilfsfunktion: zählt alle zu kopierenden Dateien
+     *
+     * @return int
+     */
+    public function countFilesToCopy(): int
     {
-        $total_files = $this->countFilesInFolder($this->source_folder);
-        return $total_files;
+        return $this->countFilesInFolder($this->source_folder);
     }
 
+    /**
+     * Daten in Datei speichern
+     *
+     * @param string $data JSON-Daten
+     * @param string $file_name Dateiname
+     * @return bool|string true oder Fehlermeldung
+     */
     public function saveToFile($data, $file_name)
     {
         try {
             $handle = fopen($this->destination_folder . $file_name, 'w+');
-            if ($handle === false) {
+            if ($handle === false)
                 throw new \ckvsoft\CkvException('Failed to open file for writing.');
-            }
 
-            $result = fwrite($handle, $data);
-            if ($result === false) {
+            if (fwrite($handle, $data) === false)
                 throw new \ckvsoft\CkvException('Failed to write to file.');
-            }
-
-            $closed = fclose($handle);
-            if ($closed === false) {
+            if (fclose($handle) === false)
                 throw new \ckvsoft\CkvException('Failed to close file handle.');
-            }
         } catch (\ckvsoft\CkvException $e) {
-            // Handle the error here, e.g. log it or display a message to the user.
             return 'Error: ' . $e->getMessage();
         }
+
         return true;
     }
 
-    public function jsonToCsv($json_data)
+    /**
+     * JSON-Daten importieren
+     *
+     * @param string $json_data JSON-Daten
+     * @return bool
+     */
+    public function importJSON($json_data): bool
     {
-        $data = json_decode($json_data, true);
-        $csv = '';
+        $tables = json_decode($json_data, true);
+        if (empty($tables))
+            throw new \ckvsoft\CkvException("Import Error: JSON ist leer oder ungültig.");
 
-        if (!empty($data)) {
-            $header = array_keys($data[0]);
-            $csv .= implode(',', $header) . "\n";
+        foreach ($tables as $table) {
+            if (!isset($table['name'], $table['fields'], $table['rows']))
+                continue;
 
-            foreach ($data as $row) {
-                $csv .= implode(',', $row) . "\n";
-            }
-        }
+            $tableName = $table['name'];
+            $fields = $table['fields'];
+            $rows = $table['rows'];
 
-        return $csv;
-    }
+            if (empty($fields) || empty($rows))
+                continue;
 
-    public function importCSV($table, $filename, $delimiter = ',', $enclosure = '"')
-    {
-        if (!file_exists($filename) || !is_readable($filename)) {
-            die("<div>Import Error: <b>$filename</b> does not exist or is not readable</div>");
-        }
+            foreach ($rows as $row) {
+                $keys = [];
+                $values = [];
 
-        $header = NULL;
-        $data = array();
-
-        if (($handle = fopen($filename, 'r')) !== FALSE) {
-            while (($row = fgetcsv($handle, 1000, $delimiter, $enclosure)) !== FALSE) {
-                if (!$header) {
-                    $header = $row;
-                } else {
-                    $data[] = array_combine($header, $row);
+                foreach ($fields as $field) {
+                    $keys[] = "`$field`";
+                    $value = $row[$field] ?? null;
+                    $values[] = ($value === null) ? "NULL" : "'" . $this->db->escape($value) . "'";
                 }
+
+                $query = "INSERT INTO `$tableName` (" . implode(',', $keys) . ")
+                          VALUES (" . implode(',', $values) . ")";
+                $this->db->query($query);
             }
-            fclose($handle);
         }
 
-        foreach ($data as $row) {
-            $keys = array();
-            $values = array();
-
-            foreach ($row as $key => $value) {
-                $keys[] = "`$key`";
-                $values[] = "'" . $this->db->escape($value) . "'";
-            }
-
-            $query = "INSERT INTO $table (implode(',', $keys)) VALUES (implode(',', $values))";
-            $this->db->query($query);
-        }
+        return true;
     }
 
-    public function progress($id)
+    /**
+     * Fortschritt abfragen
+     *
+     * @param int $id Progress-Bar ID
+     * @return array
+     */
+    public function progress($id): array
     {
-        return $this->db->select("SELECT percent FROM progress_bars WHERE id=" . $id);
+        return $this->db->select("SELECT percent FROM progress_bars WHERE id = :id", ['id' => $id]);
     }
 }
