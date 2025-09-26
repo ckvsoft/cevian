@@ -1,0 +1,16 @@
+CREATE TABLE migrations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    module_name VARCHAR(100) NOT NULL,
+    migration VARCHAR(255) NOT NULL,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_migration (module_name, migration)
+);
+CREATE TABLE modules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    version VARCHAR(50) NOT NULL,
+    enabled TINYINT(1) DEFAULT 1,
+    core TINYINT(1) DEFAULT 0,
+    installed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

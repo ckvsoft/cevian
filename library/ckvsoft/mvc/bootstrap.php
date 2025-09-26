@@ -106,6 +106,15 @@ class Bootstrap extends \stdClass
         if (!isset($this->_pathRoot))
             die('You must run setPathRoot($path)');
 
+        $updater = new \ckvsoft\Update\Updater();
+
+        if ($updater->needsUpdate()) {
+            try {
+                $updater->runUpdate();
+            } catch (\Exception $e) {
+                error_log("Framework update failed: " . $e->getMessage());
+            }
+        }
         /** When a route overrides a URI we build the path here */
         $urlToBuild = ($overrideUri == true) ? $overrideUri : $this->uri;
         $this->_buildComponents($urlToBuild);

@@ -288,28 +288,56 @@ class Database extends \PDO
     /**
      * beginTransaction - Overloading default method
      */
+    #[\Override]
     public function beginTransaction(): bool
     {
-        parent::beginTransaction();
-        $this->activeTransaction = true;
+        $ret = parent::beginTransaction();
+        $this->activeTransaction = parent::inTransaction();
+        return $ret;
     }
 
     /**
      * commit - Overloading default method
      */
+    #[\Override]
     public function commit(): bool
     {
-        parent::commit();
-        $this->activeTransaction = false;
+        if (parent::inTransaction()) {
+            $ret = parent::commit();
+            $this->activeTransaction = $ret;
+            return $ret;
+        } else {
+            // In PHP 8.0 a PDOException is thrown when a commit is attempted with no
+            // transaction active. In previous PHP versions this failed silently.
+            return true;
+        }
     }
 
     /**
      * rollback - Overloading default method
      */
-    public function rollback(): bool
+    #[\Override]
+    public function rollback()
     {
-        parent::rollback();
+        // MySQL will automatically commit transactions when tables are altered or
+        // created (DDL transactions are not supported). Prevent triggering an
+        // exception to ensure that the error that has caused the rollback is
+        // properly reported.
+        if (!$this->activeTransaction) {
+            // On PHP 7 $this->connection->inTransaction() will return TRUE and
+            // $this->connection->rollback() does not throw an exception; the
+            // following code is unreachable.
+            // If \DatabaseConnection::rollback() would throw an
+            // exception then continue to throw an exception.
+            if (!$this->activeTransaction) {
+                throw new DatabaseTransactionNoActiveException();
+            }
+            trigger_error('Rollback attempted when there is no active transaction. This can cause data integrity issues.', E_USER_WARNING);
+            return;
+        }
+        $ret = parent::rollback();
         $this->activeTransaction = false;
+        return $ret;
     }
 
     /**
@@ -319,7 +347,7 @@ class Database extends \PDO
      */
     public function showColumns($table)
     {
-        // Die Methode muss den String parsen
+// Die Methode muss den String parsen
         $parts = explode('.', $table);
 
         if (count($parts) == 2) {
