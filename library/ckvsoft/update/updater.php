@@ -12,29 +12,45 @@ class Updater extends \ckvsoft\mvc\Config
     {
         parent::__construct();
         $this->configPath = $configPath;
-        $this->config = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
+
+        // Load or initialize config
+        if (file_exists($configPath)) {
+            $raw = file_get_contents($configPath);
+            $decoded = json_decode($raw, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $this->config = $decoded;
+            } else {
+                // corrupted JSON? reset to default
+                $this->config = [];
+            }
+        } else {
+            // file doesn't exist, initialize empty
+            $this->config = [];
+        }
+
+        // Ensure the key exists
+        if (!isset($this->config['framework_updated_version'])) {
+            $this->config['framework_updated_version'] = '0.0.0';
+            $this->saveConfig();
+        }
     }
 
-    /**
-     * Get framework version without build/hash
-     */
+    private function saveConfig(): void
+    {
+        file_put_contents($this->configPath, json_encode($this->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
     private function getCurrentVersion(): string
     {
-        $fullVersion = \ckvsoft\Version::version(); // e.g., 0.6.4-250922 (git: e9a3b9f)
-        return explode('-', $fullVersion)[0]; // returns 0.6.4
+        $fullVersion = \ckvsoft\Version::version();
+        return explode('-', $fullVersion)[0];
     }
 
-    /**
-     * Get last updated version from config
-     */
     private function getLastUpdatedVersion(): string
     {
         return $this->config['framework_updated_version'] ?? '0.0.0';
     }
 
-    /**
-     * Check if update is needed
-     */
     public function needsUpdate(): bool
     {
         return version_compare($this->getCurrentVersion(), $this->getLastUpdatedVersion(), '>');
