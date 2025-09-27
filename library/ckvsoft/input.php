@@ -115,6 +115,12 @@ class Input
         // Use mimic post if available
         if (is_array($this->_mimicPost) && array_key_exists($name, $this->_mimicPost)) {
             $input = $this->_mimicPost[$name];
+        } elseif ($this->_mode === 'POST' && isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $raw = file_get_contents('php://input');
+            $jsonData = json_decode($raw, true);
+            if (is_array($jsonData) && array_key_exists($name, $jsonData)) {
+                $input = $jsonData[$name];
+            }
         } else {
             switch ($this->_mode) {
                 case 'POST':
@@ -292,7 +298,7 @@ class Input
           if (count($this->_errorData) > 0) {
           throw new \ckvsoft\CkvException("There are errors in the form. Please wrap the form in a try/catch and call \$form->fetchErrors() in the catch.\n" . implode(", ", $this->_errorData));
           }
-         * 
+         *
          */
     }
 
@@ -324,7 +330,6 @@ class Input
              * Make sure no empty items get placed
              */
             return array_filter($this->_inputData, fn($v) => $v !== null && strlen($v) > 0);
-
         }
     }
 
