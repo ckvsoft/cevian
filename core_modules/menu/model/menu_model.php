@@ -52,7 +52,7 @@ class Menu_Model extends Model
 
     public function menuSingleList($id)
     {
-        return $this->db->select('SELECT id, label, link, parent, sort, role, is_public FROM ' . $this->_table . ' WHERE id = :id', array('id' => $id));
+        return $this->db->select('SELECT id, label, link, parent, sort, role, is_public FROM ' . $this->_table . ' WHERE id = :id', ['id' => $id]);
     }
 
     /**
@@ -75,7 +75,7 @@ class Menu_Model extends Model
      */
     public function update($id, $data)
     {
-        return $this->db->update($this->_table, $data, "id = :id", array('id' => $id));
+        return $this->db->update($this->_table, $data, "id = :id", ['id' => $id]);
     }
 
     /**
@@ -86,7 +86,7 @@ class Menu_Model extends Model
     public function delete($id)
     {
         $entry = $this->_getMenuEntry($id);
-        return $this->db->delete($this->_table, "id = :id", array('id' => $id));
+        return $this->db->delete($this->_table, "id = :id", ['id' => $id]);
     }
 
     /**
@@ -97,7 +97,7 @@ class Menu_Model extends Model
      */
     private function _getMenuEntry($id)
     {
-        $result = $this->db->select("SELECT * FROM " . $this->_table . " WHERE   id = :id", array('id' => $id));
+        $result = $this->db->select("SELECT * FROM " . $this->_table . " WHERE   id = :id", ['id' => $id]);
 
         if (!empty($result)) {
             return $result[0];
