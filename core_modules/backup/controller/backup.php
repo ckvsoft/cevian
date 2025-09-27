@@ -66,73 +66,49 @@ class Backup extends ckvsoft\mvc\BaseController
             \ckvsoft\Output::error($result);
     }
 
-    public function countFilesToCopy($directory)
+    public function countFilesToCopy()
     {
-        $this->model = $this->loadModel('backup', null, $directory, "backup/images");
-        $result = $this->model->countFilesToCopy();
+        $input = new \ckvsoft\Input();
+        try {
+            $input->post('directory')
+                    ->submit();
 
-        header('Content-Type: application/json');
-        echo json_encode(['totalSize' => $result]);
+            if ($input->fetchErrors()) {
+                \ckvsoft\Output::error($input->fetchErrors());
+                return;
+            }
+
+            $data = $input->fetch();
+
+            $this->model = $this->loadModel('backup', null, $data['directory'], "backup/images");
+            $result = $this->model->countFilesToCopy();
+
+            \ckvsoft\Output::success(['totalSize' => $result]);
+        } catch (Exception $e) {
+            \ckvsoft\Output::error(['e' => $e->getMessage()]);
+        }
     }
 
-    /*
-      public function backupFiles($directory)
-      {
-      $result = "";
-
-      try {
-      $timeLimit = 10;
-      set_time_limit(60 * $timeLimit);
-
-      ignore_user_abort(true);
-      session_write_close();
-
-      // Clear output buffer and save output; while loop handles potential multiple levels of output buffering.
-      // you can skip this if you don't use output buffering
-      $output = '';
-      while (ob_get_level()) {
-      $output .= ob_get_clean();
-      }
-
-      // Disable gzip compression in apache, as it can result in this request being buffered until it is complete,
-      // regardless of other settings.
-      if (function_exists('apache_setenv')) {
-      apache_setenv('no-gzip', 1);
-      }
-
-      // If not redirecting, send appropriate headers and output.
-      header('Connection: close');
-      header('Content-length: ' . strlen($output));
-
-      $this->model = $this->loadModel('backup', null, $directory, "backup/images");
-      $result = $this->model->backupImages(1);
-
-      // session_start();
-
-      error_log("Result: $result");
-
-      if ($result === false)
-      \ckvsoft\Output::error($result);
-      else
-      \ckvsoft\Output::success($result);
-      } catch (Exception $e) {
-      \ckvsoft\Output::error(['data' => $result, 'e' => $e]);
-      // throw new \ckvsoft\CkvException("Error: $e");
-      }
-      }
-     * 
-     */
-
-    public function backupFiles($directory)
+    public function backupFiles()
     {
-        $result = "";
 
+        $input = new \ckvsoft\Input();
         try {
+            $input->post('directory')
+                    ->submit();
+
+            if ($input->fetchErrors()) {
+                \ckvsoft\Output::error($input->fetchErrors());
+                return;
+            }
+
+            $data = $input->fetch();
+
             set_time_limit(60 * 10);
             ignore_user_abort(true);
             session_write_close();
 
-            $this->model = $this->loadModel('backup', null, $directory, "backup/images");
+            $this->model = $this->loadModel('backup', null, $data['directory'], "backup/images");
             $result = $this->model->backupImages(1);
 
             // Logging
@@ -142,10 +118,10 @@ class Backup extends ckvsoft\mvc\BaseController
             if ($result === false) {
                 \ckvsoft\Output::error($result);
             } else {
-                \ckvsoft\Output::success($result);
+                \ckvsoft\Output::success();
             }
         } catch (Exception $e) {
-            \ckvsoft\Output::error(['data' => $result, 'e' => $e->getMessage()]);
+            \ckvsoft\Output::error(['e' => $e->getMessage()]);
         }
     }
 
@@ -172,14 +148,12 @@ class Backup extends ckvsoft\mvc\BaseController
             if ($file->isDir()) {
                 $relativePath = str_replace($baseDir . DIRECTORY_SEPARATOR, '', $file->getPathname());
 
-                // Exclude-Ordner überspringen
                 foreach ($exclude as $ex) {
                     if (strpos($relativePath, $ex) === 0) {
                         continue 2; // direkt nächste Iteration
                     }
                 }
 
-                // Dateien im Ordner durchgehen und auf echte Bilder prüfen
                 foreach (scandir($file->getPathname()) as $f) {
                     if ($f[0] === '.')
                         continue; // versteckte Dateien ignorieren

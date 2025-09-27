@@ -99,25 +99,6 @@
         updateProgress(2);
     }
 
-    // Gesamtanzahl der Dateien für Backup ermitteln
-    function getTotalFileSize(dir) {
-        fetchAndLog(`backup/countFilesToCopy/${dir}`, {method: "GET"})
-                .then(jsonData => {
-                    if (jsonData.totalSize === 0) {
-                        displayMessage("info", "Backup", "Es gibt nichts zu sichern.");
-                    } else {
-                        displayMessage("info", "Backup", `Starte Backup von ${jsonData.totalSize} Dateien.`);
-                        startBackup(jsonData.totalSize, dir);
-                    }
-                })
-                .catch(error => console.log(error));
-    }
-
-    // Startet das Image-Backup
-    function startBackup(totalSize, dir) {
-        return fetchAndLog(`backup/backupFiles/${dir}/`, {method: "POST"});
-    }
-
     // Startet das Datenbank-Backup
     function startBackupDB() {
         return fetchAndLog("backup/backupDatabase/", {method: "POST"});
@@ -135,16 +116,26 @@
 
     function startBackup(dir) {
         displayMessage("info", "Backup", "Starte Backup. Zähle Dateien...");
-        fetchAndLog(`backup/countFilesToCopy/${dir}`, {method: "GET"})
+        fetchAndLog('backup/countFilesToCopy/', {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({directory: dir})  // <- hier der Pfad
+        })
                 .then(jsonData => {
                     if (jsonData.totalSize === 0) {
                         displayMessage("info", "Backup", "Es gibt nichts zu sichern.");
                         // Stoppe eventuell laufenden Fortschrittsbalken, falls vorhanden
                         updateProgress(-1);
                     } else {
-                        displayMessage("info", "Backup", `Starte Backup von ${jsonData.totalSize} Dateien.`);
+                        displayMessage("info", "Backup", `Starte Backup von ${jsonData.data.totalSize} Dateien.`);
                         // Starte den Backup-Prozess im Backend
-                        fetchAndLog(`backup/backupFiles/${dir}/`, {method: "POST"})
+
+                        fetchAndLog('backup/backupFiles/', {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({directory: dir})  // <- hier der Pfad
+                        })
+                                // fetchAndLog(`backup/backupFiles/${dir}/`, {method: "POST"})
                                 .then(jsonData => {
                                     console.log("Backup gestartet:", jsonData);
                                 })
