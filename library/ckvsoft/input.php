@@ -99,6 +99,21 @@ class Input
         return $this->_handle_input($name, $required);
     }
 
+    private $_jsonData = null;
+
+    private function _decodeJson()
+    {
+        if ($this->_jsonData !== null)
+            return $this->_jsonData;
+        if (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $raw = file_get_contents('php://input');
+            $this->_jsonData = json_decode($raw, true) ?: [];
+        } else {
+            $this->_jsonData = [];
+        }
+        return $this->_jsonData;
+    }
+
     /**
      * The master method which handles a POST/GET/REQUEST
      *
@@ -108,17 +123,20 @@ class Input
      * @return \ckvsoft\Input
      * @throws \Exception
      */
-    private function _handle_input($name, $required)
+    private function _handle_input($name, $required, $all = false)
     {
         $input = null;
 
-        // Use mimic post if available
         if (is_array($this->_mimicPost) && array_key_exists($name, $this->_mimicPost)) {
             $input = $this->_mimicPost[$name];
-        } elseif ($this->_mode === 'POST' && isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
-            $raw = file_get_contents('php://input');
-            $jsonData = json_decode($raw, true);
-            if (is_array($jsonData) && array_key_exists($name, $jsonData)) {
+        } elseif ($this->_mode === 'POST' && strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
+            $jsonData = $this->_decodeJson();
+            if ($all) {
+                // ALLES zurückgeben
+                $this->_inputData = $jsonData;
+                return $this;
+            }
+            if (array_key_exists($name, $jsonData)) {
                 $input = $jsonData[$name];
             }
         } else {
@@ -331,6 +349,12 @@ class Input
              */
             return array_filter($this->_inputData, fn($v) => $v !== null && strlen($v) > 0);
         }
+    }
+
+    public function fetchAllJson()
+    {
+        $this->_handle_input('', false, true);
+        return $this->fetch();
     }
 
     /**
