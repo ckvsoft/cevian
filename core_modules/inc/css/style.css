@@ -17,6 +17,14 @@ table {
     background: rgba(0, 0, 0, 0);
 }
 
+td, th {
+    text-align: left;
+}
+
+td:last-child {
+    width: 100%;
+}
+
 .fixed-header, .fixed-footer{
     z-index: 5;
     width: 100%;
@@ -173,12 +181,90 @@ textarea:invalid, input:invalid {
     transform: translateY(4px);
 }
 
+/* Allgemeines Small-Action Styling */
+.button.small-action {
+    font-size: 14px;
+    padding: 3px 8px;
+    margin-right: 5px;
+    border-radius: 4px;
+    box-shadow: 2px 2px black;
+    border: none;
+    cursor: pointer;
+    color: #fff;           /* weiße Schrift standardmäßig */
+    text-align: center;
+    float: none;           /* inline nebeneinander */
+}
+
+/* Edit-Button (Blau) */
+.button.small-action.edit-permission {
+    background-color: #004080; /* dunkelblau */
+}
+
+.button.small-action.edit-permission:hover {
+    background-color: #0059b3; /* helleres blau beim Hover */
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Delete-Button (Rot) */
+.button.small-action.ajax-delete {
+    background-color: #cc0000; /* rot */
+}
+
+.button.small-action.ajax-delete:hover {
+    background-color: #ff3333; /* hellrot beim Hover */
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Optional Pfeil bei Hover, falls noch gewünscht */
+.button.small-action span:after {
+    right: -10px;
+}
 
 a {
     color: #E84C11;
 }
 a:hover {
     color: #FFFFFF;
+}
+
+/* Allgemeines Small-Action Styling für Links */
+a.small-action {
+    display: inline-block;
+    font-size: 14px;
+    padding: 3px 8px;
+    margin-right: 5px;
+    border-radius: 4px;
+    box-shadow: 2px 2px black;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;  /* kein Unterstrich */
+    color: #fff;           /* weiße Schrift */
+    float: none;
+}
+
+/* Edit-Link (Blau) */
+a.small-action.edit-permission {
+    background-color: #004080;
+}
+
+a.small-action.edit-permission:hover {
+    background-color: #0059b3;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Delete-Link (Rot) */
+a.small-action.ajax-delete {
+    background-color: #cc0000;
+}
+
+a.small-action.ajax-delete:hover {
+    background-color: #ff3333;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
 }
 
 #status {
