@@ -8,13 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!form)
             return;
 
+        const container = document.querySelector(`[data-form="${formId}"]`);
+        var sendAsJson = false;
+        if (container) {
+            sendAsJson = container.dataset.json === '1';
+        }
+        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const url = form.getAttribute('action');
-            const formData = new FormData(form);
+
+            let options = {method: 'POST'};
+
+            if (sendAsJson) {
+                const formData = Object.fromEntries(new FormData(form).entries());
+                options.body = JSON.stringify(formData);
+                options.headers = {'Content-Type': 'application/json'};
+            } else {
+                options.body = new FormData(form);
+            }
 
             try {
-                const resp = await fetch(url, {method: 'POST', body: formData});
+                const resp = await fetch(url, options);
                 const data = await resp.json();
 
                 if (data.success === 1) {
