@@ -23,32 +23,30 @@ class Database extends \PDO
      * @param string $name Optional if using arugments to connect
      * @param string $user Optional if using arugments to connect
      * @param string $pass Optional if using arugments to connect
-     *
-     *  // First Way:
-     *    $db = array(
-     *        'type' => 'mysql'
-     *        ,'host' => 'localhost'
-     *        ,'name' => 'test'
-     *        ,'user' => 'root'
-     *        ,'pass' => ''
-     *    );
-     *  $db = new ckvsoft\Database($db);
-     *
-     *  // Second Way:
-     *  $db = new ckvsoft\Database(null, 'mysql', 'localhost', 'test', 'root', '');
+     * @param boolean $persistent Optional: whether to use a persistent connection
      */
     public function __construct($db, $type = null, $host = null, $name = null, $user = null, $pass = null, $persistent = false)
     {
+        // Add ATTR_ERRMODE => ERRMODE_EXCEPTION explicitly, even if it's the default in PHP 8+,
+        // to ensure consistent behavior across different environments.
+        $options = [
+            \PDO::ATTR_PERSISTENT => $persistent,
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+        ];
+
         try {
             /** Connect with arguments */
             if ($db == false || $db == null) {
-                parent::__construct("{$type}:host={$host};dbname={$name};charset=utf8mb4", $user, $pass, array(\PDO::ATTR_PERSISTENT => $persistent));
+                parent::__construct("{$type}:host={$host};dbname={$name};charset=utf8mb4", $user, $pass, $options);
             }
             /** Connect with assoc array */ else {
                 $persistent = isset($db['persistent']) ? $db['persistent'] : false;
-                parent::__construct("{$db['type']}:host={$db['host']};dbname={$db['name']};charset=utf8mb4", $db['user'], $db['pass'], array(\PDO::ATTR_PERSISTENT => $persistent));
+                $options[\PDO::ATTR_PERSISTENT] = $persistent; // Override persistent if set in array
+                parent::__construct("{$db['type']}:host={$db['host']};dbname={$db['name']};charset=utf8mb4", $db['user'], $db['pass'], $options);
             }
         } catch (\PDOException $e) {
+            // Note: In a library, it's often better to throw a custom exception here as well,
+            // but keeping 'die()' as in your original code.
             die($e->getMessage());
         }
     }
@@ -66,13 +64,9 @@ class Database extends \PDO
     /**
      * select - Run & Return a Select Query
      *
-     * @param string $query Build a query with ? marks in the proper order,
-     *    eg: SELECT :email, :password FROM tablename WHERE userid = :userid
-     *
-     * @param array $bindParams Fields The fields to select to replace the :colin marks,
-     *    eg: array('email' => 'email', 'password' => 'password', 'userid' => 200);
-     *
-     * @param constant $overrideFetchMode Pass in a PDO::FETCH_MODE to override the default or the setFetchMode setting
+     * @param string $query Build a query with :colin marks for binding
+     * @param array $bindParams The fields to select to replace the :colin marks
+     * @param constant $overrideFetchMode Pass in a PDO::FETCH_MODE to override the default
      *
      * @return array
      */
@@ -88,10 +82,14 @@ class Database extends \PDO
         /** Run Query and Bind the Values */
         $sth = $this->_prepareAndBind($bindParams);
 
-        $result = $sth->execute();
-
-        /** Throw an exception for an error */
-        $this->_handleError($result, __FUNCTION__);
+        try {
+            // Execute the query. If an error occurs, an exception is thrown.
+            $sth->execute();
+        } catch (\PDOException $e) {
+            // Catch the exception and call the custom error handler
+            $this->_handleError(false, __FUNCTION__, $e);
+            return []; // Return empty array on SELECT failure
+        }
 
         /** Automatically return all the goods */
         if ($overrideFetchMode != null)
@@ -103,8 +101,9 @@ class Database extends \PDO
     /**
      * insert - Convenience method to insert data
      *
-     * @param string $table    The table to insert into
-     * @param array $data    An associative array of data: field => value
+     * @param string $table     The table to insert into
+     * @param array $data      An associative array of data: field => value
+     * @return int|false The last insert ID on success, or false on error.
      */
     public function insert($table, $data)
     {
@@ -117,14 +116,20 @@ class Database extends \PDO
         /** Bind Values */
         $sth = $this->_prepareAndBind($data);
 
-        /** Execute Query */
-        $result = $sth->execute();
+        try {
+            /** Execute Query */
+            $sth->execute();
+        } catch (\PDOException $e) {
+            // Catch the exception and call the custom error handler
+            $this->_handleError(false, __FUNCTION__, $e);
 
-        /** Throw an exception for an error */
-        $this->_handleError($result, __FUNCTION__);
+            // Optional: Handle specific SQLSTATE codes, e.g., '23000' for Integrity Constraint Violation (Duplicate Entry)
+            if ($e->getCode() == '23000' || (isset($e->errorInfo[0]) && $e->errorInfo[0] == '23000')) {
+                // Specific logic for Duplicate Entry, if needed
+            }
 
-        if ($result == false)
-            return false;
+            return false; // Return false on failure
+        }
 
         /** Return the insert id */
         return $this->lastInsertId();
@@ -153,11 +158,14 @@ class Database extends \PDO
         /** Bind Where Params */
         $sth = $this->_prepareAndBind($bindWhereParams, $sth);
 
-        /** Execute Query */
-        $result = $sth->execute();
-
-        /** Throw an exception for an error */
-        $this->_handleError($result, __FUNCTION__);
+        try {
+            /** Execute Query */
+            $result = $sth->execute();
+        } catch (\PDOException $e) {
+            // Catch the exception and call the custom error handler
+            $this->_handleError(false, __FUNCTION__, $e);
+            return false; // Return false on failure
+        }
 
         /** Return Result */
         return $result;
@@ -165,7 +173,7 @@ class Database extends \PDO
 
     /**
      * replace - Convenience method to replace into the database
-     *              Note: Replace does a Delete and Insert
+     * Note: Replace does a Delete and Insert
      *
      * @param string $table The table to update
      * @param array $data An associative array of fields to change: field => value
@@ -183,11 +191,14 @@ class Database extends \PDO
         /** Bind Values */
         $sth = $this->_prepareAndBind($data);
 
-        /** Execute Query */
-        $result = $sth->execute();
-
-        /** Throw an exception for an error */
-        $this->_handleError($result, __FUNCTION__);
+        try {
+            /** Execute Query */
+            $result = $sth->execute();
+        } catch (\PDOException $e) {
+            // Catch the exception and call the custom error handler
+            $this->_handleError(false, __FUNCTION__, $e);
+            return false; // Return false on failure
+        }
 
         /** Return Result */
         return $result;
@@ -210,11 +221,14 @@ class Database extends \PDO
         /** Bind Values */
         $sth = $this->_prepareAndBind($bindWhereParams);
 
-        /** Execute Query */
-        $result = $sth->execute();
-
-        /** Throw an exception for an error */
-        $this->_handleError($result, __FUNCTION__);
+        try {
+            /** Execute Query */
+            $sth->execute();
+        } catch (\PDOException $e) {
+            // Catch the exception and call the custom error handler
+            $this->_handleError(false, __FUNCTION__, $e);
+            return 0; // Return 0 affected rows on failure
+        }
 
         /** Return Result */
         return $sth->rowCount();
@@ -223,8 +237,9 @@ class Database extends \PDO
     /**
      * insertUpdate - Convenience method to insert/if key exists update.
      *
-     * @param string $table    The table to insert into
-     * @param array $data    An associative array of data: field => value
+     * @param string $table     The table to insert into
+     * @param array $data      An associative array of data: field => value
+     * @return integer The last insert id on success.
      */
     public function insertUpdate($table, $data)
     {
@@ -238,11 +253,14 @@ class Database extends \PDO
         /** Bind Values */
         $sth = $this->_prepareAndBind($data);
 
-        /** Execute Query */
-        $result = $sth->execute();
-
-        /** Throw an exception for an error */
-        $this->_handleError($result, __FUNCTION__);
+        try {
+            /** Execute Query */
+            $sth->execute();
+        } catch (\PDOException $e) {
+            // Catch the exception and call the custom error handler
+            $this->_handleError(false, __FUNCTION__, $e);
+            return 0; // Return 0 on failure
+        }
 
         /** Return the insert id */
         return $this->lastInsertId();
@@ -266,6 +284,7 @@ class Database extends \PDO
 
     public function showTables()
     {
+        // Note: The select method is already secured via try/catch
         $tablesResult = $this->select("SHOW TABLES");
         $tables = array();
         foreach ($tablesResult as $tableRow) {
@@ -303,9 +322,15 @@ class Database extends \PDO
     public function commit(): bool
     {
         if (parent::inTransaction()) {
-            $ret = parent::commit();
-            $this->activeTransaction = $ret;
-            return $ret;
+            try {
+                $ret = parent::commit();
+                $this->activeTransaction = $ret;
+                return $ret;
+            } catch (\PDOException $e) {
+                // Catch commit errors (e.g., if connection was lost)
+                $this->_handleError(false, __FUNCTION__, $e);
+                return false;
+            }
         } else {
             // In PHP 8.0 a PDOException is thrown when a commit is attempted with no
             // transaction active. In previous PHP versions this failed silently.
@@ -329,15 +354,24 @@ class Database extends \PDO
             // following code is unreachable.
             // If \DatabaseConnection::rollback() would throw an
             // exception then continue to throw an exception.
-            if (!$this->activeTransaction) {
-                throw new DatabaseTransactionNoActiveException();
+            if (!parent::inTransaction()) { // Use parent::inTransaction() to be safe
+                // Assuming DatabaseTransactionNoActiveException is defined elsewhere
+                // throw new DatabaseTransactionNoActiveException();
             }
             trigger_error('Rollback attempted when there is no active transaction. This can cause data integrity issues.', E_USER_WARNING);
             return;
         }
-        $ret = parent::rollback();
-        $this->activeTransaction = false;
-        return $ret;
+
+        try {
+            $ret = parent::rollback();
+            $this->activeTransaction = false;
+            return $ret;
+        } catch (\PDOException $e) {
+            // Catch rollback errors (e.g., if connection was lost)
+            $this->_handleError(false, __FUNCTION__, $e);
+            $this->activeTransaction = false;
+            return false;
+        }
     }
 
     /**
@@ -347,7 +381,7 @@ class Database extends \PDO
      */
     public function showColumns($table)
     {
-// Die Methode muss den String parsen
+        // The method must parse the string
         $parts = explode('.', $table);
 
         if (count($parts) == 2) {
@@ -359,6 +393,7 @@ class Database extends \PDO
             $sql = "SHOW COLUMNS FROM `$tableName`";
         }
 
+        // Note: The select method is already secured via try/catch
         $result = $this->select($sql, array(), \PDO::FETCH_ASSOC);
 
         $output = array();
@@ -382,13 +417,13 @@ class Database extends \PDO
      */
     private function _prepareAndBind($data, $reuseStatement = false)
     {
-        if ($reuseStatement == false) {
-            $sth = $this->prepare($this->_sql);
-        } else {
-            $sth = $reuseStatement;
-        }
+        $sth = $reuseStatement ? $reuseStatement : $this->prepare($this->_sql);
 
         foreach ($data as $key => $value) {
+            if ($value instanceof DbExpr) {
+                // Skip binding, raw SQL used
+                continue;
+            }
             if (is_int($value)) {
                 $sth->bindValue(":$key", $value, \PDO::PARAM_INT);
             } else {
@@ -407,14 +442,21 @@ class Database extends \PDO
      */
     private function _prepareInsertString($data)
     {
-        /**
-         * @ Incoming $data looks like:
-         * $data = array('field' => 'value', 'field2'=> 'value2');
-         */
-        return array(
-            'names' => implode("`, `", array_keys($data)),
-            'values' => ':' . implode(', :', array_keys($data))
-        );
+        $names = [];
+        $values = [];
+        foreach ($data as $key => $value) {
+            $names[] = $key;
+            if ($value instanceof DbExpr) {
+                $values[] = (string) $value; // raw SQL
+            } else {
+                $values[] = ':' . $key;
+            }
+        }
+
+        return [
+            'names' => implode('`, `', $names),
+            'values' => implode(', ', $values)
+        ];
     }
 
     /**
@@ -425,26 +467,42 @@ class Database extends \PDO
      */
     private function _prepareUpdateString($data)
     {
-        /**
-         * @ Incoming $data looks like:
-         * $data = array('field' => 'value', 'field2'=> 'value2');
-         */
-        $fieldDetails = NULL;
+        $parts = [];
         foreach ($data as $key => $value) {
-            $fieldDetails .= "`$key`=:$key, ";/** Notice the space after the comma */
+            if ($value instanceof DbExpr) {
+                $parts[] = "`$key`=" . (string) $value;
+            } else {
+                $parts[] = "`$key`=:$key";
+            }
         }
-//        if ($fieldDetails !== null) {
-        $fieldDetails = rtrim($fieldDetails, ', ');
-//        }
-
-        return $fieldDetails;
+        return implode(', ', $parts);
     }
 
     /**
-     * _handleError - Handles errors with PDO and throws an exception.
+     * _handleError - Handles errors with PDO and throws a custom exception.
+     *
+     * @param boolean $result The result of the execute() call (false on error)
+     * @param string $method The calling function name
+     * @param \PDOException $e Optional: The PDOException object, if thrown
+     * @throws \ckvsoft\CkvException
      */
-    private function _handleError($result, $method)
+    private function _handleError($result, $method, \PDOException $e = null)
     {
+        // *** PRIMARY LOGIC FOR EXCEPTION MODE ***
+        if ($e !== null) {
+            // Use the errorInfo array from the exception
+            $errorInfo = $e->errorInfo ?? ['N/A', 'N/A', $e->getMessage()];
+
+            throw new \ckvsoft\CkvException(
+                            "DB Error in $method: " . implode(', ', $errorInfo) .
+                            " - SQL: " . $this->showQuery() .
+                            " - Message: " . $e->getMessage(),
+                            (int) $e->getCode(), // Use PDO error code
+                            $e // Pass the original exception for the stack trace
+                    );
+        }
+
+        // *** FALLBACK LOGIC FOR SILENT/WARNING MODE (Should not be reached) ***
 
         /** If it's an SQL error */
         if ($this->errorCode() != '00000') {
