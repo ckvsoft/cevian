@@ -26,4 +26,4 @@
     </form>
 </fieldset>
 <hr />
-<div id="menulist" class="ajax-list" data-form="menuForm" data-url="menu/menuList" style="position: relative;"></div>
+<div id="menulist" class="ajax-list" data-list="menu/menuList" style="position: relative;"></div>
