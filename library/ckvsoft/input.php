@@ -115,13 +115,16 @@ class Input
     }
 
     /**
-     * The master method which handles a POST/GET/REQUEST
+     * Handles input retrieval for POST, GET, or REQUEST, including full JSON payloads.
      *
-     * @param string $name The name of the item to get
-     * @param boolean $required Is this field required?
+     * This method fetches a single field or, if $all is true and the request is a JSON POST,
+     * populates the internal _inputData array with the entire JSON payload.
      *
-     * @return \ckvsoft\Input
-     * @throws \Exception
+     * @param string $name The name of the field to retrieve.
+     * @param bool|string $required If true, the field is required; can also be 'checkbox'.
+     * @param bool $all If true and request is JSON, fetch all fields instead of a single one.
+     *
+     * @return \ckvsoft\Input Returns $this for chaining.
      */
     private function _handle_input($name, $required, $all = false)
     {
