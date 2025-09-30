@@ -1,6 +1,9 @@
 <fieldset>
     <legend>User: Add</legend>
     <form action="user/create" method="post" id="userForm" autocomplete="off">
+        <label for="username">Name:</label>
+        <input type="text" id="username" name="username" required autocomplete="off"><br />
+
         <label for="email">Email:</label>
         <input type="text" id="email" name="email" required autocomplete="off"><br />
 
@@ -17,4 +20,4 @@
     </form>
 </fieldset>
 <hr />
-<div id="userlist" class="ajax-list" data-form="userForm" data-url="user/userList"></div>
+<div id="userlist" class="ajax-list" data-list="user/userList"></div>
