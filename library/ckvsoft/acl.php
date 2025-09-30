@@ -2,37 +2,44 @@
 
 namespace ckvsoft;
 
+use ckvsoft\DbExpr;
+use ckvsoft\CkvException;
+
 /**
- * ACL with nested-set role storage and permission helpers.
+ * Access Control List (ACL) component with nested-set role storage and
+ * permission resolution logic.
  */
 class ACL extends \ckvsoft\mvc\Config
 {
 
-    private $perms = [];      // Calculated permissions for current user
-    private $userid = 0;      // Current user id
-    private $userRoles = []; // Roles of current user
+    // =================================================================
+    // 1. PROPERTIES
+    // =================================================================
 
-    public function __construct($user_id = -1)
+    private array $perms = [];     // Calculated permissions (role + user overrides) for the current user (keyed by permKey)
+    private int $userid = 0;       // Current user ID
+    private array $userRoles = []; // Roles assigned directly to the current user
+
+    // =================================================================
+    // 2. CONSTRUCTOR & INITIALIZATION
+    // =================================================================
+
+    /**
+     * ACL constructor. Initializes user context and calculates effective permissions.
+     */
+    public function __construct(int $user_id = -1)
     {
         parent::__construct();
-        $this->userid = ($user_id != -1) ? $user_id : $_SESSION['user_id'] ?? 0;
+        // Set user ID
+        $this->userid = ($user_id !== -1) ? $user_id : $_SESSION['user_id'] ?? 0;
+        // Retrieve roles
         $this->userRoles = $this->getUserRoles();
+        // Calculate the final permissions map
         $this->buildACL();
     }
 
     /**
-     * Build ACL (role-perms + user-perms).
-     */
-    private function buildACL()
-    {
-        if (!empty($this->userRoles)) {
-            $this->perms = array_merge($this->perms, $this->getRolePerms($this->userRoles, true));
-        }
-        $this->perms = array_merge($this->perms, $this->getUserPerms($this->userid));
-    }
-
-    /**
-     * Check if current user is superuser (user_id == 1).
+     * Check if the current user is the superuser (user_id == 1).
      */
     public function isSuperuser(): bool
     {
@@ -40,17 +47,19 @@ class ACL extends \ckvsoft\mvc\Config
             return false;
         }
         $expectedKey = \ckvsoft\Hash::create('sha256', $_SESSION['user_id'], HASH_KEY);
-        return hash_equals($expectedKey, $_SESSION['user_key']) && $_SESSION['user_id'] == 1;
+        return hash_equals($expectedKey, $_SESSION['user_key']) && $_SESSION['user_id'] === 1;
     }
 
-    // -----------------------------------------------------------------
-    // Roles / Nested Set operations
-    // -----------------------------------------------------------------
+    // =================================================================
+    // 3. ROLE MANAGEMENT (NESTED SET CRUD & LOOKUPS)
+    // =================================================================
 
     /**
-     * Add a new role under a parent or as root.
+     * Add a new role under a parent or as a new root node.
      *
-     * @return int inserted role id
+     * @param string $roleName The name of the new role.
+     * @param int|null $parentId The ID of the parent role, or null for a root role.
+     * @return int The ID of the inserted role.
      * @throws \ckvsoft\CkvException If parent role is not found or a DB error occurs during transaction.
      */
     public function addRole(string $roleName, ?int $parentId = null): int
@@ -62,18 +71,18 @@ class ACL extends \ckvsoft\mvc\Config
                     ['id' => $parentId]
             );
             if (empty($parent)) {
-                // Throw CkvException for consistency in application errors
-                throw new \ckvsoft\CkvException("Parent role not found");
+                throw new CkvException("Parent role not found");
             }
             $parent = $parent[0];
             $insertAt = (int) $parent['rgt'];
             $depth = (int) $parent['depth'] + 1;
 
-            // Make space
+            // Transaction for Nested Set insert
             $this->db->beginTransaction();
             try {
-                $this->db->update('roles', ['rgt' => new DbExpr('rgt + ' . (2))], 'rgt >= :p', ['p' => $insertAt]);
-                $this->db->update('roles', ['lft' => new DbExpr('lft + ' . (2))], 'lft >= :p', ['p' => $insertAt]);
+                // Make space
+                $this->db->update('roles', ['rgt' => new DbExpr('rgt + 2')], 'rgt >= :p', ['p' => $insertAt]);
+                $this->db->update('roles', ['lft' => new DbExpr('lft + 2')], 'lft >= :p', ['p' => $insertAt]);
 
                 // Insert new node
                 $this->db->insert('roles', [
@@ -86,7 +95,7 @@ class ACL extends \ckvsoft\mvc\Config
                 $newId = (int) $this->db->id();
                 $this->db->commit();
                 return $newId;
-            } catch (\ckvsoft\CkvException $e) { // <-- Catch CkvException from Database
+            } catch (CkvException $e) {
                 $this->db->rollback();
                 throw $e;
             }
@@ -108,8 +117,10 @@ class ACL extends \ckvsoft\mvc\Config
      * Move a role (and its subtree) to be a child of $newParentId.
      * If $newParentId is null, move to root (append).
      *
-     * This implements a safe nested-set move without changing role IDs (permissions kept).
-     * @throws \ckvsoft\CkvException If the new parent is not found or if the move is invalid.
+     * Implements a safe nested-set move.
+     * @param int $roleId The ID of the role to move.
+     * @param int|null $newParentId The ID of the new parent role, or null to move to root.
+     * @throws \ckvsoft\CkvException If the new parent is not found or if the move is invalid (e.g., into its own subtree).
      */
     public function moveRole(int $roleId, ?int $newParentId): bool
     {
@@ -121,12 +132,11 @@ class ACL extends \ckvsoft\mvc\Config
         $nodeDepth = (int) $node[0]['depth'];
         $width = $nodeR - $nodeL + 1;
 
-        // Target position
+        // Calculate target position
         if ($newParentId) {
             $parent = $this->db->select("SELECT lft, rgt, depth FROM roles WHERE id = :id LIMIT 1", ['id' => $newParentId]);
             if (empty($parent)) {
-                // Throw CkvException for consistency in application errors
-                throw new \ckvsoft\CkvException("New parent not found");
+                throw new CkvException("New parent not found");
             }
             $parent = $parent[0];
             $dest = (int) $parent['rgt']; // insert before parent's rgt
@@ -138,15 +148,14 @@ class ACL extends \ckvsoft\mvc\Config
             $newDepth = 0;
         }
 
-        // Can't move into itself or its subtree
+        // Prevent moving into itself or its subtree
         if ($dest >= $nodeL && $dest <= $nodeR) {
-            // Throw CkvException for consistency in application errors
-            throw new \ckvsoft\CkvException("Cannot move a node into its own subtree");
+            throw new CkvException("Cannot move a node into its own subtree");
         }
 
         $this->db->beginTransaction();
         try {
-            // 1) mark subtree with negative values (to protect it)
+            // 1) Mark subtree with negative values
             $this->db->update(
                     'roles',
                     ['lft' => new DbExpr('-lft'), 'rgt' => new DbExpr('-rgt')],
@@ -154,23 +163,22 @@ class ACL extends \ckvsoft\mvc\Config
                     ['l' => $nodeL, 'r' => $nodeR]
             );
 
-            // 2) close gap left by the subtree
+            // 2) Close gap left by the subtree
             $this->db->update('roles', ['lft' => new DbExpr("lft - {$width}")], 'lft > :r', ['r' => $nodeR]);
             $this->db->update('roles', ['rgt' => new DbExpr("rgt - {$width}")], 'rgt > :r', ['r' => $nodeR]);
 
-            // Adjust dest if it was after the removed node
+            // Adjust destination if it was after the removed node
             if ($dest > $nodeR) {
                 $dest = $dest - $width;
             }
 
-            // 3) make room at destination
+            // 3) Make room at destination
             $this->db->update('roles', ['lft' => new DbExpr("lft + {$width}")], 'lft >= :d', ['d' => $dest]);
             $this->db->update('roles', ['rgt' => new DbExpr("rgt + {$width}")], 'rgt >= :d', ['d' => $dest]);
 
-            // 4) move the marked subtree into place and fix depth
-            $offset = $dest - $nodeL; // how much to add to absolute positions
+            // 4) Move the marked subtree into place and fix depth
+            $offset = $dest - $nodeL;
             $depthDiff = $newDepth - $nodeDepth;
-            // Convert negative lft/rgt back to positive and shift them
             $this->db->update(
                     'roles',
                     [
@@ -183,76 +191,94 @@ class ACL extends \ckvsoft\mvc\Config
 
             $this->db->commit();
             return true;
-        } catch (\ckvsoft\CkvException $e) { // <-- Catch CkvException from Database
+        } catch (CkvException $e) {
             $this->db->rollback();
             throw $e;
         }
     }
 
     /**
+     * Updates a role's name.
+     * @param int $roleId The ID of the role to update.
+     * @param string $roleName The new name for the role.
+     * @throws \ckvsoft\CkvException On DB error.
+     */
+    public function updateRoleName(int $roleId, string $roleName): void
+    {
+        $this->db->update('roles', ['roleName' => $roleName], 'id = :id', ['id' => $roleId]);
+    }
+
+// ... (Letztes Fragment der ACL-Klasse) ...
+
+    /**
      * Delete role and its subtree.
+     * @param int $roleId The ID of the role to delete.
+     * @throws \ckvsoft\CkvException On DB error (e.g., foreign key constraint violation).
      */
     public function deleteRole(int $roleId): bool
     {
         $node = $this->db->select("SELECT lft, rgt FROM roles WHERE id = :id LIMIT 1", ['id' => $roleId]);
-        if (empty($node))
+        if (empty($node)) {
             return false;
-        $lft = (int) $node[0]['lft'];
-        $rgt = (int) $node[0]['rgt'];
-        $width = $rgt - $lft + 1;
+        }
+        $nodeL = (int) $node[0]['lft'];
+        $nodeR = (int) $node[0]['rgt'];
+        $width = $nodeR - $nodeL + 1; // Correctly calculate the width of the subtree
 
-        // Delete subtree (will throw CkvException on foreign key constraint violation)
-        $this->db->delete('roles', "lft BETWEEN :l AND :r", ['l' => $lft, 'r' => $rgt]);
+        $this->db->beginTransaction();
+        try {
+            // 1. Delete all nodes in the subtree
+            $this->db->delete('roles', 'lft >= :l AND rgt <= :r', ['l' => $nodeL, 'r' => $nodeR]);
 
-        // Close gap
-        $this->db->update('roles', ['rgt' => new DbExpr("rgt - {$width}")], 'rgt > :r', ['r' => $rgt]);
-        $this->db->update('roles', ['lft' => new DbExpr("lft - {$width}")], 'lft > :r', ['r' => $rgt]);
+            // 2. Close the gap left by the deleted subtree
+            $this->db->update('roles', ['lft' => new DbExpr("lft - {$width}")], 'lft > :r', ['r' => $nodeR]);
+            $this->db->update('roles', ['rgt' => new DbExpr("rgt - {$width}")], 'rgt > :r', ['r' => $nodeR]);
 
-        return true;
+            // NOTE: Associated permissions (role_perms) and user assignments (user_roles)
+            // should ideally be handled by CASCADE DELETE constraints in the database.
+            // If not, explicit deletion logic must be added here (or in Rbac_Model).
+
+            $this->db->commit();
+            return true;
+        } catch (CkvException $e) {
+            $this->db->rollback();
+            throw $e;
+        }
     }
 
     /**
-     * Return all roles. Format 'full' returns id, roleName and depth.
+     * Checks if a role name already exists.
      */
-    public function getAllRoles($format = 'ids')
+    public function roleNameExists(string $roleName): bool
+    {
+        $exists = $this->db->select(
+                "SELECT id FROM roles WHERE roleName = :name LIMIT 1",
+                ['name' => $roleName]
+        );
+
+        return !empty($exists);
+    }
+
+    /**
+     * Return all roles, ordered by Nested Set (tree traversal).
+     * Format 'full' returns id, roleName and depth.
+     */
+    public function getAllRoles(string $format = 'ids'): array
     {
         $rows = $this->db->select("SELECT * FROM roles ORDER BY lft ASC");
         $resp = [];
         foreach ($rows as $row) {
             if (strtolower($format) === 'full') {
                 $resp[] = [
-                    'id' => $row['id'],
+                    'id' => (int) $row['id'],
                     'roleName' => $row['roleName'],
-                    'depth' => $row['depth']
+                    'depth' => (int) $row['depth']
                 ];
             } else {
-                $resp[] = $row['id'];
+                $resp[] = (int) $row['id'];
             }
         }
         return $resp;
-    }
-
-    /**
-     * Get role name from id.
-     */
-    public function getRoleNameFromid($roleID)
-    {
-        $res = $this->db->select("SELECT roleName FROM roles WHERE id = :id LIMIT 1", ['id' => $roleID]);
-        return $res[0]['roleName'] ?? null;
-    }
-
-    /**
-     * Return direct children of a role (subtree excluding the node itself).
-     */
-    public function getChildren(int $roleId): array
-    {
-        $node = $this->db->select("SELECT lft, rgt FROM roles WHERE id = :id LIMIT 1", ['id' => $roleId]);
-        if (empty($node))
-            return [];
-        return $this->db->select(
-                        "SELECT * FROM roles WHERE lft BETWEEN :l AND :r AND id != :id ORDER BY lft ASC",
-                        ['l' => $node[0]['lft'], 'r' => $node[0]['rgt'], 'id' => $roleId]
-                );
     }
 
     /**
@@ -282,21 +308,36 @@ class ACL extends \ckvsoft\mvc\Config
         return $last['id'] ?? null;
     }
 
-    // -----------------------------------------------------------------
-    // Permissions Management (CRUD on permissions table) - MOVED FROM RBAC MODEL
-    // -----------------------------------------------------------------
-
     /**
-     * Checks if a permission key already exists.
+     * Return direct children of a role (subtree excluding the node itself).
      */
-    public function permissionKeyExists(string $key): bool
+    public function getChildren(int $roleId): array
     {
-        return !empty($this->db->select("SELECT id FROM permissions WHERE permKey = :key", ['key' => $key]));
+        $node = $this->db->select("SELECT lft, rgt FROM roles WHERE id = :id LIMIT 1", ['id' => $roleId]);
+        if (empty($node))
+            return [];
+        return $this->db->select(
+                        "SELECT * FROM roles WHERE lft BETWEEN :l AND :r AND id != :id ORDER BY lft ASC",
+                        ['l' => $node[0]['lft'], 'r' => $node[0]['rgt'], 'id' => $roleId]
+                );
     }
 
     /**
+     * Get role name from id.
+     */
+    public function getRoleNameFromid(int $roleID): ?string
+    {
+        $res = $this->db->select("SELECT roleName FROM roles WHERE id = :id LIMIT 1", ['id' => $roleID]);
+        return $res[0]['roleName'] ?? null;
+    }
+
+    // =================================================================
+    // 4. PERMISSION DEFINITION MANAGEMENT (CRUD)
+    // =================================================================
+
+    /**
      * Creates a new permission.
-     * * @param array $data Contains 'permKey', 'permName', 'permDescription'.
+     * @param array $data Contains 'permKey', 'permName', 'permDescription'.
      * @return int New permission ID.
      * @throws \ckvsoft\CkvException On DB error (e.g., duplicate key).
      */
@@ -310,7 +351,7 @@ class ACL extends \ckvsoft\mvc\Config
 
     /**
      * Updates an existing permission.
-     * * @param int $id
+     * @param int $id The ID of the permission to update.
      * @param array $data Data to update.
      * @throws \ckvsoft\CkvException On DB error (e.g., duplicate key).
      */
@@ -321,7 +362,7 @@ class ACL extends \ckvsoft\mvc\Config
 
     /**
      * Deletes a permission and associated role/user permissions.
-     * * @param int $id
+     * @param int $id The ID of the permission to delete.
      * @throws \ckvsoft\CkvException On DB error (e.g., foreign key violation).
      */
     public function deletePermission(int $id): void
@@ -333,59 +374,71 @@ class ACL extends \ckvsoft\mvc\Config
         $this->db->delete('permissions', "id = :id", ['id' => $id]);
     }
 
-    // -----------------------------------------------------------------
-    // Permissions Lookups
-    // -----------------------------------------------------------------
-
-    public function getPermKeyFromid($permID)
+    /**
+     * Checks if a permission key already exists.
+     */
+    public function permissionKeyExists(string $key): bool
     {
-        $res = $this->db->select("SELECT permKey FROM permissions WHERE id = :id LIMIT 1", ['id' => $permID]);
-        return $res[0]['permKey'] ?? null;
-    }
-
-    public function getPermNameFromid($permID)
-    {
-        $res = $this->db->select("SELECT permName FROM permissions WHERE id = :id LIMIT 1", ['id' => $permID]);
-        return $res[0]['permName'] ?? null;
+        return !empty($this->db->select("SELECT id FROM permissions WHERE permKey = :key", ['key' => $key]));
     }
 
     /**
-     * Return all permissions. 'full' returns associative details keyed by permKey.
+     * Return all permission definitions. 'full' returns associative details keyed by permKey.
      */
-    public function getAllPerms($format = 'ids')
+    public function getAllPerms(string $format = 'ids'): array
     {
         $rows = $this->db->select("SELECT * FROM permissions ORDER BY permName ASC");
         $resp = [];
         foreach ($rows as $row) {
             if (strtolower($format) === 'full') {
                 $resp[$row['permKey']] = [
-                    'id' => $row['id'],
+                    'id' => (int) $row['id'],
                     'permName' => $row['permName'],
                     'permKey' => $row['permKey'],
                     'permDescription' => $row['permDescription']
                 ];
             } else {
-                $resp[] = $row['id'];
+                $resp[] = (int) $row['id'];
             }
         }
         return $resp;
     }
 
     /**
+     * Get permission key from ID.
+     */
+    public function getPermKeyFromid(int $permID): ?string
+    {
+        $res = $this->db->select("SELECT permKey FROM permissions WHERE id = :id LIMIT 1", ['id' => $permID]);
+        return $res[0]['permKey'] ?? null;
+    }
+
+    /**
+     * Get permission name from ID.
+     */
+    public function getPermNameFromid(int $permID): ?string
+    {
+        $res = $this->db->select("SELECT permName FROM permissions WHERE id = :id LIMIT 1", ['id' => $permID]);
+        return $res[0]['permName'] ?? null;
+    }
+
+    // =================================================================
+    // 5. PERMISSION ASSIGNMENT & RESOLUTION (ROLE/USER PERMS)
+    // =================================================================
+
+    /**
      * Get role permissions (optionally include inherited from ancestors).
      *
-     * Returns array of permission entries (not just IDs):
-     * [
-     * 'perm.key' => ['perm'=>'perm.key','inheritted'=>true,'value'=>true,'permName'=>..., 'id'=>...],
-     * ...
-     * ]
+     * Returns array of permission entries: [perm.key => ['perm'=>..., 'value'=>true, ...]]
+     *
+     * NOTE: Performance could be improved by caching key/name lookups or using a JOIN.
      */
     public function getRolePerms(array $roleIds, bool $includeInherited = false): array
     {
         if (empty($roleIds))
             return [];
 
-        // named placeholders for IN()
+        // Named placeholders for IN() clause
         $placeholders = [];
         $params = [];
         foreach ($roleIds as $i => $rid) {
@@ -401,13 +454,16 @@ class ACL extends \ckvsoft\mvc\Config
 
         $perms = [];
         foreach ($rows as $row) {
-            $key = strtolower($this->getPermKeyFromid($row['permID']));
+            $key = strtolower($this->getPermKeyFromid($row['permID']) ?? '');
+            if ($key === '')
+                continue;
+
             $perms[$key] = [
                 'perm' => $key,
                 'inheritted' => true,
                 'value' => ((string) $row['value'] === '1'),
                 'permName' => $this->getPermNameFromid($row['permID']),
-                'id' => $row['permID']
+                'id' => (int) $row['permID']
             ];
         }
 
@@ -415,8 +471,9 @@ class ACL extends \ckvsoft\mvc\Config
             foreach ($roleIds as $rid) {
                 $managers = $this->getManagers($rid);
                 foreach ($managers as $m) {
-                    // Only merge if not already explicitly set in a closer role
-                    $perms = array_merge($perms, $this->getRolePerms([$m['id']], false));
+                    // Inherited permissions are merged. Explicit settings in $perms take priority.
+                    $inheritedPerms = $this->getRolePerms([$m['id']], false);
+                    $perms = array_merge($inheritedPerms, $perms);
                 }
             }
         }
@@ -424,42 +481,96 @@ class ACL extends \ckvsoft\mvc\Config
         return $perms;
     }
 
+// --- NEUE METHODE IN ckvsoft\ACL ---
+
     /**
-     * Get permissions assigned directly to the user.
+     * Berechnet die effektiven Berechtigungen für eine Rolle, indem die Hierarchie
+     * (Role und Ancestors) nach der ersten expliziten Zuweisung (0 oder 1) durchsucht wird.
+     *
+     * @param int $roleId Die ID der zu prüfenden Rolle.
+     * @return array [permID => effectiveValue (bool)]
      */
-    private function getUserPerms(int $userId): array
+
+    /**
+     * Berechnet die effektiven Berechtigungen für eine Rolle, indem die Hierarchie
+     * (Role und Ancestors) nach der ersten expliziten Zuweisung (0 oder 1) durchsucht wird.
+     *
+     * @param int $roleId Die ID der zu prüfenden Rolle.
+     * @return array [permID => effectiveValue (bool)]
+     */
+    public function getRoleEffectivePermissions(int $roleId): array
     {
-        $rows = $this->db->select("SELECT * FROM user_perms WHERE userID = :u", ['u' => $userId]);
-        $perms = [];
-        foreach ($rows as $row) {
-            $key = strtolower($this->getPermKeyFromid($row['permID']));
-            $perms[$key] = [
-                'perm' => $key,
-                'inheritted' => false,
-                'value' => ((string) $row['value'] === '1'),
-                'permName' => $this->getPermNameFromid($row['permID']),
-                'id' => $row['permID']
-            ];
+        $effectivePerms = [];
+        // 1. Alle verfügbaren Rechte definieren (als Basis)
+        $allPermDefs = $this->db->select("SELECT id, permKey FROM permissions");
+
+        // Initialisieren aller effektiven Rechte auf false (Deny-by-Default)
+        foreach ($allPermDefs as $def) {
+            $effectivePerms[(int) $def['id']] = false;
         }
-        return $perms;
+
+        // 2. Rollen-IDs abrufen, die zur Auflösung beitragen (Rolle selbst + alle Manager/Ahnen)
+        $relevantRoleIds = [$roleId];
+        $managers = $this->getManagers($roleId);
+        foreach ($managers as $manager) {
+            $relevantRoleIds[] = (int) $manager['id'];
+        }
+
+        if (empty($relevantRoleIds)) {
+            return $effectivePerms;
+        }
+
+        // 💥 KORREKTUR: Benannte Platzhalter für die IN() Klausel erstellen.
+        // Die Keys im $params-Array sind OHNE Doppelpunkt, da _prepareAndBind den Doppelpunkt hinzufügt.
+        $placeholders = [];
+        $params = [];
+        foreach ($relevantRoleIds as $index => $id) {
+            $name = "roleId_{$index}"; // Key Name OHNE Doppelpunkt für $params
+            $key = ":{$name}";          // Platzhalter MIT Doppelpunkt für SQL
+            $placeholders[] = $key;
+            $params[$name] = $id;    // Parameter Key OHNE Doppelpunkt
+        }
+        $inClause = implode(',', $placeholders);
+
+        // 3. Rollendaten für Sortierung abrufen (benötigt lft für Hierarchie-Reihenfolge)
+        $roleRows = $this->db->select(
+                "SELECT id, lft FROM roles WHERE id IN ({$inClause}) ORDER BY lft ASC",
+                $params
+        );
+
+        // 4. Zuweisungen abrufen: RoleID, PermID, Value
+        $permRows = $this->db->select(
+                "SELECT roleID, permID, value FROM role_perms WHERE roleID IN ({$inClause})",
+                $params
+        );
+
+        // 5. Alle Zuweisungen nach Rolle gruppieren
+        $roleAssignments = [];
+        foreach ($permRows as $row) {
+            $roleAssignments[(int) $row['roleID']][(int) $row['permID']] = $row['value'];
+        }
+
+        // 6. Merging: Von der Wurzel zur aktuellen Rolle (lft ASC)
+        $sortedRoleIds = array_column($roleRows, 'id');
+
+        foreach ($sortedRoleIds as $currentRoleId) {
+            if (isset($roleAssignments[$currentRoleId])) {
+                foreach ($roleAssignments[$currentRoleId] as $permID => $value) {
+                    // Nur wenn Wert explizit 0 oder 1 ist (nicht 'X'/'null')
+                    if ($value == 1 || $value == 0) {
+                        // Der gefundene Wert (näher am Blatt/der aktuellen Rolle) überschreibt den vorherigen (vom Ahnen).
+                        $effectivePerms[$permID] = ($value == 1);
+                    }
+                }
+            }
+        }
+
+        return $effectivePerms;
     }
 
-    // -----------------------------------------------------------------
-    // User roles / checks
-    // -----------------------------------------------------------------
-
-    public function getUserRoles(): array
-    {
-        $rows = $this->db->select("SELECT roleID FROM user_roles WHERE userID = :u ORDER BY date_added ASC", ['u' => $this->userid]);
-        return array_map(fn($r) => $r['roleID'], $rows);
-    }
-
-    public function userHasRole($roleID): bool
-    {
-        if ($this->isSuperuser())
-            return true;
-        return in_array((int) $roleID, $this->userRoles, true);
-    }
+    // =================================================================
+    // 6. USER/ROLE QUERIES & CHECKS
+    // =================================================================
 
     /**
      * Check permission key for current user.
@@ -467,6 +578,7 @@ class ACL extends \ckvsoft\mvc\Config
     public function hasPermission(string $permKey): bool
     {
         $key = strtolower($permKey);
+
         if ($this->isSuperuser()) {
             $perm = $this->db->select("SELECT id FROM permissions WHERE permKey = :k", ['k' => $key]);
             if (!$perm) {
@@ -479,12 +591,76 @@ class ACL extends \ckvsoft\mvc\Config
             }
             return true;
         }
+
         return isset($this->perms[$key]) && $this->perms[$key]['value'] === true;
     }
 
-    public function getUserName($userId)
+    /**
+     * Return roles assigned directly to the current user.
+     */
+    public function getUserRoles(): array
+    {
+        $rows = $this->db->select("SELECT roleID FROM user_roles WHERE userID = :u ORDER BY date_added ASC", ['u' => $this->userid]);
+        return array_map(fn($r) => (int) $r['roleID'], $rows);
+    }
+
+    /**
+     * Check if current user has a specific role.
+     */
+    public function userHasRole($roleID): bool
+    {
+        if ($this->isSuperuser())
+            return true;
+        return in_array((int) $roleID, $this->userRoles, true);
+    }
+
+    /**
+     * Get user name from user id.
+     * NOTE: This is a user-specific lookup and ideally belongs in a separate User/Auth component.
+     */
+    public function getUserName(int $userId): ?string
     {
         $res = $this->db->select("SELECT username FROM user WHERE user_id = :id LIMIT 1", ['id' => $userId]);
         return $res[0]['username'] ?? null;
+    }
+
+    // =================================================================
+    // 7. INTERNAL LOGIC (PRIVATE METHODS)
+    // =================================================================
+
+    /**
+     * Builds the final ACL map by merging role permissions and user overrides.
+     */
+    private function buildACL(): void
+    {
+        // 1. Load role permissions (including inheritance)
+        if (!empty($this->userRoles)) {
+            $this->perms = array_merge($this->perms, $this->getRolePerms($this->userRoles, true));
+        }
+        // 2. Apply user overrides (user perms overwrite role perms)
+        $this->perms = array_merge($this->perms, $this->getUserPerms($this->userid));
+    }
+
+    /**
+     * Get permissions assigned directly to the user (overrides).
+     */
+    private function getUserPerms(int $userId): array
+    {
+        $rows = $this->db->select("SELECT * FROM user_perms WHERE userID = :u", ['u' => $userId]);
+        $perms = [];
+        foreach ($rows as $row) {
+            $key = strtolower($this->getPermKeyFromid($row['permID']) ?? '');
+            if ($key === '')
+                continue;
+
+            $perms[$key] = [
+                'perm' => $key,
+                'inheritted' => false,
+                'value' => ((string) $row['value'] === '1'),
+                'permName' => $this->getPermNameFromid($row['permID']),
+                'id' => (int) $row['permID']
+            ];
+        }
+        return $perms;
     }
 }
