@@ -16,6 +16,9 @@ jobs:
           # Holen der kompletten Historie und aller Tags
           fetch-depth: 0
           fetch-tags: true 
+      # NEU: Alten Changelog löschen, damit die Action die KOMPLETTE Historie neu erstellt
+      - name: Clear existing CHANGELOG.md
+        run: rm -f CHANGELOG.md
 
       - name: Generate Changelog
         uses: TriPSs/conventional-changelog-action@v6.1.0
