@@ -41,28 +41,6 @@ INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_pub
 
 -- --------------------------------------------------------
 
---
--- Tabellenstruktur für Tabelle `migrations`
---
-
-CREATE TABLE `migrations` (
-  `id` int(11) NOT NULL,
-  `module_name` varchar(100) NOT NULL,
-  `migration` varchar(255) NOT NULL,
-  `applied_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Daten für Tabelle `migrations`
---
-
-INSERT INTO `migrations` (`id`, `module_name`, `migration`, `applied_at`) VALUES
-(1, '_core_', '0.7.0', '2025-09-26 05:24:01'),
-(2, '_core_', '0.8.0', '2025-10-01 15:24:01');
-
--- --------------------------------------------------------
-
---
 -- Tabellenstruktur für Tabelle `modules`
 --
 
