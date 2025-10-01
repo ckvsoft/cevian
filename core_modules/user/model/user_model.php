@@ -37,7 +37,7 @@ class User_Model extends \ckvsoft\mvc\Model
 
     public function userList()
     {
-        return $this->db->select('SELECT user_id, email, role FROM user');
+        return $this->db->select('SELECT user_id, username, email, role FROM user');
     }
 
     public function userSingleList($userid)
