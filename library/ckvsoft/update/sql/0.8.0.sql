@@ -13,7 +13,7 @@ SET foreign_key_checks = 0; -- Temporarily disable FK checks if any exist
 -- Rename existing permissions and roles table if they exist, to prepare for new structure
 RENAME TABLE `permissions` TO `permissions_old_070`,
              `roles` TO `roles_old_070`,
-             `user_roles` TO `user_roles_old_070`;
+             `user_roles` TO `user_roles_old_070`,
              `role_perms` TO `role_perms_old_070`;
 
 -- RBAC Tables (New/Updated Schema)
