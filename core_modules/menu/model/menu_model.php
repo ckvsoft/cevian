@@ -63,8 +63,20 @@ class Menu_Model extends Model
      */
     public function create($data)
     {
-        $this->db->insert($this->_table, $data);
-        return $this->db->id();
+        try {
+            $this->db->insert($this->_table, $data);
+            return (int) $this->db->id();
+        } catch (\ckvsoft\CkvException $e) {
+            // CATCH: Intercept the exception thrown by the Database class.
+            // CHECK: Look for known DB errors (e.g., Duplicate Entry, SQLSTATE '23000')
+            if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
+                // Return a specific, user-friendly message
+                return "The menu already exists.";
+            }
+
+            // FALLBACK: Return a generic database error message
+            return "Database error: User could not be created.";
+        }
     }
 
     /**
