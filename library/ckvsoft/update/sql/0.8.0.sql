@@ -13,6 +13,7 @@ SET foreign_key_checks = 0; -- Temporarily disable FK checks if any exist
 -- Rename existing permissions and roles table if they exist, to prepare for new structure
 RENAME TABLE `permissions` TO `permissions_old_070`,
              `roles` TO `roles_old_070`,
+             `user_roles` TO `user_roles_old_070`;
              `role_perms` TO `role_perms_old_070`;
 
 -- RBAC Tables (New/Updated Schema)
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS `role_perms` (
   `roleID` int(11) NOT NULL,
   `permID` int(11) NOT NULL,
   `value` tinyint(1) NOT NULL DEFAULT 1,
-  `date_changed` datetime DEFAULT CURRENT_TIMESTAMP(),
+  `date_added` datetime DEFAULT CURRENT_TIMESTAMP(),
+  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `roleID` (`roleID`,`permID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
