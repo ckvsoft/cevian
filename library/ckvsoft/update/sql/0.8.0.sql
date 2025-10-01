@@ -141,6 +141,8 @@ INSERT INTO `permissions` (`id`, `permKey`, `permName`, `permDescription`, `is_u
 ON DUPLICATE KEY UPDATE
     `permName`=VALUES(`permName`), `permDescription`=VALUES(`permDescription`);
 
+ALTER TABLE `user` ADD COLUMN `username` VARCHAR(50) NOT NULL AFTER `user_id`;
+
 -- --------------------------------------------------------
 -- 5. ASSIGN Permissions to Administrator (ID 5) & Assign Role to Superuser (ID 1)
 
