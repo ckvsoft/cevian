@@ -22,5 +22,6 @@
     </div>
 </fieldset>
 <fieldset style="margin-top: 30px;">
+    <legend>Existing User</legend>
     <div id="userlist" class="ajax-list" data-list="user/userList"></div>
 </fieldset>
