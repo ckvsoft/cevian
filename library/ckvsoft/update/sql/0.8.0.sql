@@ -158,4 +158,13 @@ INSERT INTO `user_roles` (`userID`, `roleID`, `date_added`, `date_changed`) VALU
 (1, 5, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `roleID`=VALUES(`roleID`);
 
+-- --------------------------------------------------------
+-- 6. CLEANUP (Remove temporary backup tables)
+-- --------------------------------------------------------
+-- Die temporär umbenannten Tabellen werden gelöscht, da die Migration erfolgreich war.
+DROP TABLE IF EXISTS `permissions_old_070`;
+DROP TABLE IF EXISTS `roles_old_070`;
+DROP TABLE IF EXISTS `user_roles_old_070`;
+DROP TABLE IF EXISTS `role_perms_old_070`;
+
 SET foreign_key_checks = 1; -- Re-enable FK checks
