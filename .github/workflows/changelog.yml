@@ -16,20 +16,17 @@ jobs:
           # Holen der kompletten Historie und aller Tags
           fetch-depth: 0
           fetch-tags: true 
-      # NEU: Alten Changelog löschen, damit die Action die KOMPLETTE Historie neu erstellt
-      - name: Clear existing CHANGELOG.md
-        run: rm -f CHANGELOG.md
 
-      - name: Generate Changelog
+      # ACHTUNG: Der Schritt zum Löschen der CHANGELOG.md WURDE HIER ENTFERNT!
+
+      - name: Generate Changelog for new Release
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-tag: true
           git-push: true
           skip-version-file: true
+          skip-git-pull: true
           
-          # NEU/KORREKT: Überspringt den internen 'git pull' (behebt den "clobbering"-Fehler)
-          skip-git-pull: true 
-          
-          # NEU: Generiert das Changelog für alle existierenden Releases (von Anfang an)
-          release-count: 0
+          # NEU: Entfernt. Die Action sucht nun standardmäßig nach 1 Release.
+          # release-count: 0
