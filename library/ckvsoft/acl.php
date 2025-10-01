@@ -580,15 +580,22 @@ class ACL extends \ckvsoft\mvc\Config
         $key = strtolower($permKey);
 
         if ($this->isSuperuser()) {
-            $perm = $this->db->select("SELECT id FROM permissions WHERE permKey = :k", ['k' => $key]);
+            $perm = $this->db->select("SELECT id, is_used FROM permissions WHERE permKey = :k", ['k' => $key]);
+
             if (!$perm) {
-                // Auto-create permission for superuser if it doesn't exist
+                // Auto-create permission by superuser if it doesn't exist
                 $this->db->insert('permissions', [
                     'permKey' => $key,
                     'permName' => ucfirst($key),
-                    'permDescription' => 'Auto-created for superuser'
+                    'permDescription' => 'Auto-created by superuser',
+                    'is_used' => 1
                 ]);
+            } else {
+                if (isset($perm[0]['is_used']) && $perm[0]['is_used'] == 0) {
+                    $this->db->update('permissions', ['is_used' => 1], 'id = :id_val', ['id_val' => $perm[0]['id']]);
+                }
             }
+
             return true;
         }
 
