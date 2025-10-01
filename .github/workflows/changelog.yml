@@ -13,9 +13,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Holen der kompletten Historie
+          # Holen der kompletten Historie und aller Tags
           fetch-depth: 0
-          # Sicherstellen, dass alle Tags geholt werden
           fetch-tags: true 
 
       - name: Generate Changelog
@@ -25,5 +24,9 @@ jobs:
           skip-tag: true
           git-push: true
           skip-version-file: true
-          # NEU: Überspringe den internen 'git pull', der den Fehler verursacht hat
-          skip-pull: true
+          
+          # NEU/KORREKT: Überspringt den internen 'git pull' (behebt den "clobbering"-Fehler)
+          skip-git-pull: true 
+          
+          # NEU: Generiert das Changelog für alle existierenden Releases (von Anfang an)
+          release-count: 0
