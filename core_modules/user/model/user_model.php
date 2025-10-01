@@ -55,7 +55,7 @@ class User_Model extends \ckvsoft\mvc\Model
     {
         try {
             $this->db->insert($this->_table, $data);
-            return $this->db->id();
+            return (int) $this->db->id();
         } catch (\ckvsoft\CkvException $e) {
             // CATCH: Intercept the exception thrown by the Database class.
             // CHECK: Look for known DB errors (e.g., Duplicate Entry, SQLSTATE '23000')
