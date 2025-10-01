@@ -67,16 +67,13 @@ class Menu extends ckvsoft\mvc\BaseController
             // model and check if its a real user!
             $model = $this->loadModel('menu');
             $result = $model->create($input->fetch());
-            if ($result == false) {
-                ckvsoft\Output::error(["Menuentry not created"]);
+            if (is_string($result)) {
+                \ckvsoft\Output::error([$result]);
             } else {
-                // When we output success, I set jQuery in the view
-                // which does a window.location.href redirect
-                ckvsoft\Output::success();
+                \ckvsoft\Output::success();
             }
         } catch (\ckvsoft\CkvException $e) {
-            // This will output our precious form errors
-            ckvsoft\Output::error($input->fetchErrors());
+            \ckvsoft\Output::error($input->fetchErrors());
         }
     }
 
