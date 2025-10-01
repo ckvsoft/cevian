@@ -25,16 +25,7 @@ class User extends ckvsoft\mvc\BaseController
     public function userList()
     {
         $this->model = $this->loadModel('user');
-        $html = "<table><tr><th>id</th><th>email</th><th></th><th></th></tr>";
-        foreach ($this->model->userList() as $key => $value) {
-            $html .= '<tr><td>' . $value['user_id'] . '</td><td>' . $value['email'] . '</td> <td> <a href="' . BASE_URI . 'user/edit/' . $value['user_id'] . '">Edit</a> ';
-            if ($value['user_id'] > 1)
-                $html .= '<a href="' . BASE_URI . 'user/delete/' . $value['user_id'] . '">Delete</a>';
-            $html .= '</td></tr>';
-        }
-        $html .= '</table>';
-
-        echo $html;
+        $this->view->render("user/user_snipped", ['userList' => $this->model->userList()]);
     }
 
     public function create()
