@@ -26,10 +26,7 @@ class Menu extends ckvsoft\mvc\BaseController
     {
         $model = $this->loadModel('menu');
         $menu = $model->generateMenuArray(0);
-        $tableHtml = "<table id=\"menu-table\" style=\"white-space: nowrap;\"><tr><th align=right>id</th><th align=left>entry</th><th align=right>public</th><th></th><th></th></tr>";
-        $tableHtml .= $this->generateMenuTable($menu);
-        $tableHtml .= '</table>';
-        echo $tableHtml;
+        $this->view->render("menu/menu_snippet", ['generatedMenuTable' => $this->generateMenuTable($menu)]);
     }
 
     private function generateMenuTable($menu, $depth = 0)
@@ -41,8 +38,8 @@ class Menu extends ckvsoft\mvc\BaseController
             $html .= "<tr><td align=right>$item[id]</td>";
             $html .= "<td align=left>$indent . $item[label]</td>";
             $html .= "<td align=right>$is_public</td>";
-            $html .= '<td><a href="' . BASE_URI . 'menu/edit/' . $item['id'] . '">Edit</a></td>';
-            $html .= '<td><a href="' . BASE_URI . 'menu/delete/' . $item['id'] . '">Delete</a></td>';
+            $html .= '<td><a class="small-action" href="' . BASE_URI . 'menu/edit/' . $item['id'] . '">Edit</a></td>';
+            $html .= '<td><a class="small-action ajax-delete" href="' . BASE_URI . 'menu/delete/' . $item['id'] . '">Delete</a></td>';
             $html .= '</tr>';
             if (isset($item['submenu'])) {
                 $html .= $this->generateMenuTable($item['submenu'], $depth + 1); // Rekursion mit erhöhter Tiefe
