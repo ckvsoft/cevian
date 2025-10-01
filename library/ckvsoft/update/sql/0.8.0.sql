@@ -1,91 +1,101 @@
 -- Migration Script: 0.8.0
--- Changes: Introduces full RBAC (Role-Based Access Control) structure
---          and updates the mainmenu for RBAC management.
+-- Changes: Introduces full RBAC (Role-Based Access Control) structure,
+--          updates the mainmenu, and applies necessary schema corrections to 'user'.
+--          NOTE: No 'age' column is added. The 'migrations' insert is omitted.
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET foreign_key_checks = 0; -- Temporarily disable FK checks if any exist
+SET foreign_key_checks = 0;
 
 -- --------------------------------------------------------
--- 1. DROP and CREATE/ALTER TABLES (RBAC)
--- Note: We assume the existing tables are mostly empty or the new structure is mandatory.
---       If the tables already exist from 0.7.0, we use ALTER/DROP/RENAME/ADD.
+-- 1. DROP and CREATE/ALTER TABLES (RBAC & User Schema Update)
+-- --------------------------------------------------------
 
--- Rename existing permissions and roles table if they exist, to prepare for new structure
-RENAME TABLE `permissions` TO `permissions_old_070`,
-             `roles` TO `roles_old_070`,
-             `user_roles` TO `user_roles_old_070`,
-             `role_perms` TO `role_perms_old_070`;
+-- A. VORBEREITUNG: Temporäre Tabellen von vorherigen fehlerhaften Läufen ZUERST löschen
+DROP TABLE IF EXISTS `permissions_old_070`;
+DROP TABLE IF EXISTS `roles_old_070`;
+DROP TABLE IF EXISTS `role_perms_old_070`;
+DROP TABLE IF EXISTS `user_roles_old_070`;
+
+-- B. UMBENENNEN: Existierende 0.7.0 Tabellen umbenennen (separate Anweisungen zur Vermeidung von Syntaxfehlern)
+RENAME TABLE `permissions` TO `permissions_old_070`;
+RENAME TABLE `roles` TO `roles_old_070`;
+RENAME TABLE `role_perms` TO `role_perms_old_070`;
+RENAME TABLE `user_roles` TO `user_roles_old_070`;
+
 
 -- RBAC Tables (New/Updated Schema)
 -- --------------------------------------------------------
-
 -- a) New/Updated `permissions` Table
 CREATE TABLE IF NOT EXISTS `permissions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `permKey` varchar(100) DEFAULT NULL,
-  `permName` varchar(100) DEFAULT NULL,
-  `permDescription` varchar(255) DEFAULT NULL,
-  `is_used` int(1) NOT NULL DEFAULT 0,
-  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Zeitpunkt der Erstellung des Eintrags',
-  `date_changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Zeitpunkt der letzten Aktualisierung des Eintrags',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `permKey` (`permKey`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `permKey` varchar(100) DEFAULT NULL,
+  `permName` varchar(100) DEFAULT NULL,
+  `permDescription` varchar(255) DEFAULT NULL,
+  `is_used` int(1) NOT NULL DEFAULT 0,
+  `date_added` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Zeitpunkt der Erstellung des Eintrags',
+  `date_changed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Zeitpunkt der letzten Aktualisierung des Eintrags',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permKey` (`permKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- b) New/Updated `roles` Table (Nested Set)
 CREATE TABLE IF NOT EXISTS `roles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `roleName` varchar(100) NOT NULL,
-  `lft` int(11) NOT NULL,
-  `rgt` int(11) NOT NULL,
-  `depth` int(11) NOT NULL DEFAULT 0,
-  `date_added` datetime DEFAULT CURRENT_TIMESTAMP(),
-  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
-  PRIMARY KEY (`id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `roleName` varchar(100) NOT NULL,
+  `lft` int(11) NOT NULL,
+  `rgt` int(11) NOT NULL,
+  `depth` int(11) NOT NULL DEFAULT 0,
+  `date_added` datetime DEFAULT CURRENT_TIMESTAMP(),
+  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- c) New/Updated `role_perms` Table
 CREATE TABLE IF NOT EXISTS `role_perms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `roleID` int(11) NOT NULL,
-  `permID` int(11) NOT NULL,
-  `value` tinyint(1) NOT NULL DEFAULT 1,
-  `date_added` datetime DEFAULT CURRENT_TIMESTAMP(),
-  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `roleID` (`roleID`,`permID`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `roleID` int(11) NOT NULL,
+  `permID` int(11) NOT NULL,
+  `value` tinyint(1) NOT NULL DEFAULT 1,
+  `date_added` datetime DEFAULT CURRENT_TIMESTAMP(),
+  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roleID` (`roleID`,`permID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- d) New/Updated `user_perms` Table
 CREATE TABLE IF NOT EXISTS `user_perms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `userID` int(11) NOT NULL,
-  `permID` int(11) NOT NULL,
-  `value` tinyint(1) NOT NULL,
-  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `userID` (`userID`,`permID`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userID` int(11) NOT NULL,
+  `permID` int(11) NOT NULL,
+  `value` tinyint(1) NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userID` (`userID`,`permID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- e) New/Updated `user_roles` Table
 CREATE TABLE IF NOT EXISTS `user_roles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `userID` int(11) NOT NULL,
-  `roleID` int(11) NOT NULL,
-  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(),
-  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
-  PRIMARY KEY (`id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userID` int(11) NOT NULL,
+  `roleID` int(11) NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- --------------------------------------------------------
+-- C. ALTER: User Schema Korrektur (username)
+-- --------------------------------------------------------
+-- Fügt die Spalte 'username' (falls sie fehlt) hinzu und setzt den UNIQUE KEY
+ALTER TABLE `user` ADD COLUMN `username` VARCHAR(50) NOT NULL AFTER `user_id`;
+ALTER TABLE `user` ADD UNIQUE KEY `username` (`username`);
+
 
 -- --------------------------------------------------------
 -- 2. UPDATE mainmenu for RBAC Links (ID 10, 11, 12)
--- Note: Assuming IDs 10, 11, 12 are new and won't conflict with existing data.
-
--- Add missing date columns (if not present from 0.7.0)
-ALTER TABLE `mainmenu`
-  ADD COLUMN `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() AFTER `is_public`,
-  ADD COLUMN `date_changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() AFTER `date_added`;
+-- --------------------------------------------------------
 
 -- Insert the new RBAC menu items (ID 10, 11, 12)
 INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_public`, `date_added`, `date_changed`) VALUES
@@ -93,7 +103,7 @@ INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_pub
 (11, 'Permissions', 'rbac/permissions', 10, NULL, 'admin', -1, NOW(), NOW()),
 (12, 'Roles', 'rbac', 10, NULL, 'admin', -1, NOW(), NOW())
 ON DUPLICATE KEY UPDATE
-    `link`=VALUES(`link`), `parent`=VALUES(`parent`), `sort`=VALUES(`sort`), `role`=VALUES(`role`);
+    `link`=VALUES(`link`), `parent`=VALUES(`parent`), `sort`=VALUES(`sort`), `role`=VALUES(`role`);
 
 -- --------------------------------------------------------
 -- 3. INSERT Default Nested Roles
@@ -106,7 +116,7 @@ INSERT INTO `roles` (`id`, `roleName`, `lft`, `rgt`, `depth`, `date_added`, `dat
 (5, 'Administrator', 11, 12, 0, NOW(), NOW()),
 (6, 'Owner', 13, 14, 0, NOW(), NOW())
 ON DUPLICATE KEY UPDATE
-    `roleName`=VALUES(`roleName`), `lft`=VALUES(`lft`), `rgt`=VALUES(`rgt`), `depth`=VALUES(`depth`);
+    `roleName`=VALUES(`roleName`), `lft`=VALUES(`lft`), `rgt`=VALUES(`rgt`), `depth`=VALUES(`depth`);
 
 -- --------------------------------------------------------
 -- 4. INSERT Permissions
@@ -141,9 +151,7 @@ INSERT INTO `permissions` (`id`, `permKey`, `permName`, `permDescription`, `is_u
 (27, 'system_settings', 'Modify System Settings', 'Global permission for modifying core framework settings.', 0, NOW(), NOW()),
 (28, 'system_maintenance', 'Run Maintenance Tasks', 'Permission to execute system maintenance tasks (e.g., cache clear).', 0, NOW(), NOW())
 ON DUPLICATE KEY UPDATE
-    `permName`=VALUES(`permName`), `permDescription`=VALUES(`permDescription`);
-
-ALTER TABLE `user` ADD COLUMN `username` VARCHAR(50) NOT NULL AFTER `user_id`;
+    `permName`=VALUES(`permName`), `permDescription`=VALUES(`permDescription`);
 
 -- --------------------------------------------------------
 -- 5. ASSIGN Permissions to Administrator (ID 5) & Assign Role to Superuser (ID 1)
@@ -164,7 +172,7 @@ ON DUPLICATE KEY UPDATE `roleID`=VALUES(`roleID`);
 -- Die temporär umbenannten Tabellen werden gelöscht, da die Migration erfolgreich war.
 DROP TABLE IF EXISTS `permissions_old_070`;
 DROP TABLE IF EXISTS `roles_old_070`;
-DROP TABLE IF EXISTS `user_roles_old_070`;
 DROP TABLE IF EXISTS `role_perms_old_070`;
+DROP TABLE IF EXISTS `user_roles_old_070`;
 
-SET foreign_key_checks = 1; -- Re-enable FK checks
+SET foreign_key_checks = 1;
