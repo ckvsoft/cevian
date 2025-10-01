@@ -13,7 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # Holen der kompletten Historie
           fetch-depth: 0
+          # Sicherstellen, dass alle Tags geholt werden
+          fetch-tags: true 
 
       - name: Generate Changelog
         uses: TriPSs/conventional-changelog-action@v6.1.0
@@ -21,4 +24,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-tag: true
           git-push: true
-          skip-version-file: true   # <--- wichtig für Projekte ohne package.json
+          skip-version-file: true
+          # NEU: Überspringe den internen 'git pull', der den Fehler verursacht hat
+          skip-pull: true
