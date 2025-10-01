@@ -27,5 +27,7 @@
         </form>
     </div>
 </fieldset>
-<hr />
-<div id="menulist" class="ajax-list" data-list="menu/menuList" style="position: relative;"></div>
+<fieldset style="margin-top: 30px;">
+    <legend>Existing Menuentries</legend>
+    <div id="menulist" class="ajax-list" data-list="menu/menuList" style="position: relative;"></div>
+</fieldset>
