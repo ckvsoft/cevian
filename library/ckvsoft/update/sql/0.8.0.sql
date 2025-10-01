@@ -1,6 +1,5 @@
--- Migration Script: 0.8.0 - FINAL DIFF SKRIPT V2
--- Strategy: Pure ALTER TABLE / DROP/CREATE/INSERT.
--- Changes: Forcing the new user_perms and user_roles structure via DROP/CREATE.
+-- Migration Script: 0.8.0 - FINAL DIFF SKRIPT V3
+-- Strategy: Pure ALTER TABLE / DROP/CREATE/INSERT with explicit PRIMARY KEY setup.
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET foreign_key_checks = 0;
@@ -11,6 +10,7 @@ START TRANSACTION;
 -- --------------------------------------------------------
 
 -- a) user Tabelle: Hinzufügen von username und unique Index (Fehleranfällig beim wiederholten Lauf)
+-- HINWEIS: Diese Befehle müssen bei wiederholtem Lauf, bei dem die Spalten bereits existieren, MANUELL GELÖSCHT werden!
 ALTER TABLE `user` ADD COLUMN `username` VARCHAR(50) NOT NULL AFTER `user_id`;
 ALTER TABLE `user` ADD UNIQUE KEY `username` (`username`);
 ALTER TABLE `user` ADD UNIQUE KEY `email` (`email`);
@@ -23,6 +23,9 @@ ALTER TABLE `mainmenu` ADD UNIQUE KEY `unique_menu_item` (`label`,`parent`,`link
 
 
 -- c) permissions Tabelle: Modifikationen
+-- 1. PRIMÄRSCHLÜSSEL SICHERN (Vermeidet 1075 Fehler bei AUTO_INCREMENT)
+ALTER TABLE `permissions` ADD PRIMARY KEY (`id`);
+-- 2. AUTO_INCREMENT setzen und Typ anpassen
 ALTER TABLE `permissions` MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `permissions` MODIFY `permKey` VARCHAR(100) DEFAULT NULL;
 ALTER TABLE `permissions` MODIFY `permName` VARCHAR(100) DEFAULT NULL;
@@ -30,11 +33,14 @@ ALTER TABLE `permissions` MODIFY `permDescription` VARCHAR(255) DEFAULT NULL;
 ALTER TABLE `permissions` ADD COLUMN `is_used` INT(1) NOT NULL DEFAULT 0 AFTER `permDescription`;
 ALTER TABLE `permissions` ADD COLUMN `date_added` TIMESTAMP NOT NULL DEFAULT current_timestamp() COMMENT 'Zeitpunkt der Erstellung des Eintrags';
 ALTER TABLE `permissions` ADD COLUMN `date_changed` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Zeitpunkt der letzten Aktualisierung des Eintrags';
-ALTER TABLE `permissions` DROP KEY `permKey`; -- Index löschen, falls alter 0.7.0-Index vorhanden
+ALTER TABLE `permissions` DROP KEY IF EXISTS `permKey`;
 ALTER TABLE `permissions` ADD UNIQUE KEY `permKey` (`permKey`);
 
 
 -- d) roles Tabelle: Hinzufügen von Nested Set Spalten
+-- 1. PRIMÄRSCHLÜSSEL SICHERN (Vermeidet 1075 Fehler bei AUTO_INCREMENT)
+ALTER TABLE `roles` ADD PRIMARY KEY (`id`);
+-- 2. AUTO_INCREMENT setzen und Typ anpassen
 ALTER TABLE `roles` MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `roles` ADD COLUMN `lft` INT(11) NOT NULL;
 ALTER TABLE `roles` ADD COLUMN `rgt` INT(11) NOT NULL;
@@ -44,16 +50,19 @@ ALTER TABLE `roles` ADD COLUMN `date_changed` DATETIME NOT NULL DEFAULT current_
 
 
 -- e) role_perms Tabelle: Spalten anpassen
+-- 1. PRIMÄRSCHLÜSSEL SICHERN (Vermeidet 1075 Fehler bei AUTO_INCREMENT)
+ALTER TABLE `role_perms` ADD PRIMARY KEY (`id`);
+-- 2. AUTO_INCREMENT setzen und Typ anpassen
 ALTER TABLE `role_perms` MODIFY `id` INT(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `role_perms` DROP COLUMN `addDate`;
 ALTER TABLE `role_perms` MODIFY `value` TINYINT(1) NOT NULL DEFAULT 1;
 ALTER TABLE `role_perms` ADD COLUMN `date_changed` DATETIME DEFAULT current_timestamp() AFTER `value`;
-ALTER TABLE `role_perms` DROP KEY `roleID`; -- Index löschen, falls alter 0.7.0-Index vorhanden
+ALTER TABLE `role_perms` DROP KEY IF EXISTS `roleID`; -- Index löschen, falls alter 0.7.0-Index vorhanden
 ALTER TABLE `role_perms` ADD UNIQUE KEY `roleID` (`roleID`,`permID`);
 
 
 -- --------------------------------------------------------
--- 2. NEUE/INKOMPATIBLE TABELLEN ERSTELLEN (user_perms und user_roles)
+-- 2. NEUE/INKOMPATIBLE TABELLEN ERSTELLEN (user_roles und user_perms)
 -- --------------------------------------------------------
 
 -- ZUERST ALTE, INKOMPATIBLE TABELLEN LÖSCHEN (UNUMGÄNGLICH)
@@ -63,24 +72,24 @@ DROP TABLE IF EXISTS `user_perms`;
 
 -- user_roles NEU ERSTELLEN (mit 0.8.0 Struktur)
 CREATE TABLE `user_roles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `userID` int(11) NOT NULL,
-  `roleID` int(11) NOT NULL,
-  `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userID` int(11) NOT NULL,
+  `roleID` int(11) NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- user_perms NEU ERSTELLEN (mit 0.8.0 Struktur)
 CREATE TABLE `user_perms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `userID` int(11) NOT NULL,
-  `permID` int(11) NOT NULL,
-  `value` tinyint(1) NOT NULL,
-  `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `userID` (`userID`,`permID`)
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userID` int(11) NOT NULL,
+  `permID` int(11) NOT NULL,
+  `value` tinyint(1) NOT NULL,
+  `date_added` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userID` (`userID`,`permID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -96,7 +105,7 @@ DELETE FROM `role_perms`;
 
 
 -- --------------------------------------------------------
--- 4. NEUE DATEN EINFÜGEN
+-- 3. NEUE DATEN EINFÜGEN
 -- --------------------------------------------------------
 
 -- INSERT mainmenu
@@ -155,8 +164,7 @@ INSERT INTO `permissions` (`id`, `permKey`, `permName`, `permDescription`, `is_u
 (26, 'system_backup', 'Manage System Backup', 'Permission to create, download, or manage system backups.', 0, NOW(), NOW()),
 (27, 'system_settings', 'Modify System Settings', 'Global permission for modifying core framework settings.', 0, NOW(), NOW()),
 (28, 'system_maintenance', 'Run Maintenance Tasks', 'Permission to execute system maintenance tasks (e.g., cache clear).', 0, NOW(), NOW())
-ON DUPLICATE KEY UPDATE
-    `permName`=VALUES(`permName`), `permDescription`=VALUES(`permDescription`);
+ON DUPLICATE KEY UPDATE `permName`=VALUES(`permName`), `permDescription`=VALUES(`permDescription`);
 
 -- ASSIGN Permissions to Administrator (ID 5) & Assign Role to Superuser (ID 1)
 INSERT INTO `role_perms` (`roleID`, `permID`, `value`, `date_changed`)
