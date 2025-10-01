@@ -21,5 +21,6 @@
         </form>
     </div>
 </fieldset>
-<hr />
-<div id="userlist" class="ajax-list" data-list="user/userList"></div>
+<fieldset style="margin-top: 30px;">
+    <div id="userlist" class="ajax-list" data-list="user/userList"></div>
+</fieldset>
