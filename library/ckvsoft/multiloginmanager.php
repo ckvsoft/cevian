@@ -24,25 +24,19 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     public static function isFrameworkLoggedIn(): bool
     {
         try {
-            $stmt = self::$sharedDb->prepare("
+            $rows = self::$sharedDb->select("
                 SELECT user_key, user_id, data
                 FROM multi_login_sessions
                 WHERE session_id = :session_id AND module_name = 'ckvsoft'
-            ");
-            $stmt->execute(['session_id' => self::sessionId()]);
+            ", ['session_id' => self::sessionId()]);
 
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if (!$row) {
+            if (empty($rows)) {
                 return false;
             }
 
+            $row = $rows[0];
             $expectedKey = \ckvsoft\Hash::create('sha256', $row['user_id'], HASH_KEY);
-            if (!hash_equals($expectedKey, $row['user_key'])) {
-                return false;
-            }
-
-            return true;
+            return hash_equals($expectedKey, $row['user_key']);
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::isFrameworkLoggedIn failed: " . $e->getMessage(), 0, $e);
         }
@@ -54,16 +48,16 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     public static function getUser(string $module): ?string
     {
         try {
-            $stmt = self::$sharedDb->prepare("
+            $rows = self::$sharedDb->select("
                 SELECT user_id
                 FROM multi_login_sessions
                 WHERE session_id = :session_id AND module_name = :module
-            ");
-            $stmt->execute([
+            ", [
                 'session_id' => self::sessionId(),
                 'module' => $module
             ]);
-            return $stmt->fetchColumn() ?: null;
+
+            return $rows[0]['user_id'] ?? null;
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::getUser failed: " . $e->getMessage(), 0, $e);
         }
@@ -75,17 +69,20 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     public static function getUserData(string $module): ?array
     {
         try {
-            $stmt = self::$sharedDb->prepare("
+            $rows = self::$sharedDb->select("
                 SELECT data
                 FROM multi_login_sessions
                 WHERE session_id = :session_id AND module_name = :module
-            ");
-            $stmt->execute([
+            ", [
                 'session_id' => self::sessionId(),
                 'module' => $module
             ]);
-            $json = $stmt->fetchColumn();
-            return $json ? json_decode($json, true) : null;
+
+            if (empty($rows)) {
+                return null;
+            }
+
+            return json_decode($rows[0]['data'], true);
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::getUserData failed: " . $e->getMessage(), 0, $e);
         }
@@ -104,23 +101,14 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
         }
 
         try {
-            $stmt = self::$sharedDb->prepare("
-                INSERT INTO multi_login_sessions 
-                    (session_id, user_id, module_name, user_key, data, created_at, last_active)
-                VALUES 
-                    (:session_id, :user_id, :module, :user_key, :data, NOW(), NOW())
-                ON DUPLICATE KEY UPDATE
-                    user_id = VALUES(user_id),
-                    user_key = VALUES(user_key),
-                    data = VALUES(data),
-                    last_active = NOW()
-            ");
-            $stmt->execute([
+            self::$sharedDb->insertUpdate("multi_login_sessions", [
                 'session_id' => self::sessionId(),
                 'user_id' => $userId,
-                'module' => $module,
+                'module_name' => $module,
                 'user_key' => $userKey,
-                'data' => json_encode($data)
+                'data' => json_encode($data),
+                'created_at' => new DbExpr("NOW()"),
+                'last_active' => new DbExpr("NOW()")
             ]);
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::login failed: " . $e->getMessage(), 0, $e);
@@ -133,100 +121,85 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     public static function logout(string $module): void
     {
         try {
-            $stmt = self::$sharedDb->prepare("
-                DELETE FROM multi_login_sessions 
-                WHERE session_id = :session_id AND module_name = :module
-            ");
-            $stmt->execute([
-                'session_id' => self::sessionId(),
-                'module' => $module
-            ]);
+            self::$sharedDb->delete("multi_login_sessions",
+                    "session_id = :session_id AND module_name = :module",
+                    [
+                        'session_id' => self::sessionId(),
+                        'module' => $module
+                    ]
+            );
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::logout failed: " . $e->getMessage(), 0, $e);
         }
     }
 
-/**
- * Holt das Mapping für die aktuelle Session **nur für ein bestimmtes Modul**.
- * 
- * @param string $module Modulname, z.B. 'pmwh3'
- * @return array|null ['user_id' => string, 'data' => array] oder null wenn kein Mapping
- */
-public static function getMappedUserForModule(string $module): ?array
-{
-    try {
-        // Aktuellen Framework-User anhand der aktuellen Session ermitteln
-        $stmt = self::$sharedDb->prepare("
-            SELECT user_id 
-            FROM multi_login_sessions 
-            WHERE session_id = :session_id AND module_name = 'ckvsoft'
-        ");
-        $stmt->execute(['session_id' => self::sessionId()]);
-        $frameworkUserId = $stmt->fetchColumn();
-
-        if (!$frameworkUserId) {
-            // Kein Framework-User -> Fallback
-            return null;
-        }
-
-        // Mapping für das angeforderte Modul abfragen
-        $stmt = self::$sharedDb->prepare("
-            SELECT module_user_id 
-            FROM module_user_mapping 
-            WHERE framework_user_id = :uid AND module_name = :module
-            LIMIT 1
-        ");
-        $stmt->execute([
-            'uid' => $frameworkUserId,
-            'module' => $module
-        ]);
-
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if (!$row) {
-            return null;
-        }
-
-        return [
-            'user_id' => $row['module_user_id']
-        ];
-
-    } catch (\PDOException $e) {
-        throw new \ckvsoft\CkvException("MultiLoginManager::getMappedUserForModule failed: " . $e->getMessage(), 0, $e);
-    }
-}
-
-/**
- * Mapping-Login für ein Modul ausführen
- * Setzt die SessionNS nur, wenn Mapping existiert
- */
-public static function applyMappedUser(string $module): bool
-{
-    $user = self::getMappedUserForModule($module);
-    if (!$user) {
-        return false; // kein Mapping, Modul muss eigenes Login machen
-    }
-
-    // Modul-Login setzen
-    self::login($module, $user['user_id'], $user['data']);
-    return true;
-}
     /**
-     * Session-abhängiges Logout: Auch alle Mapping-User der aktuellen Session ausloggen
+     * Holt das Mapping für die aktuelle Session **nur für ein bestimmtes Modul**.
+     */
+    public static function getMappedUserForModule(string $module): ?array
+    {
+        try {
+            // Aktuellen Framework-User anhand der aktuellen Session ermitteln
+            $fwRows = self::$sharedDb->select("
+                SELECT user_id
+                FROM multi_login_sessions
+                WHERE session_id = :session_id AND module_name = 'ckvsoft'
+            ", ['session_id' => self::sessionId()]);
+
+            $frameworkUserId = $fwRows[0]['user_id'] ?? null;
+            if (!$frameworkUserId) {
+                return null;
+            }
+
+            // Mapping für das angeforderte Modul abfragen
+            $mapRows = self::$sharedDb->select("
+                SELECT module_user_id
+                FROM module_user_mapping
+                WHERE framework_user_id = :uid AND module_name = :module
+                LIMIT 1
+            ", [
+                'uid' => $frameworkUserId,
+                'module' => $module
+            ]);
+
+            if (empty($mapRows)) {
+                return null;
+            }
+
+            return [
+                'user_id' => $mapRows[0]['module_user_id']
+            ];
+        } catch (\PDOException $e) {
+            throw new \ckvsoft\CkvException("MultiLoginManager::getMappedUserForModule failed: " . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Mapping-Login für ein Modul ausführen
+     */
+    public static function applyMappedUser(string $module): bool
+    {
+        $user = self::getMappedUserForModule($module);
+        if (!$user) {
+            return false;
+        }
+
+        self::login($module, $user['user_id'], $user['data'] ?? []);
+        return true;
+    }
+
+    /**
+     * Session-abhängiges Logout
      */
     public static function logoutCurrentSession(): void
     {
         try {
-            $sessionId = self::sessionId();
-
-            // Alle Modul-User dieser Session löschen
-            $stmt = self::$sharedDb->prepare("
-                DELETE FROM multi_login_sessions 
-                WHERE session_id = :session_id
-            ");
-            $stmt->execute(['session_id' => $sessionId]);
-
+            self::$sharedDb->delete("multi_login_sessions",
+                    "session_id = :session_id",
+                    ['session_id' => self::sessionId()]
+            );
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::logoutCurrentSession failed: " . $e->getMessage(), 0, $e);
         }
-    }    
+    }
 }
