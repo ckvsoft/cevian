@@ -81,17 +81,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ----------------------------
-    // 3. Setup Pagination (COMPLETE CODE!)
-    // ----------------------------
+// ----------------------------
+// 3. Setup Pagination (UNIVERSELL FÜR TABLE UND GRID)
+// ----------------------------
+// ----------------------------
+// 3. Setup Pagination (UNIVERSELL UND KONFIGURIERBAR)
+// ----------------------------
     function setupPagination(container) {
-        const table = container.querySelector('table');
-        if (!table)
-            return;
 
-        const rowsPerPage = 15;
+        const table = container.querySelector('table');
+        const imageGrid = container.querySelector('.image-grid');
+
+        let paginatedContent;
+        let items;
+        let totalItems = 0;
+        let isTable = false;
+
+        if (table) {
+            // --- LOGIK FÜR TABELLE (ORIGINAL) ---
+            paginatedContent = table;
+            isTable = true;
+            // table.rows enthält Header (Index 0) und Daten
+            totalItems = table.rows.length - 1;
+
+        } else if (imageGrid) {
+            // --- LOGIK FÜR GALERIE GRID (NEU) ---
+            paginatedContent = imageGrid;
+            isTable = false;
+            // items sind die direkten Kinder (Bilder) des Grids
+            items = Array.from(imageGrid.children);
+            totalItems = items.length;
+
+        } else {
+            // Weder Tabelle noch Grid gefunden
+            return;
+        }
+
+        // Wenn keine Daten da sind (außer ggf. Header bei Table)
+        if (totalItems <= 0) {
+            return;
+        }
+
+        // ✅ KONFIGURIERBARE PARAMETER: Liest data-per-page und fällt auf 15 zurück
+        const configRows = parseInt(container.dataset.perPage, 10);
+        const rowsPerPage = (configRows > 0) ? configRows : 15;
+
         let currentPage = 1;
-        const totalPages = Math.ceil((table.rows.length - 1) / rowsPerPage);
+        const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+        // Wenn es nur eine Seite gibt, beende die Funktion, nachdem alte Paginierung entfernt wurde.
+        if (totalPages <= 1) {
+            const oldPagination = container.querySelector('.pagination');
+            if (oldPagination)
+                oldPagination.remove();
+            return;
+        }
 
         const oldPagination = container.querySelector('.pagination');
         if (oldPagination)
@@ -100,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pagination = document.createElement('div');
         pagination.className = 'pagination';
 
-        // --- MISSING CODE BLOCK REINSERTED ---
+        // Styling und Button-Erstellung (bleibt unverändert)
         pagination.style.marginTop = '10px';
         pagination.style.textAlign = 'left';
 
@@ -126,7 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pagination.appendChild(nextButton);
         pagination.appendChild(pageStatus);
 
-        table.insertAdjacentElement('afterend', pagination);
+        // Füge die Paginierung nach dem Inhalt ein
+        paginatedContent.insertAdjacentElement('afterend', pagination);
+
 
         function showPage(page) {
             if (page < 1)
@@ -135,21 +181,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 page = totalPages;
             currentPage = page;
 
-            const start = (page - 1) * rowsPerPage + 1;
+            const start = (page - 1) * rowsPerPage;
             const end = start + rowsPerPage;
 
-            for (let i = 0; i < table.rows.length; i++) {
-                table.rows[i].style.display = (i === 0 || (i >= start && i < end)) ? '' : 'none';
+            if (isTable) {
+                // ORIGINAL LOGIK FÜR TABELLEN
+                for (let i = 0; i < table.rows.length; i++) {
+                    // start + 1 und end + 1, da der Header i=0 übersprungen wird
+                    const startRow = start + 1;
+                    const endRow = end + 1;
+
+                    table.rows[i].style.display = (i === 0 || (i >= startRow && i < endRow)) ? '' : 'none';
+                }
+            } else {
+                // LOGIK FÜR DIVS (Grid)
+                items.forEach((item, index) => {
+                    item.style.display = (index >= start && index < end) ? '' : 'none';
+                });
             }
 
-            pageStatus.textContent = `Page ${currentPage} of ${totalPages}`; // English output
+            pageStatus.textContent = `Page ${currentPage} of ${totalPages}`;
+
+            // Buttons bleiben IMMER sichtbar, werden aber ggf. deaktiviert.
             prevButton.disabled = currentPage === 1;
             nextButton.disabled = currentPage === totalPages;
         }
 
+        // showPage(1) wird immer aufgerufen.
         showPage(1);
     }
-
+    
     // ----------------------------
     // 4. New Sequential Save Logic
     // ----------------------------
