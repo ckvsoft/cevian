@@ -87,7 +87,7 @@ class Bootstrap extends \stdClass
      */
     public function __construct()
     {
-        $uri = filter_input(INPUT_GET, 'uri', FILTER_SANITIZE_URL);
+        $uri = filter_input(INPUT_GET, 'uri');
 
         if ($uri !== null && $uri !== false) {
             $uri = rtrim($uri, '/');
@@ -130,35 +130,45 @@ class Bootstrap extends \stdClass
      */
     private function _buildComponents($uri)
     {
-        $uri = explode('/', trim($uri, '/'));
-        $this->uriSegments = $uri;
+        // 1. Split the URI into segments. These segments are still URL-encoded.
+        $uriSegments = explode('/', trim($uri, '/'));
+        $this->uriSegments = $uriSegments;
         $this->_initUriSlashPath();
 
-        $module = strtolower($uri[0] ?? $this->_controllerDefault);
-        $subcontroller = strtolower($uri[1] ?? '');
-        $method = strtolower($uri[2] ?? 'index');
+        $module = strtolower($uriSegments[0] ?? $this->_controllerDefault);
+        $subcontroller = strtolower($uriSegments[1] ?? '');
+        $method = strtolower($uriSegments[2] ?? 'index');
 
-        // Prüfen ob Subcontroller existiert
+        $uriValueSliceIndex = 0; // Index from where the value segments start
+        // Check if Subcontroller exists
         if ($subcontroller && file_exists($this->_pathController . $module . "/controller/" . $subcontroller . ".php")) {
             $this->_uriModule = $module;
             $this->_uriController = ucwords($module);
             $this->_uriSubController = ucwords($subcontroller);
             $this->_uriMethod = $method;
-            $this->_uriValue = array_splice($uri, 3);
+            $uriValueSliceIndex = 3;
         } else {
-            // kein Subcontroller, Modulcontroller verwenden
+            // No subcontroller, use module controller
             $this->_uriModule = $module;
             $this->_uriController = ucwords($module);
             $this->_uriMethod = $subcontroller ?: 'index';
-            $this->_uriValue = array_splice($uri, 2);
+            $uriValueSliceIndex = 2;
         }
 
-        // Default-Controller wenn nichts gesetzt
+        // 3. Slice the remaining segments as the method parameters
+        $uriValue = array_slice($uriSegments, $uriValueSliceIndex);
+
+        // 4. CRITICAL FIX: Decode ALL parameter values here once!
+        // This ensures spaces (%20) and umlauts (%C3%A4) are converted to clean strings (" ", "ä")
+        // before being passed to the controller method as arguments (string ...$pathParts).
+        $this->_uriValue = array_map('urldecode', $uriValue);
+
+        // Default Controller if nothing is set
         if (empty($this->_uriController)) {
             $this->_uriController = ucwords($this->_controllerDefault);
         }
 
-        // Default-Methode
+        // Default Method
         if (empty($this->_uriMethod)) {
             $this->_uriMethod = 'index';
         }
@@ -331,7 +341,7 @@ class Bootstrap extends \stdClass
 
         $this->controller->pathClass = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathController) . $module : $this->_pathController . $module;
 
-        $this->controller->baseController = strtolower($baseController);
+        $this->controller->baseControllerName = strtolower($baseController);
         $this->controller->coreModulePath = $this->_pathRoot . CORE_MODULES_URI;
 
         // --- Initialize the view object ---
