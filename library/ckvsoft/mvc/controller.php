@@ -38,8 +38,18 @@ class Controller extends \stdClass
         }
 
         $modelFile = rtrim($this->pathModel, '/') . '/' . $module . '/model/' . $model . '_model.php';
+
+        // 1. Versuche, Model im Standard-Modulpfad zu finden
         if (!file_exists($modelFile)) {
-            throw new \Exception("Model file not found: $modelFile");
+            // 2. Wenn nicht gefunden, versuche Fallback in CORE_MODULES
+            $coreModelFile = str_replace(MODULES_URI, CORE_MODULES_URI, $modelFile);
+
+            if (!file_exists($coreModelFile)) {
+                // Wenn es weder im Modul- noch im Core-Pfad existiert, werfe eine Exception
+                throw new \Exception("Model file not found in module or core_modules for model: $modelFile");
+            }
+            // Model im Core-Pfad gefunden, diesen Pfad verwenden
+            $modelFile = $coreModelFile;
         }
 
         require_once $modelFile;
@@ -121,16 +131,16 @@ class Controller extends \stdClass
     }
 
     /**
-     * Load a JavaScript file either from the current module's view folder 
+     * Load a JavaScript file either from the current module's view folder
      * or from the general 'modules' directory, with fallback to core_modules.
      *
      * Usage:
      * 1. Relative path (within current module view):
-     *      loadScript("js/script.js") 
+     *      loadScript("js/script.js")
      *      -> modules/<current_module>/view/js/script.js
      *
      * 2. Absolute path (starting with '/') for modules root:
-     *      loadScript("/inc/js/another_script.js") 
+     *      loadScript("/inc/js/another_script.js")
      *      -> modules/inc/js/another_script.js
      *
      * @param string $script Path to the script, relative or starting with '/' for modules root
@@ -142,7 +152,6 @@ class Controller extends \stdClass
         // absoluter Basis-Pfad = Arbeitsverzeichnis + BASE_URI
         // $baseFs = rtrim(getcwd(), '/') . '/' . ltrim(BASE_URI, '/');
         $baseFs = rtrim(getcwd(), '/') . '/';
-
 
         $paths = [];
 
