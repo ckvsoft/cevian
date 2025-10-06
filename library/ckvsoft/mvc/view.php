@@ -10,97 +10,100 @@ class View extends \stdClass
     private $_viewQueue = [];
     private $_path;
     private $_coreModulePath;
-    private $_current;
 
-    public function __construct($debugCssJsAnalyse = false)
+    public function __construct(bool $debugCssJsAnalyse = false)
     {
-        // Fetch User-Agent from server safely
         $user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
-        if (strpos($user_agent ?? '', 'Mobile') !== false) {
-            $this->mobile = true;
-        }
-
+        $this->mobile = (strpos($user_agent ?? '', 'Mobile') !== false);
         $this->cssjsDebug = $debugCssJsAnalyse;
     }
 
-    public function render($name, $viewValues = [])
-    {
-        $this->_viewQueue[] = $name;
-
-        foreach ($viewValues as $key => $value) {
-            $this->{$key} = $value;
-        }
-    }
-
-    public function setPath($path)
+    public function setPath(string $path)
     {
         $this->_path = rtrim($path, '/') . '/';
     }
 
-    public function setCoreModulePath($path)
+    public function setCoreModulePath(string $path)
     {
         $this->_coreModulePath = rtrim($path, '/') . '/';
+    }
+
+    /**
+     * Render a view or partial.
+     * @param string $name View name or path.
+     * @param array $viewValues Variables to extract in view.
+     * @param bool $returnHtml Return HTML as string instead of queuing.
+     * @return string|null
+     * @throws \ckvsoft\CkvException
+     */
+    public function render(string $name, array $viewValues = [], bool $returnHtml = false)
+    {
+        foreach ($viewValues as $key => $value) {
+            $this->{$key} = $value;
+        }
+
+        if ($returnHtml) {
+            ob_start();
+            require $this->resolveViewPath($name);
+            return ob_get_clean();
+        }
+
+        $this->_viewQueue[] = $name;
+    }
+
+    /**
+     * Resolve view file path using module path, core path, and view folder fallback.
+     * @param string $vc
+     * @return string
+     * @throws \ckvsoft\CkvException
+     */
+    private function resolveViewPath(string $vc): string
+    {
+        $vc = ltrim($vc, '/');
+        $pathsToCheck = [
+            $this->_path . $vc . '.php',
+            $this->_coreModulePath . $vc . '.php',
+        ];
+
+        if (!file_exists($pathsToCheck[0]) && !file_exists($pathsToCheck[1])) {
+            $firstSlashPos = strpos($vc, "/");
+            $firstPart = $firstSlashPos === false ? $vc : substr($vc, 0, $firstSlashPos);
+            $restPath = $firstSlashPos === false ? '' : substr($vc, $firstSlashPos + 1);
+
+            $pathsToCheck[] = $this->_path . $firstPart . '/view/' . $restPath . '.php';
+            $pathsToCheck[] = $this->_coreModulePath . $firstPart . '/view/' . $restPath . '.php';
+        }
+
+        foreach ($pathsToCheck as $path) {
+            $path = preg_replace('#/+#', '/', $path);
+            if (file_exists($path))
+                return $path;
+        }
+
+        throw new \ckvsoft\CkvException("View file not found: $vc");
     }
 
     public function __destruct()
     {
         $htmlFinal = '';
-
-        // Fetch DOCUMENT_ROOT once safely
         $documentRoot = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT', FILTER_SANITIZE_SPECIAL_CHARS);
 
         foreach ($this->_viewQueue as $vc) {
-            $vc = ltrim($vc, '/');
+            ob_start();
+            require $this->resolveViewPath($vc);
+            $viewHtml = ob_get_clean();
+            $htmlFinal .= $viewHtml;
 
-            $pathsToCheck = [
-                $this->_path . $vc . '.php', // Module direct
-                $this->_coreModulePath . $vc . '.php'    // Core direct
-            ];
-
-            // If not found → old View path check fallback
-            if (!file_exists($pathsToCheck[0]) && !file_exists($pathsToCheck[1])) {
-                $firstSlashPos = strpos($vc, "/");
-                if ($firstSlashPos === false) {
-                    $firstPart = $vc;
-                    $restPath = '';
-                } else {
-                    $firstPart = substr($vc, 0, $firstSlashPos);
-                    $restPath = substr($vc, $firstSlashPos + 1);
-
-                    // Only if there is a "view" folder → Module views fallback
-                    $pathsToCheck[] = $this->_path . $firstPart . '/view/' . $restPath . '.php';
-                    $pathsToCheck[] = $this->_coreModulePath . $firstPart . '/view/' . $restPath . '.php';
-                }
-            }
-
-            $found = false;
-            foreach ($pathsToCheck as $path) {
-                $path = preg_replace('#/+#', '/', $path);
-                if (file_exists($path)) {
-                    ob_start();
-                    require $path;
-                    $viewHtml = ob_get_clean();
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
-                throw new \Exception("View file not found in module or core_modules: $vc");
-            }
-
-            // CSS/JS Analyse
             if ($this->cssjsDebug) {
                 $this->analyseCssUsage($viewHtml, $vc, $documentRoot);
                 $this->analyseJsUsagePerView($viewHtml, $vc, $documentRoot);
             }
-
-            $htmlFinal .= $viewHtml;
         }
 
         echo $htmlFinal;
     }
 
+    // --- CSS/JS Analyse bleibt unverändert ---
     private function analyseCssUsage(string $htmlContent, string $viewIdentifier = '', string $documentRoot = '')
     {
         $log_file = $documentRoot . BASE_URI . 'var/log/css_unused.log';
@@ -133,14 +136,10 @@ class View extends \stdClass
         $used = [];
         foreach ($selectors as $selector) {
             $name = substr($selector, 1);
-            if ($selector[0] === '.') {
-                if (preg_match('/class=["\'][^"\']*' . preg_quote($name, '/') . '[^"\']*["\']/', $htmlContent)) {
-                    $used[] = $selector;
-                }
-            } elseif ($selector[0] === '#') {
-                if (preg_match('/id=["\']' . preg_quote($name, '/') . '["\']/', $htmlContent)) {
-                    $used[] = $selector;
-                }
+            if ($selector[0] === '.' && preg_match('/class=["\'][^"\']*' . preg_quote($name, '/') . '[^"\']*["\']/', $htmlContent)) {
+                $used[] = $selector;
+            } elseif ($selector[0] === '#' && preg_match('/id=["\']' . preg_quote($name, '/') . '["\']/', $htmlContent)) {
+                $used[] = $selector;
             }
         }
 
@@ -170,7 +169,6 @@ class View extends \stdClass
             if (file_exists($jsFile)) {
                 $content = file_get_contents($jsFile);
                 $usesJquery = preg_match('/\$[\(\.]|jQuery\(/', $content) ? 'ja' : 'nein';
-
                 file_put_contents(
                         $log_file,
                         "[" . date('Y-m-d H:i:s') . "] View: {$viewName} | File: {$src} | jQuery: {$usesJquery}\n",
@@ -185,7 +183,6 @@ class View extends \stdClass
         foreach ($inlineScripts as $index => $code) {
             $usesJquery = preg_match('/\$[\(\.]|jQuery\(/', $code) ? 'ja' : 'nein';
             $identifier = 'inline-script #' . ($index + 1);
-
             file_put_contents(
                     $log_file,
                     "[" . date('Y-m-d H:i:s') . "] View: {$viewName} | {$identifier} | jQuery: {$usesJquery}\n",
