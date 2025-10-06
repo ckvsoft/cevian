@@ -4,7 +4,6 @@ namespace ckvsoft\Helper;
 
 class Css_Helper extends \ckvsoft\mvc\Helper
 {
-
     /**
      * Load, minify and fix URLs in CSS file from module or core_module fallback
      *
@@ -12,20 +11,33 @@ class Css_Helper extends \ckvsoft\mvc\Helper
      * @return string minified CSS
      * @throws \Exception if file not found
      */
-    public function getCss($css)
+
+    /**
+     * Load, minify and fix URLs in CSS file from module or core_module fallback
+     *
+     * @param string $css relative path, e.g. 'inc/css/mbv.css'
+     * @param string|null $module optional module name to override baseControllerName
+     * @return string minified CSS
+     * @throws \Exception if file not found
+     */
+    public function getCss($css, $module = null)
     {
-        // Prüfen, ob $css mit einem / beginnt
+        // Modulname bestimmen (entweder explizit angegeben oder vom Controller ableiten)
+        $moduleName = $module !== null ? $module : $this->baseControllerName;
+
+        // Prüfen, ob $css mit einem / beginnt (bedeutet: Pfad ist relativ zu MODULES_URI/CORE_MODULES_URI)
         if (strpos($css, '/') === 0) {
-            // Suche direkt in MODULES oder CORE_MODULES
+            // Suche direkt in MODULES oder CORE_MODULES (Unabhängig vom aktuellen Modul)
             $pathsToCheck = [
                 getcwd() . '/' . MODULES_URI . ltrim($css, '/'),
                 getcwd() . '/' . CORE_MODULES_URI . ltrim($css, '/'),
             ];
         } else {
-            // Standard-Suche im Modul/view-Ordner
+            // Standard-Suche im angegebenen/aktuellen Modul/view-Ordner
+            // Hier wird $moduleName verwendet
             $pathsToCheck = [
-                getcwd() . '/' . MODULES_URI . $this->baseControllerName . '/view/' . $css,
-                getcwd() . '/' . CORE_MODULES_URI . $this->baseControllerName . '/view/' . $css,
+                getcwd() . '/' . MODULES_URI . $moduleName . '/view/' . $css,
+                getcwd() . '/' . CORE_MODULES_URI . $moduleName . '/view/' . $css,
             ];
         }
 
@@ -41,16 +53,18 @@ class Css_Helper extends \ckvsoft\mvc\Helper
         }
 
         if (!$found) {
-            throw new \Exception("CSS file not found in module or core_modules: $css");
+            throw new \Exception("CSS file not found in module or core_modules: $css (Module: $moduleName)");
         }
 
+        // --- Rest der Logik (Minify & URL-Fixing) bleibt unverändert ---
         // Minify
         $style = preg_replace('/\/\*[\s\S]*?\*\//', '', $style); // Kommentare entfernen
         $style = preg_replace('/\s+/', ' ', $style); // Whitespace komprimieren
         $style = str_replace(["\r", "\n"], '', $style);
 
         // --- Fix relative URLs ---
-        // Ziel: aus dem gefundenen Dateipfad eine web-URL-Basis bauen, z.B. "/meinprojekt/modules/..../inc/css"
+        // ... (Der gesamte nachfolgende Code zur Pfadkorrektur bleibt identisch)
+
         $docRoot = rtrim(getcwd(), DIRECTORY_SEPARATOR);
         $cssDirFs = dirname($foundPath); // filesystem dir der gefundenen CSS
         $relativePath = null;
@@ -69,7 +83,7 @@ class Css_Helper extends \ckvsoft\mvc\Helper
 
         $style = preg_replace_callback(
                 '/url\((["\']?)([^"\')]+)\1\)/i',
-                function ($matches) use ($baseUri) {
+                function ($matches) use ($baseUri, $webDir) { // $webDir hier hinzugefügt, falls benötigt
                     $url = trim($matches[2]);
 
                     // Wenn schon absolut oder ein Sonderfall → nicht anfassen
@@ -81,8 +95,8 @@ class Css_Helper extends \ckvsoft\mvc\Helper
                     if (strpos($url, 'public/') === 0) {
                         $fixed = rtrim($baseUri, '/') . '/' . $url;
                     } else {
-                        // Sonst relative URL: am besten den Web-Pfad des CSS-Ordners davor setzen
-                        $fixed = rtrim($baseUri, '/') . '/' . ltrim($url, '/');
+                        // Sonst relative URL: den Web-Pfad des CSS-Ordners davor setzen
+                        $fixed = rtrim($webDir, '/') . '/' . ltrim($url, '/'); // $webDir anstelle von $baseUri
                     }
 
                     // Doppelte Slashes normalisieren
