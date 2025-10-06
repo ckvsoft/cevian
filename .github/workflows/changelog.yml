@@ -1,10 +1,9 @@
-name: Automatic Changelog & Tagging
+name: Automatic Changelog Generation
 
 on:
   push:
-    # NEUE ZEILE: Reaktion auf Commits im 'main' (oder 'master') Branch
-    branches:
-      - main 
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -14,18 +13,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # Holen der kompletten Historie und aller Tags
           fetch-depth: 0
           fetch-tags: true 
 
-      - name: Generate Changelog and Create Tag 🚀
+      # ACHTUNG: Der Schritt zum Löschen der CHANGELOG.md WURDE HIER ENTFERNT!
+
+      - name: Generate Changelog for new Release
         uses: TriPSs/conventional-changelog-action@v6.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # 🛑 NEU: 'skip-tag' entfernen oder auf 'false' setzen
-          # Die Action berechnet jetzt v0.8.3 oder v0.9.0 und erstellt den Tag!
-          # skip-tag: true # DIESE ZEILE ENTFERNEN
+          skip-tag: true
           git-push: true
           skip-version-file: true
-          skip-git-pull: true 
-          # 🛑 NEU: 'skip-on-empty' auf false setzen, um sicherzustellen, dass ein Changelog erzeugt wird, selbst wenn es nur ein kleines Update ist.
-          skip-on-empty: false
+          skip-git-pull: true
+          
+          # NEU: Entfernt. Die Action sucht nun standardmäßig nach 1 Release.
+          # release-count: 0
