@@ -21,7 +21,6 @@ class Config
         } else {
             $this->db = null; // Installer Mode
         }
-
     }
 
     public static function getAppConfig(): array
@@ -49,6 +48,26 @@ class Config
             self::initMergedConfig();
         }
         return self::$mergedConfig;
+    }
+
+    /**
+     * Retrieves a specific configuration value safely.
+     * @param string $key The configuration key (e.g., 'paths.gallery_albums_public_path').
+     * @return mixed|null The configuration value or null if not found.
+     */
+    public static function get(string $key)
+    {
+        $config = self::getMergedConfig();
+        $keys = explode('.', $key);
+
+        $value = $config;
+        foreach ($keys as $k) {
+            if (!isset($value[$k])) {
+                return null;
+            }
+            $value = $value[$k];
+        }
+        return $value;
     }
 
     protected static function initDb()
