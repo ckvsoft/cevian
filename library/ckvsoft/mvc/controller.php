@@ -14,7 +14,7 @@ class Controller extends \stdClass
     public $pathRoot;
     public $pathClass;
     public $mobile = false;
-    public $baseController;
+    public $baseControllerName;
     public $modulePath;
     public $coreModulePath;
 
@@ -91,7 +91,7 @@ class Controller extends \stdClass
             }
 
             // Instantiate helper
-            $helperObject = new $helperClass($this->baseController);
+            $helperObject = new $helperClass($this->baseControllerName);
 
             // Call method directly if provided
             if (isset($params['method']) && is_callable([$helperObject, $params['method']])) {
