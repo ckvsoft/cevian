@@ -24,8 +24,8 @@ class Css_Helper extends \ckvsoft\mvc\Helper
         } else {
             // Standard-Suche im Modul/view-Ordner
             $pathsToCheck = [
-                getcwd() . '/' . MODULES_URI . $this->baseController . '/view/' . $css,
-                getcwd() . '/' . CORE_MODULES_URI . $this->baseController . '/view/' . $css,
+                getcwd() . '/' . MODULES_URI . $this->baseControllerName . '/view/' . $css,
+                getcwd() . '/' . CORE_MODULES_URI . $this->baseControllerName . '/view/' . $css,
             ];
         }
 
