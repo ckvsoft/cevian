@@ -14,10 +14,10 @@ class Image
     /** @var string $_path */
     private $_path = null;
 
-    /** @var origName $_path */
+    /** @var string $_origName */
     private $_origName = null;
 
-    /** @var ext $_path */
+    /** @var string $_ext */
     private $_ext = null;
 
     /**
@@ -33,7 +33,7 @@ class Image
         $this->_path = $path;
 
         $info = pathinfo($this->_originalFile);
-        $this->_ext = $info['extension'];
+        $this->_ext = strtolower($info['extension']);  // Kleinbuchstaben erzwingen
         $this->_origName = $info['filename'];
         $this->_newName = $newName;
     }
@@ -45,7 +45,7 @@ class Image
      */
     public function resize($dimensions = array(125, 125))
     {
-        if (!is_array($dimensions) && count($dimensions) != 2) {
+        if (!is_array($dimensions) || count($dimensions) != 2) {
             throw new \ckvsoft\CkvException('Dimensions must be an array of two');
         }
 
@@ -53,11 +53,7 @@ class Image
             throw new \ckvsoft\CkvException('originalFile, path, newName must be set');
         }
 
-        /** Prepare the width and height */
-        $width = $dimensions[0];
-        $height = $dimensions[1];
-
-        /** Adjust the image ratio */
+        list($width, $height) = $dimensions;
         list($origWidth, $origHeight) = getimagesize($this->_originalFile);
         $ratio = $origWidth / $origHeight;
 
@@ -67,40 +63,35 @@ class Image
             $height = (int) round($width / $ratio);
         }
 
-        /** Create the image */
         $image = imagecreatetruecolor($width, $height);
 
-        /** Determine the extension */
         switch ($this->_ext) {
             case "jpg":
             case "jpeg":
                 $src = imagecreatefromjpeg($this->_originalFile);
-                imagecopyresampled($image, $src, 0, 0, /* left */ 0, /* top */ 0,
-                        $width, $height, $origWidth, $origHeight);
-                $result = imagejpeg($image, $this->_path . $this->_newName, /* compression */ 90);
+                imagecopyresampled($image, $src, 0, 0, 0, 0, $width, $height, $origWidth, $origHeight);
+                $result = imagejpeg($image, $this->_path . $this->_newName, 90);
                 break;
             case "png":
                 imagealphablending($image, false);
                 imagesavealpha($image, true);
-
                 $src = imagecreatefrompng($this->_originalFile);
-                imagecopyresampled($image, $src, 0, 0, /* left */ 0, /* top */ 0,
-                        $width, $height, $origWidth, $origHeight);
+                imagecopyresampled($image, $src, 0, 0, 0, 0, $width, $height, $origWidth, $origHeight);
                 imagealphablending($src, true);
-                $result = imagepng($image, $this->_path . $this->_newName, /* compression */ 9);
+                $result = imagepng($image, $this->_path . $this->_newName, 9);
                 break;
             default:
                 return false;
         }
 
-        /** Remove Temporary Image */
         imagedestroy($image);
         return $result;
     }
 
     /**
-     * 
-     * @return type
+     * toBase64
+     *
+     * @return string
      * @throws \ckvsoft\CkvException
      */
     public function toBase64()
@@ -109,7 +100,6 @@ class Image
             throw new \ckvsoft\CkvException("Image not found: " . $this->_originalFile);
         }
 
-        // MIME-Type bestimmen
         $mime = mime_content_type($this->_originalFile);
         $data = file_get_contents($this->_originalFile);
 
