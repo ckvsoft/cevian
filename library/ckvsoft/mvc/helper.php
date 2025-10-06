@@ -10,11 +10,11 @@ namespace ckvsoft\mvc;
 class Helper extends \ckvsoft\mvc\Config
 {
 
-    protected $baseController;
+    protected $baseControllerName;
 
-    public function __construct($baseController)
+    public function __construct($baseControllerName)
     {
         parent::__construct();
-        $this->baseController = $baseController;
+        $this->baseControllerName = $baseControllerName;
     }
 }
