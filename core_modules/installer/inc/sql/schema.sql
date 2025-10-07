@@ -8,9 +8,8 @@ START TRANSACTION;
 --
 -- Tabellenstruktur für Tabelle `mainmenu`
 --
-
 CREATE TABLE `mainmenu` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(50) NOT NULL DEFAULT '',
   `link` varchar(100) NOT NULL DEFAULT '#',
   `parent` int(11) NOT NULL DEFAULT 0,
@@ -18,13 +17,14 @@ CREATE TABLE `mainmenu` (
   `role` varchar(255) DEFAULT 'owner',
   `is_public` tinyint(1) NOT NULL DEFAULT -1,
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_menu_item` (`label`,`parent`,`link`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Daten für Tabelle `mainmenu`
 --
-
 INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_public`, `date_added`, `date_changed`) VALUES
 (1, 'Dashboard', 'dashboard', 0, 0, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
 (2, 'User-Manager', 'user', 5, 0, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
@@ -39,19 +39,31 @@ INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_pub
 (11, 'Permissions', 'rbac/permissions', 10, NULL, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
 (12, 'Roles', 'rbac', 10, NULL, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06');
 
+--
+-- Tabellenstruktur für Tabelle `migrations` (war bereits korrekt)
+--
+CREATE TABLE migrations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    module_name VARCHAR(100) NOT NULL,
+    migration VARCHAR(255) NOT NULL,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_migration` (`module_name`,`migration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- --------------------------------------------------------
 
+--
 -- Tabellenstruktur für Tabelle `modules`
 --
-
 CREATE TABLE `modules` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `version` varchar(50) NOT NULL,
   `enabled` tinyint(1) DEFAULT 1,
   `core` tinyint(1) DEFAULT 0,
   `installed_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -59,14 +71,15 @@ CREATE TABLE `modules` (
 --
 -- Tabellenstruktur für Tabelle `module_user_mapping`
 --
-
 CREATE TABLE `module_user_mapping` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `framework_user_id` int(11) NOT NULL,
   `module_name` varchar(50) NOT NULL,
   `module_user_id` int(11) NOT NULL,
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_module_mapping` (`framework_user_id`,`module_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -74,7 +87,6 @@ CREATE TABLE `module_user_mapping` (
 --
 -- Tabellenstruktur für Tabelle `multi_login_sessions`
 --
-
 CREATE TABLE `multi_login_sessions` (
   `session_id` char(64) NOT NULL,
   `user_id` varchar(255) NOT NULL,
@@ -82,7 +94,10 @@ CREATE TABLE `multi_login_sessions` (
   `module_name` varchar(50) NOT NULL,
   `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`data`)),
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `last_active` datetime NOT NULL DEFAULT current_timestamp()
+  `last_active` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`session_id`),
+  KEY `user_id` (`user_id`),
+  KEY `module_name` (`module_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -90,24 +105,24 @@ CREATE TABLE `multi_login_sessions` (
 --
 -- Tabellenstruktur für Tabelle `permissions`
 --
-
 CREATE TABLE `permissions` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `permKey` varchar(100) DEFAULT NULL,
   `permName` varchar(100) DEFAULT NULL,
   `permDescription` varchar(255) DEFAULT NULL,
   `is_used` int(1) NOT NULL DEFAULT 0,
   `date_added` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Zeitpunkt der Erstellung des Eintrags',
-  `date_changed` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Zeitpunkt der letzten Aktualisierung des Eintrags'
+  `date_changed` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Zeitpunkt der letzten Aktualisierung des Eintrags',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permKey` (`permKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `permissions`
 --
-
 INSERT INTO `permissions` (`id`, `permKey`, `permName`, `permDescription`, `is_used`, `date_added`, `date_changed`) VALUES
 (1, 'view_dashboard', 'View Dashboard', 'Permission to view the main administrative dashboard.', 0, '2025-10-01 13:28:17', '2025-10-01 13:28:17'),
-(2, 'view_manager_menu', 'View Manager Menu', 'Permission to see the main \"Manager\" navigation entry.', 0, '2025-10-01 13:28:17', '2025-10-01 13:28:17'),
+(2, 'view_manager_menu', 'View Manager Menu', 'Permission to see the main "Manager" navigation entry.', 0, '2025-10-01 13:28:17', '2025-10-01 13:28:17'),
 (3, 'view_user_manager', 'View User Manager', 'Permission to access the user management interface.', 0, '2025-10-01 13:28:17', '2025-10-01 13:28:17'),
 (4, 'view_menu_manager', 'View Menu Manager', 'Permission to access the menu management interface.', 0, '2025-10-01 13:28:17', '2025-10-01 13:28:17'),
 (5, 'view_rbac_manager', 'View RBAC Manager', 'Permission to access the Role-Based Access Control configuration.', 0, '2025-10-01 13:28:17', '2025-10-01 13:28:17'),
@@ -140,18 +155,17 @@ INSERT INTO `permissions` (`id`, `permKey`, `permName`, `permDescription`, `is_u
 --
 -- Tabellenstruktur für Tabelle `progress_bars`
 --
-
 CREATE TABLE `progress_bars` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL DEFAULT 'default',
   `percent` int(11) NOT NULL DEFAULT -1,
-  `modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Daten für Tabelle `progress_bars`
 --
-
 INSERT INTO `progress_bars` (`id`, `name`, `percent`, `modified`) VALUES
 (1, 'images', 100, '2025-09-27 06:08:33'),
 (2, 'database', 100, '2025-09-27 03:54:14');
@@ -161,21 +175,20 @@ INSERT INTO `progress_bars` (`id`, `name`, `percent`, `modified`) VALUES
 --
 -- Tabellenstruktur für Tabelle `roles`
 --
-
 CREATE TABLE `roles` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `roleName` varchar(100) NOT NULL,
   `lft` int(11) NOT NULL,
   `rgt` int(11) NOT NULL,
   `depth` int(11) NOT NULL DEFAULT 0,
   `date_added` datetime DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Daten für Tabelle `roles`
 --
-
 INSERT INTO `roles` (`id`, `roleName`, `lft`, `rgt`, `depth`, `date_added`, `date_changed`) VALUES
 (1, 'Guest', 1, 10, 0, '2025-10-01 15:34:23', '2025-10-01 15:34:23'),
 (2, 'Member', 2, 5, 1, '2025-10-01 15:34:23', '2025-10-01 15:34:23'),
@@ -189,13 +202,14 @@ INSERT INTO `roles` (`id`, `roleName`, `lft`, `rgt`, `depth`, `date_added`, `dat
 --
 -- Tabellenstruktur für Tabelle `role_perms`
 --
-
 CREATE TABLE `role_perms` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `roleID` int(11) NOT NULL,
   `permID` int(11) NOT NULL,
   `value` tinyint(1) NOT NULL DEFAULT 1,
-  `date_changed` datetime DEFAULT current_timestamp()
+  `date_changed` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roleID` (`roleID`,`permID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -203,16 +217,18 @@ CREATE TABLE `role_perms` (
 --
 -- Tabellenstruktur für Tabelle `user`
 --
-
 CREATE TABLE `user` (
-  `user_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(64) NOT NULL,
   `role` varchar(32) NOT NULL,
   `code` varchar(40) NOT NULL DEFAULT 'NONE',
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- --------------------------------------------------------
@@ -220,14 +236,15 @@ CREATE TABLE `user` (
 --
 -- Tabellenstruktur für Tabelle `user_perms`
 --
-
 CREATE TABLE `user_perms` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `userID` int(11) NOT NULL,
   `permID` int(11) NOT NULL,
   `value` tinyint(1) NOT NULL,
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userID` (`userID`,`permID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -235,99 +252,13 @@ CREATE TABLE `user_perms` (
 --
 -- Tabellenstruktur für Tabelle `user_roles`
 --
-
 CREATE TABLE `user_roles` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `userID` int(11) NOT NULL,
   `roleID` int(11) NOT NULL,
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
-  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Indizes der exportierten Tabellen
---
-
---
--- Indizes für die Tabelle `mainmenu`
---
-ALTER TABLE `mainmenu`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_menu_item` (`label`,`parent`,`link`);
-
---
--- Indizes für die Tabelle `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_migration` (`module_name`,`migration`);
-
---
--- Indizes für die Tabelle `modules`
---
-ALTER TABLE `modules`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indizes für die Tabelle `module_user_mapping`
---
-ALTER TABLE `module_user_mapping`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_module_mapping` (`framework_user_id`,`module_name`);
-
---
--- Indizes für die Tabelle `multi_login_sessions`
---
-ALTER TABLE `multi_login_sessions`
-  ADD PRIMARY KEY (`session_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `module_name` (`module_name`);
-
---
--- Indizes für die Tabelle `permissions`
---
-ALTER TABLE `permissions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `permKey` (`permKey`);
-
---
--- Indizes für die Tabelle `progress_bars`
---
-ALTER TABLE `progress_bars`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indizes für die Tabelle `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indizes für die Tabelle `role_perms`
---
-ALTER TABLE `role_perms`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `roleID` (`roleID`,`permID`);
-
---
--- Indizes für die Tabelle `user`
---
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- Indizes für die Tabelle `user_perms`
---
-ALTER TABLE `user_perms`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `userID` (`userID`,`permID`);
-
---
--- Indizes für die Tabelle `user_roles`
---
-ALTER TABLE `user_roles`
-  ADD PRIMARY KEY (`id`);
 
 COMMIT;
