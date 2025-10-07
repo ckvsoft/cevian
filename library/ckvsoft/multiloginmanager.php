@@ -107,7 +107,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
                 'module_name' => $module,
                 'user_key' => $userKey,
                 'data' => json_encode($data),
-                'created_at' => new DbExpr("NOW()"),
+                'date_added' => new DbExpr("NOW()"),
                 'last_active' => new DbExpr("NOW()")
             ]);
         } catch (\PDOException $e) {
