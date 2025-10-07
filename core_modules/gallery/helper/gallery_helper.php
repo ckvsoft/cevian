@@ -61,18 +61,18 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
     }
 
     /**
-     * Public Service Method: Fetches the data for a specific album path
-     * and returns the instruction list for rendering.
-     * @param string $albumPath The path to the album (e.g., 'events/wedding').
-     * @param bool $includeSubAlbums Whether sub-albums should be included.
+     *
+     * @param Gallery_Model $model
+     * @param string $albumPath The path to the album (e.g., 'events/wedding')
+     * @param bool $includeSubAlbums Whether sub-albums should be included
+     * @param bool $recursive
+     * @param bool $random
      * @return array The complete list of instructions, ready for the Controller to execute.
      */
-    public function getAlbumGridInstructions(Gallery_Model $model, string $albumPath, bool $includeSubAlbums = true): array
+    public function getAlbumGridInstructions(Gallery_Model $model, string $albumPath, bool $includeSubAlbums = true, bool $recursive = false, bool $random = false): array
     {
         $contentList = [];
 
-// --- 1. Load Albums/Sub-albums ---
-// (Logik zur Befüllung von $contentList bleibt unverändert)
         if ($includeSubAlbums) {
             $subAlbumNames = $model->getSubAlbums($albumPath);
             foreach ($subAlbumNames as $name) {
@@ -89,8 +89,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             }
         }
 
-// --- 2. Load Media (Images/Videos) ---
-        $mediaItems = $model->getMediaByAlbum($albumPath, false, false);
+        $mediaItems = $model->getMediaByAlbum($albumPath, $recursive, $random);
         foreach ($mediaItems as $item) {
             $contentList[] = [
                 'type' => $item['type'] ?? 'media',
@@ -104,7 +103,6 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             return [];
         }
 
-// 3. Return the instruction list
         return $this->collectGalleryItemInstructions($contentList);
     }
 }
