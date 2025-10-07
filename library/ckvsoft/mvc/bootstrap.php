@@ -270,34 +270,6 @@ class Bootstrap extends \stdClass
     {
         $lastSegment = $this->_uriValue[array_key_last($this->_uriValue)] ?? null;
 
-        // --- Asset Request Logging (CSS, JS, images, fonts, etc.) ---
-        if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot)$/i', $lastSegment)) {
-            $logDir = dirname(__DIR__, 3) . '/var/log/';
-            $timestamp = date('Y-m-d H:i:s');
-
-            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
-            $traceLines = [];
-            foreach ($trace as $t) {
-                $file = $t['file'] ?? '[internal]';
-                $line = $t['line'] ?? '';
-                $func = $t['function'] ?? '';
-                $class = $t['class'] ?? '';
-                $traceLines[] = "{$file}:{$line} {$class}{$func}()";
-            }
-            $traceString = implode(" | ", $traceLines);
-
-            $msg = sprintf(
-                    "[%s] Misrouted asset request: %s | Referrer: %s | Agent: %s | URI: %s | Trace: %s\n",
-                    $timestamp,
-                    $this->uri,
-                    filter_input(INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL),
-                    strip_tags((string) filter_input(INPUT_SERVER, 'HTTP_USER_AGENT')),
-                    filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL),
-                    $traceString
-            );
-            error_log($msg, 3, $logDir . 'bootstrap_assets.log');
-        }
-
         // --- Require custom user configuration ---
         // $this->_requireCustomConfig();
 
@@ -316,6 +288,33 @@ class Bootstrap extends \stdClass
             $controllerFile = str_replace(MODULES_URI, CORE_MODULES_URI, $controllerFile);
 
             if (!file_exists($controllerFile)) {
+                // --- Asset Request Logging (CSS, JS, images, fonts, etc.) ---
+                if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot)$/i', $lastSegment)) {
+                    $logDir = dirname(__DIR__, 3) . '/var/log/';
+                    $timestamp = date('Y-m-d H:i:s');
+
+                    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+                    $traceLines = [];
+                    foreach ($trace as $t) {
+                        $file = $t['file'] ?? '[internal]';
+                        $line = $t['line'] ?? '';
+                        $func = $t['function'] ?? '';
+                        $class = $t['class'] ?? '';
+                        $traceLines[] = "{$file}:{$line} {$class}{$func}()";
+                    }
+                    $traceString = implode(" | ", $traceLines);
+
+                    $msg = sprintf(
+                            "[%s] Misrouted asset request: %s | Referrer: %s | Agent: %s | URI: %s | Trace: %s\n",
+                            $timestamp,
+                            $this->uri,
+                            filter_input(INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL),
+                            strip_tags((string) filter_input(INPUT_SERVER, 'HTTP_USER_AGENT')),
+                            filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL),
+                            $traceString
+                    );
+                    error_log($msg, 3, $logDir . 'bootstrap_assets.log');
+                }
                 die(__CLASS__ . ': error (non-existent controller): ' . $this->_uriController);
             }
             $isCoreModule = true;
