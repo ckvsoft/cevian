@@ -1,3 +1,14 @@
+## [0.8.3](https://github.com/ckvsoft/cevian/compare/v0.8.2...v0.8.3) (2025-10-07)
+
+
+### Bug Fixes
+
+* **multilogin:** Correct column name in MultiLoginManager insert ([397e543](https://github.com/ckvsoft/cevian/commit/397e543bd3c264c76b667c9e69254daec7b2ce02))
+* **schema:** Enhance SQL structure by adding primary and unique keys inline ([ff03351](https://github.com/ckvsoft/cevian/commit/ff0335187787a2c6d8dd0caaa0def1e22666936a))
+* **sql:** Add InnoDB engine and explicit charset/collation to migration 0.7.0 ([6e54f64](https://github.com/ckvsoft/cevian/commit/6e54f641dba49ecaafaf96508837a04ab490e9a6))
+
+
+
 ## [0.8.2](https://github.com/ckvsoft/cevian/compare/v0.8.0...v0.8.2) (2025-10-06)
 
 
