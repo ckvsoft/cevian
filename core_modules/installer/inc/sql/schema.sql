@@ -25,19 +25,19 @@ CREATE TABLE `mainmenu` (
 --
 -- Daten für Tabelle `mainmenu`
 --
-INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_public`, `date_added`, `date_changed`) VALUES
-(1, 'Dashboard', 'dashboard', 0, 0, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(2, 'User-Manager', 'user', 5, 0, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(3, 'Menu-Manager', 'menu', 5, 0, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(4, 'Logout', 'logout', 0, 99, 'owner', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(5, 'Manager', '#', 0, 0, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(6, 'Backup', 'backup', 0, 0, 'owner', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(7, 'Login', 'login', 0, 99, 'None', 1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(8, 'Home', 'home', 0, 0, 'None', 1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(9, 'Dataprotection', 'home/dataprotection', 0, 0, 'None', 1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(10, 'Rbac', '#', 5, 4, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(11, 'Permissions', 'rbac/permissions', 10, NULL, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06'),
-(12, 'Roles', 'rbac', 10, NULL, 'admin', -1, '2025-10-01 10:58:06', '2025-10-01 10:58:06');
+INSERT INTO `mainmenu` (`id`, `label`, `link`, `parent`, `sort`, `role`, `is_public`) VALUES
+(1, 'Dashboard', 'dashboard', 0, 0, 'admin', -1),
+(2, 'User-Manager', 'user', 5, 0, 'admin', -1),
+(3, 'Menu-Manager', 'menu', 5, 0, 'admin', -1),
+(4, 'Logout', 'logout', 0, 99, 'owner', -1),
+(5, 'Manager', '#', 0, 0, 'admin', -1),
+(6, 'Backup', 'backup', 0, 0, 'owner', -1),
+(7, 'Login', 'login', 0, 99, 'None', 1),
+(8, 'Home', 'home', 0, 0, 'None', 1),
+(9, 'Dataprotection', 'home/dataprotection', 0, 0, 'None', 1),
+(10, 'Rbac', '#', 5, 4, 'admin', -1, '2025-10-01 10:58:06'),
+(11, 'Permissions', 'rbac/permissions', 10, NULL, 'admin', -1),
+(12, 'Roles', 'rbac', 10, NULL, 'admin', -1);
 
 --
 -- Tabellenstruktur für Tabelle `migrations` (war bereits korrekt)
@@ -49,6 +49,11 @@ CREATE TABLE migrations (
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY `unique_migration` (`module_name`,`migration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `migrations` (`id`, `module_name`, `migration`) VALUES
+(1, '_core_', '0.7.0'),
+(2, '_core_', '0.8.0'),
+(3, '_core_', '0.8.3');
 
 -- --------------------------------------------------------
 
@@ -259,6 +264,30 @@ CREATE TABLE `user_roles` (
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `gallery_albums` (
+    `album_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `album_path` VARCHAR(512) NOT NULL COMMENT 'Relative path to the album, e.g., events/hochzeit',
+    `title` VARCHAR(255) NULL DEFAULT NULL COMMENT 'Display title of the album',
+    `owner_user_id` INT(11) UNSIGNED NULL DEFAULT NULL COMMENT 'ID of the user who owns the album (NULL if public/system-owned)',
+    `permissions_level` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '0=Public, 1=User, 2=Admin etc.',
+    PRIMARY KEY (`album_id`),
+    UNIQUE KEY `path_unique` (`album_path`(255)),
+    KEY `idx_owner_user_id` (`owner_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `gallery_media_stats` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `album_id` INT(11) UNSIGNED NOT NULL COMMENT 'Foreign key to the gallery_albums table',
+    `file_name` VARCHAR(255) NOT NULL COMMENT 'Media filename (e.g., image.jpg)',
+    `views` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total view count for this media file',
+    `last_view` DATETIME NULL DEFAULT NULL COMMENT 'Timestamp of the last view',
+    PRIMARY KEY (`id`),
+    -- Unique key ensures only one counter entry per album/file combination
+    UNIQUE KEY `album_file_unique` (`album_id`, `file_name`),
+    -- Foreign key constraint
+    CONSTRAINT `fk_album_id` FOREIGN KEY (`album_id`) REFERENCES `gallery_albums` (`album_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;
