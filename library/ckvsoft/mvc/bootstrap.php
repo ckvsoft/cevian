@@ -289,7 +289,7 @@ class Bootstrap extends \stdClass
 
             if (!file_exists($controllerFile)) {
                 // --- Asset Request Logging (CSS, JS, images, fonts, etc.) ---
-                if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot)$/i', $lastSegment)) {
+                if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot|json|mp4|webm|webp)$/i', $lastSegment)) {
                     $logDir = dirname(__DIR__, 3) . '/var/log/';
                     $timestamp = date('Y-m-d H:i:s');
 
@@ -305,7 +305,7 @@ class Bootstrap extends \stdClass
                     $traceString = implode(" | ", $traceLines);
 
                     $msg = sprintf(
-                            "[%s] Misrouted asset request: %s | Referrer: %s | Agent: %s | URI: %s | Trace: %s\n",
+                            "[%s] Misrouted asset request: %s (Asset not found or misrouted) | Referrer: %s | Agent: %s | URI: %s | Trace: %s\n",
                             $timestamp,
                             $this->uri,
                             filter_input(INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL),
