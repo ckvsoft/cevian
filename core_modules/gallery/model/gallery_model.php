@@ -21,8 +21,108 @@ class Gallery_Model extends ckvsoft\mvc\Model
         $this->albumsBaseUrl = BASE_URI . $relativePath . '/';
     }
 
+    /**
+     * Increments the view counter for the given media file.
+     * It first determines/creates the album_id and then updates the counter.
+     * * @param string $albumPath The path to the album (e.g., 'events/hochzeit').
+     * @param string $fileName The filename (e.g., 'image.jpg').
+     * @param int|null $currentUserId Optional ID of the user accessing the medium (used for initial album creation).
+     */
+    public function incrementViewCounter(string $albumPath, string $fileName, ?int $currentUserId = null): void
+    {
+        // STEP 1: Get the Album ID (pass the user ID for creation)
+        try {
+            // Pass the user ID to the internal method for owner assignment
+            $albumId = $this->getAlbumIdByPath($albumPath, $currentUserId);
+        } catch (\Exception $e) {
+            error_log("Database error during album ID retrieval: " . $e->getMessage());
+            return;
+        }
+
+        // STEP 2: Update the counter entry using album_id
+        $this->db->insertUpdate('gallery_media_stats', [
+            'album_id' => $albumId,
+            'file_name' => $fileName,
+            // Atomic count update: start at 1 if new, increment by 1 if existing
+            'views' => new \ckvsoft\DbExpr('IF(`views` IS NULL, 1, `views` + 1)'),
+            'last_view' => new \ckvsoft\DbExpr('NOW()')
+        ]);
+    }
+
+    /**
+     * Gets the album ID by path, or creates a new entry in gallery_albums if the path does not exist.
+     * Handles race conditions using insertUpdate/select fallback.
+     * @param string $albumPath The path of the album (e.g., 'events/hochzeit').
+     * @param int|null $currentUserId Optional ID of the user creating the album.
+     * @return int The ID of the album.
+     * @throws \ckvsoft\CkvException If the album ID cannot be retrieved or created.
+     */
+    private function getAlbumIdByPath(string $albumPath, ?int $currentUserId = null): int
+    {
+        $normalizedPath = trim($albumPath, '/');
+
+        // 1. ATTEMPT: Retrieve existing album ID
+        $album = $this->db->select(
+                "SELECT `album_id` FROM `gallery_albums` WHERE `album_path` = :path",
+                ['path' => $normalizedPath]
+        );
+
+        if (!empty($album)) {
+            return (int) $album[0]['album_id'];
+        }
+
+        // 2. IF NOT FOUND: Create album using insertUpdate.
+        $data = [
+            'album_path' => $normalizedPath,
+            'permissions_level' => 0, // Default to public
+            'owner_user_id' => $currentUserId, // Assign owner here
+        ];
+
+        // Create album using insertUpdate (Assuming this method returns the new ID or 0 on duplicate/failure)
+        $albumId = $this->db->insertUpdate('gallery_albums', $data);
+
+        if ($albumId > 0) {
+            return (int) $albumId;
+        }
+
+        // 3. FALLBACK: Re-select the ID. This catches the case where another process
+        // just created the album (race condition), and the initial insertUpdate did not return the ID.
+        $album = $this->db->select(
+                "SELECT `album_id` FROM `gallery_albums` WHERE `album_path` = :path",
+                ['path' => $normalizedPath]
+        );
+
+        if (!empty($album)) {
+            return (int) $album[0]['album_id'];
+        }
+
+        // Fail if ID could not be determined
+        throw new \ckvsoft\CkvException("Could not determine or create album_id for path '{$normalizedPath}'.");
+    }
+
+    /**
+     * Returns the absolute file path for a medium.
+     * Increments the counter for non-thumbnail/non-placeholder media entries.
+     * * @param string $albumName The album path.
+     * @param string $fileName The medium's filename.
+     * @return string The absolute path to the file.
+     */
     public function getFilePath(string $albumName, string $fileName): string
     {
+        $currentUserId = \ckvsoft\Auth::getUserId();
+        $nameNoExt = pathinfo($fileName, PATHINFO_FILENAME);
+
+        // 1. Exclusion Checks:
+        $isThumbnail = str_ends_with(strtolower($nameNoExt), '_thumb');
+        $isDefaultPlaceholder = (str_contains(strtolower($fileName), 'placeholder') || str_contains(strtolower($fileName), 'default_video_thumb'));
+
+        // 2. Counter Logic: Only count main media files
+        if (!$isThumbnail && !$isDefaultPlaceholder) {
+            // Ruft den vereinfachten Zähler auf
+            $this->incrementViewCounter($albumName, $fileName, $currentUserId);
+        }
+
+        // 3. Return file path:
         return $this->basePath . trim($albumName . '/' . $fileName, '/');
     }
 
