@@ -44,8 +44,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
             'album_id' => $albumId,
             'file_name' => $fileName,
             // Atomic count update: start at 1 if new, increment by 1 if existing
-            'views' => new \ckvsoft\DbExpr('IF(`views` IS NULL, 1, `views` + 1)'),
-            'last_view' => new \ckvsoft\DbExpr('NOW()')
+            'views' => new \ckvsoft\DbExpr('IF(`views` IS NULL, 1, `views` + 1)')
         ]);
     }
 
