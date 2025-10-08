@@ -106,9 +106,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
                 'user_id' => $userId,
                 'module_name' => $module,
                 'user_key' => $userKey,
-                'data' => json_encode($data),
-                'date_added' => new DbExpr("NOW()"),
-                'last_active' => new DbExpr("NOW()")
+                'data' => json_encode($data)
             ]);
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::login failed: " . $e->getMessage(), 0, $e);
