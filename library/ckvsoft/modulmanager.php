@@ -99,7 +99,7 @@ class ModuleManager extends \ckvsoft\mvc\Config
             $stmt = $this->db->prepare("
                 INSERT INTO modules (name, version, core, enabled)
                 VALUES (:n, :v, :c, 1)
-                ON DUPLICATE KEY UPDATE version = :v, core = :c, updated_at = NOW()
+                ON DUPLICATE KEY UPDATE version = :v, core = :c
             ");
             $stmt->execute([
                 ':n' => $config['name'],
