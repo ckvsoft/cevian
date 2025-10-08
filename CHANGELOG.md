@@ -1,3 +1,22 @@
+# [0.9.0](https://github.com/ckvsoft/cevian/compare/v0.8.3...v0.9.0) (2025-10-08)
+
+
+### Bug Fixes
+
+* **bootstrap:** Expand asset logging and clarify error message ([e25537c](https://github.com/ckvsoft/cevian/commit/e25537cd28d50c2b3579fbf66fac5ddaa0885ced))
+* **gallery:** Ensure correct parameter passing for recursive and random media fetching ([87dfd88](https://github.com/ckvsoft/cevian/commit/87dfd888bfd9dc676c73988c6b2e3ed063cf3903))
+
+
+### Features
+
+* **database:** Add gallery tables for album and media statistics ([efd8bef](https://github.com/ckvsoft/cevian/commit/efd8beff58cea528e588c6f4354f4f6d110ba14c))
+* **gallery:** Add simple-lightbox CSS styling for media viewer ([9ea125f](https://github.com/ckvsoft/cevian/commit/9ea125f769641632f003f4c75d17f1a6bacb9955))
+* **gallery:** Add simple-lightbox JavaScript for interactive media viewing ([16a7b0c](https://github.com/ckvsoft/cevian/commit/16a7b0cd76bd4300ee2ec62ac737ebda69022d33))
+* **gallery:** Implement media view counter and dynamic album tracking ([32b61ec](https://github.com/ckvsoft/cevian/commit/32b61ec6c03f92451848892771e4a201ecf63ca2))
+* **schema:** Finalize database schema with gallery and core updates ([37c4863](https://github.com/ckvsoft/cevian/commit/37c4863c8dbcdaf241967089b06cc6e215b50cdc))
+
+
+
 ## [0.8.3](https://github.com/ckvsoft/cevian/compare/v0.8.2...v0.8.3) (2025-10-07)
 
 
