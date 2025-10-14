@@ -5,7 +5,6 @@
  *
  * @author chris
  */
-
 use ckvsoft\Auth;
 
 class Menu_Helper extends \ckvsoft\mvc\Helper
@@ -14,7 +13,7 @@ class Menu_Helper extends \ckvsoft\mvc\Helper
     private $_menu;
     private $_table = 'mainmenu';
 
-    public function getMenu($parentid, $myseclevel = 10)
+    public function getMenu($parentid, $myseclevel = 10, $is_mobile = false)
     {
         $tmpmyseclevel = $myseclevel + 1;
         $role = '';
@@ -33,11 +32,17 @@ class Menu_Helper extends \ckvsoft\mvc\Helper
         if (empty($result)) {
             return "";
         }
-        $this->_menu .= ($parentid > 0) ? "<ul id= 'menu' class='subnav'>" : "<ul id='menu' class='topnav'>";
+
+        $this->_menu .= ($parentid > 0) ? "<ul id= 'menu_{$tmpmyseclevel}' class='subnav'>" : "<ul id='menu_{$tmpmyseclevel}' class='topnav'>";
         foreach ($result as $value) {
-            $this->_menu .= ($value['link'] == '#') ? "<li><a>" . $value['label'] . "</a>" : "<li><a href=\"" . BASE_URI . $value['link'] . "\">" . $value['label'] . "</a>";
             $tmpparent = $value['id'];
-            $this->getMenu($tmpparent, $myseclevel);
+
+            if ($is_mobile && $value['link'] == '#') {
+                $this->getMenu($tmpparent, $tmpmyseclevel, $is_mobile);
+                continue;
+            }
+            $this->_menu .= ($value['link'] == '#') ? "<li><a>" . $value['label'] . "</a>" : "<li><a href=\"" . BASE_URI . $value['link'] . "\">" . $value['label'] . "</a>";
+            $this->getMenu($tmpparent, $tmpmyseclevel);
             $this->_menu .= "</li>";
         }
         $this->_menu .= "</ul>";
