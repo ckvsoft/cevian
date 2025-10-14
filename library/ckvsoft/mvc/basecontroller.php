@@ -76,6 +76,7 @@ class BaseController extends \ckvsoft\mvc\Controller
         $this->baseScripts = $this->loadAssetsJs() . $extraJs;
 
         $this->menuHelper = $this->loadHelper("menu/menu");
+        $is_mobile_view = $this->mobile ?? false;
 
         $headerRendered = false;
 
@@ -89,7 +90,7 @@ class BaseController extends \ckvsoft\mvc\Controller
 
             // Prüfen, ob Header
             if (str_contains($viewFile, 'header') && !$headerRendered) {
-                $viewData['menuitems'] = $this->menuHelper->getMenu(0);
+                $viewData['menuitems'] = $this->menuHelper->getMenu(0, 10, $is_mobile_view);
                 $viewData['base_css'] = $this->baseCss;
                 $viewData['base_scripts'] = $this->baseScripts;
 
