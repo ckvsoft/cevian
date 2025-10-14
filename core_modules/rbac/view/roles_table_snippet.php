@@ -22,25 +22,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+// Konstante für die Basis-URI
+$baseUri = BASE_URI;
 ?>
-<table class="table table-striped paginated">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Role</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($this->roles as $role) { ?>
-            <tr>
-                <td> <?= $role['id'] ?> </td>
-                <td style="width: 30%"> <?= str_repeat('&nbsp;&nbsp;', $role['depth']) . htmlspecialchars($role['roleName']) ?> </td>
-                <td>
-                    <a class="small-action" href="rbac/editRole/<?= $role['id'] ?>">Edit</a>
-                    <a class="small-action ajax-delete" href="#" onclick="deleteRole(<?= $role['id'] ?>)">Delete</a>
-                </td>
-            </tr>
+
+<!-- Die Klasse 'paginated' wird hier durch 'paginated-list' und 'list-cards' ersetzt,
+     um das mobile DIV-Karten-Layout zu aktivieren. -->
+<div class="paginated-list list-cards">
+    <?php if (!empty($this->roles)): ?>
+        <?php
+        foreach ($this->roles as $role) {
+            // Berechne die Einrückung für die Baumstruktur (20px pro Tiefe)
+            $indentSize = 20;
+            $paddingLeft = ($role['depth'] * $indentSize) . 'px';
+            $labelPrefix = ($role['depth'] > 0) ? '↳ ' : '';
+            ?>
+            <!-- Start der Rollen-Karte -->
+            <div class="card role-card depth-<?= $role['depth'] ?>" data-role-id="<?= htmlspecialchars($role['id']) ?>">
+
+                <!-- 1. Rollen-Details mit Einrückung für die Baumstruktur -->
+                <div class="role-details" style="padding-left: <?= $paddingLeft ?>;">
+
+                    <!-- ID-Zeile -->
+                    <p class="detail-line">
+                        <strong>ID:</strong> <?= htmlspecialchars($role['id']) ?>
+                    </p>
+
+                    <!-- Rollenname-Zeile -->
+                    <p class="detail-line">
+                        <strong>Rolle:</strong> <?= $labelPrefix . htmlspecialchars($role['roleName']) ?>
+                    </p>
+
+                </div>
+                <!-- Ende .role-details -->
+
+                <!-- 2. Aktionen-Gruppe (Gestapelte Buttons für mobile Bearbeitung) -->
+                <!-- Inline-Style stellt sicher, dass Buttons vertikal gestapelt und zentriert werden -->
+                <div class="actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+
+                    <!-- Bearbeiten Button (Breite auf 150px begrenzt) -->
+                    <a class="button small-action edit"
+                       href="<?= htmlspecialchars($baseUri . 'rbac/editRole/' . $role['id']) ?>">Bearbeiten</a>
+
+                    <!-- Löschen Button (Breite auf 150px begrenzt) -->
+                    <a class="button small-action delete"
+                       href="#"
+                       onclick="deleteRole(<?= $role['id'] ?>)">Löschen</a>
+
+                </div>
+                <!-- Ende .actions -->
+
+            </div>
+            <!-- Ende der Rollen-Karte -->
         <?php } ?>
-    </tbody>
-</table>
+    <?php else: ?>
+        <p>Keine Rollen gefunden.</p>
+    <?php endif; ?>
+</div>
