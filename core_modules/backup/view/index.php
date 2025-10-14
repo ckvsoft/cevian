@@ -1,64 +1,65 @@
-<style>
-    button {
-        padding: 10px;
-        border: none;
-        border-radius: 5px;
-        background-color: #233853;
-        font-size: 12px;
-        color: #fff;
-        cursor: pointer;
-        margin-left: 2px;
-    }
-    button:hover {
-        background-color: #0666a3;
-    }
-    select {
-        padding: 5px;
-        font-size: 12px;
-        margin-left: 5px;
-        margin-right: 5px;
-    }
-</style>
+<?php
+/** @var array $albums */
+$baseUri = BASE_URI;
+?>
+
+<h1><?= htmlspecialchars($this->title) ?></h1>
 
 <fieldset>
     <legend>Backup</legend>
     <section class="page-content">
-        <section class="grid" style="overflow: auto; width: 1123px;">
+        <section class="grid">
             <article>
-                <p>Aktuelles/Letztes Backup</p>
-                <div>
-                    Database: <?= $this->database ?> Images: <?= $this->images ?>
-                </div>
-                <hr>
+                <div class="backup-content-wrapper">
+                    <p>Aktuelles/Letztes Backup</p>
+                    <div>
+                        Database: <?= $this->database ?><br />
+                        Images: <?= $this->images ?>
+                    </div>
+                    <hr>
 
-                <!-- Datenbank Backup -->
-                <div>
-                    <button onclick="startBackupDatabase()">Backup Datenbank starten</button>
-                </div>
-                <div>
-                    <label for="progress-bar1" style="white-space: nowrap; width: 210px; text-align: right;">
-                        Backup Database Fortschritt:
-                    </label>
-                    <progress id="progress-bar1" class="progress-bar" value="0" max="100"></progress>
-                    <span id="progress-percent1">0%</span>
-                </div>
+                    <div class="form-group">
+                        <label></label>
+                        <div>
+                            <button class="button small-action save" onclick="startBackupDatabase()">
+                                Backup Datenbank starten
+                            </button>
+                        </div>
+                    </div>
 
-                <hr>
+                    <div class="form-group">
+                        <label for="progress-bar1">Backup Datenbank Fortschritt:</label>
+                        <div>
+                            <progress id="progress-bar1" value="0" max="100"></progress>
+                            <span id="progress-percent1">0%</span>
+                        </div>
+                    </div>
 
-                <!-- Image Backup -->
-                <div style="margin-top:10px;">
-                    <label for="image-dir">Image-Verzeichnis:</label>
-                    <select id="image-dir">
-                        <option value="">Lade Verzeichnisse...</option>
-                    </select><br />
-                    <button onclick="startBackupImages()">Backup Images starten</button>
-                </div>
-                <div>
-                    <label for="progress-bar" style="white-space: nowrap; width: 210px; text-align: right;">
-                        Backup Images Fortschritt:
-                    </label>
-                    <progress id="progress-bar" class="progress-bar" value="0" max="100"></progress>
-                    <span id="progress-percent">0%</span>
+                    <hr>
+
+                    <div class="form-group">
+                        <label for="image-dir">Image-Verzeichnis:</label>
+                        <select id="image-dir">
+                            <option value="">Lade Verzeichnisse...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label></label>
+                        <div>
+                            <button class="button small-action save" onclick="startBackupImages()">
+                                Backup Images starten
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="progress-bar">Backup Images Fortschritt:</label>
+                        <div>
+                            <progress id="progress-bar" value="0" max="100"></progress>
+                            <span id="progress-percent" >0%</span>
+                        </div>
+                    </div>
                 </div>
             </article>
         </section>
