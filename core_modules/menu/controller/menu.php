@@ -29,20 +29,57 @@ class Menu extends ckvsoft\mvc\BaseController
         $this->view->render("menu/menu_snippet", ['generatedMenuTable' => $this->generateMenuTable($menu)]);
     }
 
+    /**
+     * Generiert die verschachtelte HTML-Struktur (DIV-Karten) für die Menüverwaltung.
+     * Statt einer Tabelle wird eine kartenbasierte Ansicht erzeugt, die für Mobilgeräte optimiert ist.
+     *
+     * @param array $menu Die Menüstruktur.
+     * @param int $depth Die aktuelle Verschachtelungstiefe zur Einrückung.
+     * @return string Der generierte HTML-Code.
+     */
     private function generateMenuTable($menu, $depth = 0)
     {
+        // Verwenden der BASE_URI Konstante
+        $baseUri = BASE_URI;
         $html = '';
+
+        $indentSize = 20;
+        $paddingLeft = ($depth * $indentSize) . 'px';
+
         foreach ($menu as $item) {
-            $indent = str_repeat('&nbsp;&nbsp;', $depth); // Einrückung anhand der Tiefe
             $is_public = $item['is_public'] == 1 ? 'Ja' : 'Nein';
-            $html .= "<tr><td align=right>$item[id]</td>";
-            $html .= "<td align=left>$indent . $item[label]</td>";
-            $html .= "<td align=right>$is_public</td>";
-            $html .= '<td><a class="small-action" href="' . BASE_URI . 'menu/edit/' . $item['id'] . '">Edit</a></td>';
-            $html .= '<td><a class="small-action ajax-delete" href="' . BASE_URI . 'menu/delete/' . $item['id'] . '">Delete</a></td>';
-            $html .= '</tr>';
+
+            $html .= '<div class="card menu-card depth-' . $depth . '" data-menu-id="' . htmlspecialchars($item['id']) . '">';
+
+            $html .= '<div class="menu-details" style="padding-left: ' . $paddingLeft . ';">';
+
+            $html .= '<p class="detail-line">';
+            $html .= '<strong>ID:</strong> ' . htmlspecialchars($item['id']);
+            $html .= '</p>';
+
+            $labelPrefix = ($depth > 0) ? '↳ ' : '';
+            $html .= '<p class="detail-line">';
+            $html .= '<strong>Eintrag:</strong> ' . $labelPrefix . htmlspecialchars($item['label']);
+            $html .= '</p>';
+
+            $html .= '<p class="detail-line">';
+            $html .= '<strong>Öffentlich:</strong> ' . $is_public;
+            $html .= '</p>';
+
+            $html .= '</div>';
+            $html .= '<div class="actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">';
+
+            // Bearbeiten Button
+            $html .= '<a class="button small-action edit" href="' . htmlspecialchars($baseUri . 'menu/edit/' . $item['id']) . '">Bearbeiten</a>';
+
+            // Löschen Button
+            $html .= '<a class="button small-action delete" href="' . htmlspecialchars($baseUri . 'menu/delete/' . $item['id']) . '">Löschen</a>';
+
+            $html .= '</div>';
+
+            $html .= '</div>';
             if (isset($item['submenu'])) {
-                $html .= $this->generateMenuTable($item['submenu'], $depth + 1); // Rekursion mit erhöhter Tiefe
+                $html .= $this->generateMenuTable($item['submenu'], $depth + 1);
             }
         }
         return $html;
