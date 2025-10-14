@@ -76,7 +76,7 @@ echo " <div id=\"status\"></div>";
 if ($this->mobile) {
     echo "<script>";
     echo "const hamburger = document.querySelector('.hamburger-menu');";
-    echo "const menu = document.querySelector('#menu');";
+    echo "const menu = document.querySelector('#menu_11');";
     echo "hamburger.addEventListener('click', function() {";
     echo "  menu.classList.toggle('open');";
     echo " console.log(\"toogle\")";
