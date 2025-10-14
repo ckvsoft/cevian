@@ -97,7 +97,7 @@ class Backup_Model extends \ckvsoft\mvc\Model
             if (!empty($result)) {
                 foreach ($result as $row) {
                     $this->progress->increment();
-                    usleep(30000);
+                    usleep(300);
                 }
             }
         }
@@ -170,7 +170,7 @@ class Backup_Model extends \ckvsoft\mvc\Model
 
             $backup_log[$relPath] = filemtime($srcPath);
             $progress->increment();
-            usleep(3000);
+            usleep(300);
         }
 
         file_put_contents($logFile, json_encode($backup_log));
