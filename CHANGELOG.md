@@ -1,3 +1,34 @@
+# [0.10.0](https://github.com/ckvsoft/cevian/compare/v0.9.0...v0.10.0) (2025-10-14)
+
+
+### Bug Fixes
+
+* **backup:** Correct data parsing and remove debug logs ([4cd82f6](https://github.com/ckvsoft/cevian/commit/4cd82f62451eea45b549a54adb19773f7a0a9910))
+* **mobile:** Update menu ID selector in header.php ([7ff26a9](https://github.com/ckvsoft/cevian/commit/7ff26a979fdd5d06c11ec6dceec67d6cf5a91935)), closes [#menu_11](https://github.com/ckvsoft/cevian/issues/menu_11)
+* **module:** Remove redundant updated_at assignment in module registration ([60092e9](https://github.com/ckvsoft/cevian/commit/60092e9ec9a3f4dc4d297475545c1662d3cb9903))
+
+
+### Features
+
+* **ajax:** Introduce progress polling and unify client-side pagination ([223e12a](https://github.com/ckvsoft/cevian/commit/223e12a438e39b40f7fa2d4d72c644d45ccbd0ea))
+* **auth:** Add static method to retrieve simplified permission level ([610698c](https://github.com/ckvsoft/cevian/commit/610698cc4ab19430d4aaf5f804483b48cf0f2613))
+* **controller:** Pass mobile flag to menu helper for responsive generation ([f5df782](https://github.com/ckvsoft/cevian/commit/f5df78283a62e661b064b6064cafe5da42ec9bde))
+* **database:** Add selectOne() method for single-row queries ([edfe17b](https://github.com/ckvsoft/cevian/commit/edfe17b300f1ff9336b05b3799c24c842c884210))
+* **gallery/assets:** Add placeholder images and deny icons ([40eccf4](https://github.com/ckvsoft/cevian/commit/40eccf43343bfa4b7247cfa2fe8edab2a0070e31))
+* **gallery/view/manager:** Add media item management view ([1431195](https://github.com/ckvsoft/cevian/commit/14311958125c7ee7d2665f3f3e9792096a87bc70))
+* **gallery/view:** Add dedicated view for editing individual media item metadata ([2b6a034](https://github.com/ckvsoft/cevian/commit/2b6a0349b0674162d6700f46f1112c6ab7d1135a))
+* **gallery:** Add dedicated Manager controller for gallery administration ([64c0605](https://github.com/ckvsoft/cevian/commit/64c0605ea5577d9c99de60d0a3f4818228553edd))
+* **gallerymanager:** Introduce GalleryManager_Model for administrative tasks ([19b9208](https://github.com/ckvsoft/cevian/commit/19b9208c769dffdfcf3b67cb86f87e1e8c441a74))
+* **image:** Add GIF support and improve resource cleanup in Image class ([d08aba2](https://github.com/ckvsoft/cevian/commit/d08aba2cb4565eaf725c9b8d13824406df4c3eaf))
+* **media:** Introduce dedicated Media controller for secure file serving and fallbacks ([fdbb9b1](https://github.com/ckvsoft/cevian/commit/fdbb9b169d490097ff2caac4fd6fabe85fe48e84))
+
+
+### Performance Improvements
+
+* **backup:** Drastically reduce usleep duration for faster backups ([6f8641b](https://github.com/ckvsoft/cevian/commit/6f8641b8ba15cd0d73cba313b19499234c882dd6))
+
+
+
 # [0.9.0](https://github.com/ckvsoft/cevian/compare/v0.8.3...v0.9.0) (2025-10-08)
 
 
