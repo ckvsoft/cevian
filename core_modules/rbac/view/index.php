@@ -20,7 +20,7 @@
                 </select>
             </div>
 
-            <button type="submit" style="width:100%;padding:10px;font-weight:bold;background:#007bff;color:#fff;border:none;border-radius:4px;">Create</button>
+            <button type="submit" class="button small-action save">Create</button>
         </form>
     </div>
 </fieldset>
