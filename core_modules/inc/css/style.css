@@ -1,28 +1,52 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2025 chris.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 *, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td {
     margin: 0;
     padding: 0;
+    box-sizing: border-box; /* Ensure padding doesn't affect overall width */
 }
+
+/* ============================================================
+    GLOBAL & BASE STYLES (Valid for all screen sizes)
+============================================================ */
 
 body {
     background: #353535;
     color: #FFFFFF;
     font-family: "Lucida Grande",Verdana,Arial,sans-serif;
-    text-align: center;
+    /* FIX: Global text alignment is left */
+    text-align: left; 
     padding-top: 130px;
     padding-bottom: 50px;
     margin-top: 10px;
 }
 
-table {
-    background: rgba(0, 0, 0, 0);
-}
-
-td, th {
-    text-align: left;
-}
-
-td:last-child {
-    width: 100%;
+/* Centers the entire content on the page */
+.container {
+    /* max-width: 1200px; */
+    margin: 0 auto; /* BLOCK CENTERING */
+    width: 99%;
 }
 
 .fixed-header, .fixed-footer{
@@ -32,10 +56,6 @@ td:last-child {
     background: #000000;
     padding: 10px 0;
     color: #fff;
-}
-
-.logo {
-    text-align: left;
 }
 
 .fixed-header{
@@ -56,9 +76,22 @@ h1, h2, h3, h5, h5, h6 {
     margin-left: 20px;
 }
 
-.container {
-    /* border: 1px solid red; */
-    width:99%;
+table {
+    background: rgba(0, 0, 0, 0);
+}
+
+td, th {
+    text-align: left;
+    white-space: nowrap;
+    padding: 5px;
+}
+
+td:last-child {
+    width: 100%;
+}
+
+.logo {
+    text-align: left;
 }
 
 #flex-container {
@@ -68,7 +101,6 @@ h1, h2, h3, h5, h5, h6 {
     border-spacing: 16px;
     width: 100%;
     align-items: center;
-    /* padding-top: 2.5em; */
 }
 
 /* Clear floats after the columns */
@@ -81,7 +113,6 @@ h1, h2, h3, h5, h5, h6 {
 fieldset {
     background: rgba(0, 0, 0, 0);
     border-color: #e84c11;
-    /*  background-color: #f5f5f5; */
     color: white;
 }
 
@@ -101,13 +132,11 @@ legend {
 
 .image {
     float: left;
-    /* border: 1px solid red; */
 }
 
 .body {
     float: left;
     margin: 20px auto;
-    /* border: 1px solid red; */
 }
 
 .entry li {
@@ -164,8 +193,6 @@ textarea:invalid, input:invalid {
     transition: 0.5s;
 }
 
-/* .button:hover {background-color: green;} */
-
 .button:hover span {
     padding-right: 20px;
 }
@@ -176,12 +203,11 @@ textarea:invalid, input:invalid {
 }
 
 .button:active {
-    /*  background-color: #3e8e41; */
     box-shadow: 4px 4px #666;
     transform: translateY(4px);
 }
 
-/* Allgemeines Small-Action Styling */
+/* General Small-Action Styling */
 .button.small-action {
     font-size: 14px;
     padding: 3px 8px;
@@ -190,36 +216,101 @@ textarea:invalid, input:invalid {
     box-shadow: 2px 2px black;
     border: none;
     cursor: pointer;
-    color: #fff;           /* weiße Schrift standardmäßig */
+    color: #fff;            /* white text standard */
     text-align: center;
-    float: none;           /* inline nebeneinander */
+    float: none;            /* inline side by side */
 }
 
-/* Edit-Button (Blau) */
-.button.small-action.edit-permission {
-    background-color: #004080; /* dunkelblau */
+/* Edit Button (Blue) */
+.button.small-action.edit {
+    background-color: #004080; /* dark blue */
 }
 
-.button.small-action.edit-permission:hover {
-    background-color: #0059b3; /* helleres blau beim Hover */
+.button.small-action.edit:hover {
+    background-color: #0059b3; /* lighter blue on hover */
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
 
-/* Delete-Button (Rot) */
-.button.small-action.ajax-delete {
-    background-color: #cc0000; /* rot */
+/* Delete Button (Red) */
+.button.small-action.delete {
+    background-color: #cc0000; /* red */
 }
 
-.button.small-action.ajax-delete:hover {
-    background-color: #ff3333; /* hellrot beim Hover */
+.button.small-action.delete:hover {
+    background-color: #ff3333; /* light red on hover */
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
 
-/* Optional Pfeil bei Hover, falls noch gewünscht */
-.button.small-action span:after {
-    right: -10px;
+.button.small-action.save {
+    background-color: #008000;
+}
+
+.button.small-action.save:hover {
+    background-color: #009000;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+.button.small-action.cancel {
+    background-color: #555555;
+}
+
+.button.small-action.cancel:hover {
+    background-color: #556655;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+.button.small-action.yellow {
+    background-color: #fbf799;
+    color: black;
+}
+
+.button.small-action.yellow:hover {
+    background-color: #fff85d;
+    color: black;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+.button.small-action.blue {
+    background-color: #95c9fd;
+    color: black;
+}
+
+.button.small-action.blue:hover {
+    background-color: #3499fb;
+    color: black;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+.button.small-action.pagination-nav {
+    background-color: #333333; /* Dark Gray for Active Nav Button */
+}
+
+.button.small-action.pagination-nav:hover:not(:disabled) {
+    background-color: #555555;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+
+/* DISABLED State (Overrides inherited active styles) */
+.pagination-nav:disabled {
+    /* Styles when the button is disabled (e.g., on Page 1 or Last Page) */
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    background-color: #dddddd; /* Lighter background for inactive */
+    color: #999999;             /* Gray text */
+    transform: none;           /* Remove any hover/active transformation */
+}
+
+.paginated table .mobile-label {
+    display: none;
 }
 
 a {
@@ -229,7 +320,7 @@ a:hover {
     color: #FFFFFF;
 }
 
-/* Allgemeines Small-Action Styling für Links */
+/* General Small-Action Styling for Links */
 a.small-action {
     display: inline-block;
     font-size: 14px;
@@ -240,31 +331,9 @@ a.small-action {
     border: none;
     cursor: pointer;
     text-align: center;
-    text-decoration: none;  /* kein Unterstrich */
-    color: #fff;           /* weiße Schrift */
+    text-decoration: none;  /* no underline */
+    color: #fff;            /* white text */
     float: none;
-}
-
-/* Edit-Link (Blau) */
-a.small-action.edit-permission {
-    background-color: #004080;
-}
-
-a.small-action.edit-permission:hover {
-    background-color: #0059b3;
-    box-shadow: 2px 2px #666;
-    transform: translateY(2px);
-}
-
-/* Delete-Link (Rot) */
-a.small-action.ajax-delete {
-    background-color: #cc0000;
-}
-
-a.small-action.ajax-delete:hover {
-    background-color: #ff3333;
-    box-shadow: 2px 2px #666;
-    transform: translateY(2px);
 }
 
 #status {
@@ -436,7 +505,6 @@ form label {
 
 form input, form select {
     margin: 5px 0 0 10px;
-    /* border: 2px solid #E5E5E5; */
     padding: 4px 6px;
 }
 
@@ -501,13 +569,9 @@ br {
 
 .page-content {
     background: rgba(0, 0, 0, 0);
-    /*  position: relative; */
     width: 98%;
-    /*  min-height: 100vh; */
-    /*   padding: 30px; */
     padding: 15px;
     color: var(--page-content-txtColor);
-    /*  background: var(--page-content-bgColor); */
 }
 
 .page-content .grid {
@@ -526,6 +590,179 @@ br {
 
 .page-content .grid > article:first-child,
 .page-content .grid > article:last-child {
-    /*  grid-column: 1 / -1; */
 }
 
+.form-group {
+    display: grid; 
+    grid-template-columns: 160px 1fr;
+    align-items: center; 
+    grid-gap: 20px; 
+    margin-bottom: 15px; 
+    width: auto; 
+    clear: both;
+}
+
+.form-group label {
+    text-align: left; 
+    width: auto; 
+    padding-right: 0;
+    margin: 0;
+    white-space: nowrap; 
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;      
+    margin: 0; 
+}
+.backup-content-wrapper {
+    max-width: 600px; 
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.backup-content-wrapper .form-group > div button,
+.backup-content-wrapper .form-group > div progress {
+    width: 100%;
+    display: block; 
+    float: none;
+}
+
+
+/* ============================================================
+    CARD LIST & CARD STYLES (ADAPTED TO YOUR TEMPLATE CLASSES)
+    
+    .list-cards  ->  The wrapping container
+    .card        ->  The individual card element
+    .user-details -> The content area (Details)
+    .actions     ->  The action area (Buttons)
+============================================================ */
+
+/* CONTAINER: .list-cards (or .paginated.list-cards) */
+.list-cards {
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    width: 100%;
+    padding: 15px 0; 
+    box-sizing: border-box;
+}
+
+/* INDIVIDUAL CARD: .card */
+.card {
+    /* Desktop: Makes the card itself a horizontal Flex container (side-by-side) */
+    display: flex; 
+    align-items: center; 
+    /* NO justify-content: space-between anymore! */
+    background-color: #404040; 
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* CONTENT: .user-details (or other detail classes) */
+/* Allows the content to take up only the space it needs, plus margin */
+.user-details,
+.card > div:not(.actions) {
+    flex-grow: 0; /* Important: only takes the space needed by the content */
+    flex-shrink: 0; 
+    margin-right: 20px; /* Space between content and buttons */
+    /* If you want the content to be the minimum width possible: */
+    min-width: 0;
+}
+
+/* ACTIONS: .actions (Your Buttons) */
+.actions {
+    /* Desktop: Actions (Buttons) are arranged horizontally */
+    display: flex;
+    gap: 10px; 
+    flex-shrink: 0; 
+    /* CRITICAL: Pushes this block as far right as possible, eliminating large gaps */
+    margin-right: auto; 
+}
+
+/* Button styling within the Actions */
+.actions .button.small-action,
+.actions form button {
+    display: inline-block;
+    width: auto;
+    margin: 0;
+}
+
+
+/* ============================================================
+    MEDIA QUERY (MOBILE: Responsiveness for all elements)
+    
+    The mobile rules also use YOUR class names: .card and .actions
+============================================================ */
+@media screen and (max-width: 768px) {
+    
+    /* 1. BODY: Adjust padding for mobile header/footer */
+    body {
+        padding-top: 60px; /* Less space at the top */
+        padding-bottom: 120px; /* More space for fixed footer */
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* 2. Important: On mobile devices, the container must use 100% width */
+    .container {
+        padding: 0 10px;
+    }
+    
+    /* 3. Make hamburger menu visible and hide navigation */
+    .hamburger-menu {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .topnav {
+        display: none;
+        position: fixed;
+        top: 65px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #000000;
+        z-index: 55;
+        overflow-y: auto;
+    }
+
+    /* ---------------------------------------------------- */
+    /* MOBILE CARD STYLING (Card Stacking)                  */
+    /* ---------------------------------------------------- */
+    
+    /* CARD (.card): Vertical stacking of content */
+    .card {
+        flex-direction: column; /* Details above Actions */
+        align-items: flex-start; /* Align left */
+        padding: 10px;
+    }
+    
+    /* CONTENT (.user-details): Full width and separator line */
+    .user-details,
+    .card > div:not(.actions) {
+        width: 100%;
+        margin-right: 0;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px dashed #555;
+    }
+
+    /* ACTIONS (.actions): Stack buttons vertically */
+    .actions {
+        flex-direction: column; /* Buttons are stacked one below the other */
+        width: 100%; /* Important so buttons take full width */
+        gap: 8px;
+        margin-left: auto;
+    }
+
+    /* Buttons take full width */
+    .actions .button.small-action,
+    .actions form button {
+        display: block;
+        width: 100%;
+    }
+}
