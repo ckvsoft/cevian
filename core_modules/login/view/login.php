@@ -11,7 +11,7 @@
             </div>
             <div class="form-row">
                 <label for="submit">&nbsp;</label>
-                <input type="submit" value="Login">
+                <input class="button small-action save" type="submit" value="Login">
             </div>
         </form>
     </fieldset>
