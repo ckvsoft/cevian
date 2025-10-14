@@ -1,7 +1,7 @@
 <fieldset>
     <legend>Menuentry: Edit</legend>
     <div data-form="editForm">
-        <form action="<?php echo BASE_URI; ?>menu/editSave/<?php echo $this->menuList[0]['id']; ?>" method="post" id="editForm" data-redirect="menu">    
+        <form action="<?php echo BASE_URI; ?>menu/editSave/<?php echo $this->menuList[0]['id']; ?>" method="post" id="editForm" data-redirect="menu">
             <label for="label">Label:</label>
             <input type="text" id="label" name="label" value="<?php echo $this->menuList[0]['label']; ?>" required><br />
             <label for="link">Link:</label>
@@ -22,8 +22,8 @@
             <input type="hidden" name="is_public" value="-1">
             <input class="checkbox" type="checkbox" name="is_public" value="1" <?php if ($this->menuList[0]['is_public'] == '1') echo 'checked'; ?>><br />
             <br /><br />
-            <input type="submit">
-            <input type="button" onclick="javascript:window.location = '<?php echo BASE_URI; ?>menu';" value="Cancel">
+            <input class="button small-action save" type="submit">
+            <input class="button small-action cancel" type="button" onclick="javascript:window.location = '<?php echo BASE_URI; ?>menu';" value="Cancel">
         </form>
     </div>
 </fieldset>
