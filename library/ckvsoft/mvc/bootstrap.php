@@ -137,11 +137,25 @@ class Bootstrap extends \stdClass
 
         $module = strtolower($uriSegments[0] ?? $this->_controllerDefault);
         $subcontroller = strtolower($uriSegments[1] ?? '');
-        $method = strtolower($uriSegments[2] ?? 'index');
+        // $method = strtolower($uriSegments[2] ?? 'index');
+        $method = $uriSegments[2] ?? 'index';
 
         $uriValueSliceIndex = 0; // Index from where the value segments start
-        // Check if Subcontroller exists
-        if ($subcontroller && file_exists($this->_pathController . $module . "/controller/" . $subcontroller . ".php")) {
+        // Check if Subcontroller exists in modules
+        $subcontrollerFileModules = $this->_pathController . $module . "/controller/" . $subcontroller . ".php";
+
+        // Check if Subcontroller exists in core_modules
+        $subcontrollerFileCore = str_replace(MODULES_URI, CORE_MODULES_URI, $subcontrollerFileModules);
+
+        if ($subcontroller && file_exists($subcontrollerFileModules)) {
+            // Subcontroller found in modules
+            $this->_uriModule = $module;
+            $this->_uriController = ucwords($module);
+            $this->_uriSubController = ucwords($subcontroller);
+            $this->_uriMethod = $method;
+            $uriValueSliceIndex = 3;
+        } elseif ($subcontroller && file_exists($subcontrollerFileCore)) {
+            // Subcontroller found in core_modules
             $this->_uriModule = $module;
             $this->_uriController = ucwords($module);
             $this->_uriSubController = ucwords($subcontroller);
@@ -154,7 +168,6 @@ class Bootstrap extends \stdClass
             $this->_uriMethod = $subcontroller ?: 'index';
             $uriValueSliceIndex = 2;
         }
-
         // 3. Slice the remaining segments as the method parameters
         $uriValue = array_slice($uriSegments, $uriValueSliceIndex);
 
