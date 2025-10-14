@@ -17,7 +17,7 @@
                 <option value="admin">Admin</option>
             </select><br /><br />
 
-            <input type="submit" value="Create User">
+            <input class="button small-action save" type="submit" value="Create User">
         </form>
     </div>
 </fieldset>
