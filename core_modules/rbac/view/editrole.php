@@ -23,10 +23,11 @@
             <div style="margin-top:12px;">
                 <button type="button"
                         id="saveRoleAndPerms"
-                        class="btn btn-primary"
+                        class="button small-action save"
                         data-forms-to-save="editRoleForm,rolePermissionsForm">
                     Save Role & Permissions
-                </button>            </div>
+                </button>
+            </div>
         </form>
     </div>
 </fieldset>
