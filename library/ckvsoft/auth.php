@@ -96,4 +96,25 @@ class Auth
         // Fallback
         return $_SESSION['user_id'] ?? null;
     }
+
+    /**
+     * Gibt den Berechtigungslevel des Benutzers zurück.
+     * 2 = Admin (Zugriff auf alle Alben)
+     * 1 = Registrierter Benutzer (Zugriff auf Level 0 und 1 Alben)
+     * 0 = Gast (Public) (Zugriff nur auf Level 0 Alben)
+     *
+     * @return int
+     */
+    public static function getUserPermissionLevel(): int
+    {
+        if (self::hasRole("admin")) {
+            return 2; // Admin
+        }
+
+        if (self::loginStatus()) {
+            return 1; // Registrierter Benutzer
+        }
+
+        return 0; // Gast (Public)
+    }
 }
