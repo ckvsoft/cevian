@@ -62,6 +62,27 @@ class Database extends \PDO
     }
 
     /**
+     * selectOne - Run a Select Query and return only the first row.
+     *
+     * @param string $query Build a query with :colin marks for binding
+     * @param array|mixed $bindParams The fields to select to replace the :colin marks (can be single value or array)
+     *
+     * @return array|null The first row as an associative array, or null if no result found.
+     */
+    public function selectOne(string $query, $bindParams = array()): ?array
+    {
+        // Ensure bindParams is an array, even if a single value is passed for a single placeholder
+        if (!is_array($bindParams)) {
+            $bindParams = [$bindParams];
+        }
+
+        $results = $this->select($query, $bindParams, \PDO::FETCH_ASSOC);
+
+        // Return the first row or null if the array is empty
+        return $results[0] ?? null;
+    }
+
+    /**
      * select - Run & Return a Select Query
      *
      * @param string $query Build a query with :colin marks for binding
