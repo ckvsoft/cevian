@@ -22,25 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+$userList = $this->userList; // Use the variable name from the user's original context
+$baseUri = BASE_URI; // Use the base URI constant
 ?>
 
-<table>
-    <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>eMail</th>
-        <th>Actions</th>
-    </tr>
-    <?php foreach ($this->userList as $key => $value) { ?>
-        <tr>
-            <td> <?= $value['user_id'] ?></td>
-            <td> <?= $value['username'] ?> </td>
-            <td> <?= $value['email'] ?> </td>
-            <td> <a class="small-action" href=" <?= BASE_URI ?>user/edit/<?= $value['user_id'] ?>">Edit</a>
-                <?php if ($value['user_id'] > 1) { ?>
-                    <a class="small-action ajax-delete" href=" <?= BASE_URI ?>user/delete/<?= $value['user_id'] ?> ">Delete</a>
-                <?php } ?>
-            </td>
-        </tr>
-    <?php } ?>
-</table>
+<div class="paginated list-cards">
+    <?php if (!empty($userList)): ?>
+        <?php foreach ($userList as $user): ?>
+
+            <!-- Start of the User Card -->
+            <div class="card" data-user-id="<?= htmlspecialchars($user['user_id']) ?>">
+
+                <!-- 1. User Details -->
+                <div class="user-details">
+                    <p class="name">
+                        <strong>Id:</strong> <?= htmlspecialchars($user['user_id']); ?><br>
+                        <strong>Name:</strong> <?= htmlspecialchars($user['username']); ?><br>
+                        <strong>eMail:</strong> <?= htmlspecialchars($user['email']); ?>
+                    </p>
+                </div>
+
+                <div class="actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+
+                    <a class="button small-action edit" href="<?= htmlspecialchars($baseUri . 'user/edit/' . $user['user_id']) ?>">Edit</a>
+
+                    <?php if ($user['user_id'] > 1) { ?>
+                        <a class="button small-action delete" href="<?= htmlspecialchars($baseUri . 'user/delete/' . $user['user_id']) ?>">Delete</a>
+                    <?php } ?>
+
+                </div>
+
+            </div>
+
+        <?php endforeach; ?>
+
+    <?php else: ?>
+
+        <p>Keine Benutzer gefunden.</p>
+
+    <?php endif; ?>
+
+</div>
