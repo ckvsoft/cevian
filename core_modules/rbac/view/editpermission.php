@@ -39,9 +39,9 @@
             <textarea style="width: 240px; height: 55px;" id="permDescription" name="permDescription"><?= htmlspecialchars($this->perm['permDescription'] ?? '') ?></textarea><br />
 
             <div style="margin-top:10px;">
-                <button type="submit"><?= empty($this->perm['id']) ? 'Create' : 'Save' ?></button>
+                <button class="button small-action save" type="submit"><?= empty($this->perm['id']) ? 'Create' : 'Save' ?></button>
                 <?php if (!empty($this->perm['id'])) { ?>
-                    <button class="button small-action ajax-delete" type="button" onclick="deletePermission(<?= $this->perm['id'] ?>)">Delete</button>
+                    <button class="button small-action delete" type="button" onclick="deletePermission(<?= $this->perm['id'] ?>)">Delete</button>
                 <?php } ?>
             </div>
         </form>
