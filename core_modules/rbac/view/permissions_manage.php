@@ -47,16 +47,16 @@ $addUrl = BASE_URI . 'rbac/editPermissionSave'; // Ein einziger Save-Endpunkt
             <label for="permKey">Permission Key (z.B. 'user_create')</label>
             <input type="text" name="permKey" id="permKey" class="form-control" required><br />
 
-            <label for="permName">Display Name (z.B. 'Benutzer erstellen')</label>
+            <label for="permName">Display Name (z.B. 'Create User')</label>
             <input type="text" name="permName" id="permName" class="form-control" required><br />
 
             <label for="permDescription">Description</label>
             <textarea style="width: 240px; height: 55px;" name="permDescription" id="permDescription" class="form-control"></textarea><br />
 
-            <button type="submit" class="btn btn-success" id="submitPermButton">
+            <button type="submit" class="button small-action save" id="submitPermButton">
                 <i class="fas fa-plus"></i> Add Permission
             </button>
-            <button type="button" class="btn btn-default" id="cancelPermButton" style="display:none;">
+            <button type="button" class="button small-action cancel" id="cancelPermButton" style="display:none;">
                 Cancel Edit
             </button>
         </form>
@@ -66,7 +66,7 @@ $addUrl = BASE_URI . 'rbac/editPermissionSave'; // Ein einziger Save-Endpunkt
 <fieldset style="margin-top: 30px;">
     <legend>Existing Permissions</legend>
     <div id="permissionListContainer"
-         class="ajax-list paginated"
+         class="ajax-list"
          data-list="<?= $listUrl ?>">
         <p>Loading...</p>
     </div>
