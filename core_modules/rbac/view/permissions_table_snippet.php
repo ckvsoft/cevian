@@ -25,7 +25,7 @@
 
 /**
  * View Snippet: rbac/permission_table_snippet.php
- * Renders ONLY the Permission Table for AJAX/Pagination.
+ * Renders the Permission List using a responsive DIV card structure for mobile devices.
  */
 if (empty($this->permissions)) :
     ?>
@@ -33,34 +33,57 @@ if (empty($this->permissions)) :
     <?php
     return;
 endif;
+
+// Konstante für die Basis-URI
+$baseUri = BASE_URI;
 ?>
 
-<table class="paginated">
-    <thead>
-        <tr>
-            <th style="white-space: nowrap;">ID</th>
-            <th style="width: 10%; white-space: nowrap;">Key</th>
-            <th style="width: 20%; white-space: nowrap;">Name</th>
-            <th style="width: 60%; white-space: nowrap;">Description</th>
-            <th style="width: 150px; white-space: nowrap;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        foreach ($this->permissions as $perm) :
-            ?>
-            <tr>
-                <td><?= htmlspecialchars($perm['id']) ?></td>
-                <td><?= htmlspecialchars($perm['permKey']) ?></td>
-                <td><?= htmlspecialchars($perm['permName']) ?></td>
-                <td><?= htmlspecialchars($perm['permDescription']) ?></td>
-                <td style="white-space: nowrap;">
-                    <a href="<?= BASE_URI ?>rbac/editPermission/<?= $perm['id'] ?>"
-                       class="small-action edit-permission">
-                        Edit
-                    </a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="list-cards">
+    <?php foreach ($this->permissions as $perm) : ?>
+
+        <!-- Start of Permission Card -->
+        <div class="card permission-card" data-perm-id="<?= htmlspecialchars($perm['id']) ?>">
+
+            <!-- 1. Permission Details Group -->
+            <div class="permission-details">
+
+                <!-- ID Line -->
+                <p class="detail-line">
+                    <strong>ID:</strong> <?= htmlspecialchars($perm['id']) ?>
+                </p>
+
+                <!-- Key Line -->
+                <p class="detail-line">
+                    <strong>Key:</strong> <?= htmlspecialchars($perm['permKey']) ?>
+                </p>
+
+                <!-- Name Line -->
+                <p class="detail-line">
+                    <strong>Name:</strong> <?= htmlspecialchars($perm['permName']) ?>
+                </p>
+
+                <!-- Description Line -->
+                <p class="detail-line">
+                    <strong>Description:</strong> <?= htmlspecialchars($perm['permDescription']) ?>
+                </p>
+
+            </div>
+            <!-- End .permission-details -->
+
+            <!-- 2. Actions Group (Stacked Buttons for mobile editing) -->
+            <!-- Inline style ensures buttons are stacked vertically and sized correctly -->
+            <div class="actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+
+                <!-- Edit Button (Width limited to 150px) -->
+                <a class="button small-action edit"
+                   style="width: 150px; text-align: center;"
+                   href="<?= htmlspecialchars($baseUri . 'rbac/editPermission/' . $perm['id']) ?>">Edit</a>
+
+            </div>
+            <!-- End .actions -->
+
+        </div>
+        <!-- End of Permission Card -->
+
+    <?php endforeach; ?>
+</div>
