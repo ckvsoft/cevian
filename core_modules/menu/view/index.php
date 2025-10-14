@@ -22,8 +22,8 @@
             <input type="hidden" name="is_public" value="-1">
             <input class="checkbox" type="checkbox" name="is_public" value="1"><br />
             <br /><br />
-            <input type="submit">
-            <input type="button" onclick="javascript:window.location = '<?php echo BASE_URI; ?>menu';" value="Cancel">
+            <input class="button small-action save" type="submit">
+            <input class="button small-action cancel" type="button" onclick="javascript:window.location = '<?php echo BASE_URI; ?>menu';" value="Cancel">
         </form>
     </div>
 </fieldset>
