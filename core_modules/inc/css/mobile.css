@@ -1,208 +1,685 @@
 *, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td {
-    margin:0;
-    padding:0
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .container {
-    /*    width: 100%;*/
-    margin: auto;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
 }
 
-
 /************************************************************************************
-GENERAL
+GENERAL & TYPOGRAPHY
 *************************************************************************************/
 body {
-    font: 18px/120% Arial, Helvetica, sans-serif;
-    text-align: center;
-    background-color: #EAEAEA;
-    color: black;
-    padding-top: 140px;
-    padding-bottom: 40px;
-    width: auto;
-    margin: auto;
+    background: #353535;
+    color: #FFFFFF;
+    font-family: "Lucida Grande",Verdana,Arial,sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: left;
+    padding-top: 60px;
+    /* FOOTER FIX: Increased padding for fixed footer clearance */
+    padding-bottom: 120px;
+    margin: 0;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 img {
-    width: 100%;
+    max-width: 100%;
     height: auto;
 }
 
-.fixed-header, .fixed-footer{
-    z-index: 5;
-    position: fixed;
-    background: #000000;
-    padding: 10px 0;
-    color: #fff;
+a {
+    color: #E84C11;
+    text-decoration: none;
+}
+a:hover {
+    color: #FFFFFF;
 }
 
+h1, h2, h3, h5, h6 {
+    color: #E84C11;
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 10px 0;
+    padding: 0 10px;
+}
+
+header {
+    content: " ";
+    display: block;
+}
+
+/* ====================================================================
+    STRUCTURAL & LAYOUT
+    ==================================================================== */
+
+.image, .body {
+    float: none;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.row:after {
+    content: "";
+    display: none;
+}
+
+#flex-container {
+    position: static;
+    display: block;
+    width: 100%;
+    border-spacing: 0;
+    padding: 0;
+}
+
+/* ====================================================================
+    FIXED HEADER & FOOTER
+    ==================================================================== */
+.fixed-header, .fixed-footer{
+    z-index: 50;
+    width: 100%;
+    position: fixed;
+}
 
 .fixed-header{
     background-color: #333333;
     top: 0;
+    padding: 10px;
+    border-bottom: 5px solid #e84c11;
     text-align: left;
+    /* MENU OVERFLOW FIX */
+    overflow-x: hidden;
 }
 
 .fixed-footer{
-    background-color: #333333;
     bottom: 0;
-    width: 100%;
+    background: #353535;
+    text-align: center;
+    padding: 10px;
 }
 
 .fixed {
-    position: fixed;
-    top: 65px;
-    margin-left: 60px;
+    position: static;
+    margin-left: 0;
+    top: auto;
 }
 
 .logo {
-    text-align: left;
+    padding: 0 10px;
 }
 
-a {
-    text-decoration: none;
-    color: #39C;
-}
-h1, h2 {
-    line-height: 120%;
-    margin: 0 0 5px 5px;
-    /*    margin: 0 0 10px; */
-    /*    color: #000; */
-}
-header {
-    content: " ";
-    display: table;
+#statusmessage {
+    bottom: 40px;
+    margin-bottom: 0;
+    padding: 10px;
 }
 
-input {
-    width: 250px; /* When specifying this, you can use both px and % */
-}
+/* ====================================================================
+    NAVIGATION (Hamburger Menu / Top Nav Structure)
+    ==================================================================== */
 
-textarea {
-    width: 250px;
-}
-/************************************************************************************
-STRUCTURE
-*************************************************************************************/
-
-h2.pagetitle {
-    color: #e84c11;
-    font-size: 18px;
-    padding: 0 0 15px;
-    text-align: left;
-
-    /*    width: 580px;*/
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-form br {
-    clear: left;
-}
-
-form label {
-    float: left;
-    width: 100px;
-    margin: 9px 0 0;
-    text-align: right;
-}
-
-form input, form select {
-    margin: 5px 0 0 10px;
-    border: 2px solid #E5E5E5;
-    padding: 4px 6px;
-    flex-basis: 100%;
-    margin: 10px;
-}
-
-.formbox {
-    width: 100% !important;
-}
-
-.imagebox {
-    width: 100% !important;
-    float: left;
-}
-
-.right {
-    text-align: right;
-    margin-right: 25px;
-    margin-left: 10px;
-}
-
-/* navigation */
-/* Hamburger-Menü-Styles */
+/* Hamburger Trigger */
 .hamburger-menu {
-    display: block;
+    display: block !important;
     cursor: pointer;
-    padding: 15px;
-    position: fixed;
-    top: 90px;
-    left: 0;
-    z-index: 2;
+    padding: 10px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    left: auto;
+    z-index: 9999 !important;
+    visibility: visible !important;
 }
 
+/* Bars in Hamburger */
 .bar {
     width: 25px;
     height: 3px;
-    background-color: #000;
-    margin: 5px 0;
+    background-color: #FFFFFF !important;
+    margin: 4px 0;
+    visibility: visible !important;
 }
 
-/* Menü-Styles */
-/*
-nav {
-    background-color: #fff;
-    padding: 15px;
-    position: relative;
-    z-index: 1;
-}
-*/
+/* The actual navigation menu */
 .topnav {
     display: none;
     position: fixed;
-    top: 140px;
+    top: 65px;
     left: 0;
     right: 0;
-    background-color: #233853;
+    bottom: 0;
+    background-color: #000000;
     text-align: left;
+    z-index: 55;
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    bottom: 120px;
 }
 
-.topnav li {
-    display: block;
-    margin: 2px;
-}
-
-/* Anzeigen des Menüs auf Klick */
+/* Class added via JS to show the menu */
 .open {
     display: block !important;
 }
 
+.topnav li {
+    display: block;
+    margin: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.topnav li a {
+    color: #FFFFFF;
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    /* MENU OVERFLOW FIX */
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.topnav li a:hover {
+    background-color: #1a1a1a;
+}
+
 .active {
-    background-color: beige;
+    background: #e84c11;
+    color: #fff;
 }
 
-/* for gallery3 */
-article {
+.topnav li.active.has-child {
+    background-color: transparent !important;
+}
+
+.topnav li.active:not(.has-child) {
+    background-color: #e84c11 !important;
+    color: #fff !important;
+}
+
+.topnav li.active.has-child > a {
+    color: #FFFFFF !important;
+    background-color: transparent !important;
+}
+
+.topnav li.active.has-child a {
+    background-color: transparent !important;
+}
+
+/* ====================================================================
+    FORM & INPUTS
+    ==================================================================== */
+
+h2.pagetitle {
+    color: #e84c11;
+    font-size: 18px;
+    padding: 0 0 15px 10px;
+    text-align: left;
+}
+
+form {
+    display: block;
+    width: 100%;
+    padding: 10px;
+}
+
+form br {
+    clear: both;
+}
+
+form label,
+form input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+form select,
+textarea {
+    float: none;
+    clear: both;
+    display: block;
+    width: 100%;
+    margin: 5px 0 10px 0;
+    text-align: left;
+}
+
+form label {
+    text-align: left;
+    padding-right: 0;
+    font-weight: bold;
+}
+
+form input, form select, textarea {
+    border: 2px solid #E5E5E5;
+    padding: 4px 6px;
+    flex-basis: 100%;
+    color: black;
+}
+
+.formbox, .imagebox {
+    width: 100% !important;
+    float: none;
+}
+
+.right {
+    text-align: right;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.form-group {
+    display: block;
+    grid-template-columns: none;
+    grid-gap: 0;
+    margin-bottom: 15px;
+    width: 100%;
+    clear: both;
+}
+
+.form-group label {
+    text-align: left;
+    width: 100%;
+    padding-right: 0;
+    margin: 0 0 5px 0;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    margin: 0;
+}
+
+.checkbox {
+    width: auto;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.combobox {
+    width: 100%;
+    float: none;
+}
+
+/* ====================================================================
+    BUTTONS (Colors restored)
+    ==================================================================== */
+.button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 10px 15px;
+    font-size: 28px;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+    color: #000000;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 3px 3px black;
+    margin: 10px 0;
+    float: none;
+    background-color: #f0f0f0;
+}
+
+.button span {
+    cursor: pointer;
+    display: inline-block;
     position: relative;
+    transition: 0.5s;
 }
 
-#ajax-gallery li {
-    list-style: none;
-}
-
-#ajax-pager {
+.button span:after {
+    content: '\00bb';
     position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
 }
 
-#ajax-pager ul {
+.button:hover span {
+    padding-right: 20px;
+}
+
+.button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.button:active {
+    box-shadow: 4px 4px #666;
+    transform: translateY(4px);
+}
+
+
+/* Small-Action Buttons */
+.button.small-action, a.small-action {
+    display: inline-block;
+    width: 100%;
+    font-size: 14px;
+    padding: 8px 12px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    float: none;
+    box-shadow: 2px 2px black;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+    /* FIX: Added dark background for visibility against white text on mobile/generic small actions */
+    background-color: #555555; 
+    text-align: center;
+}
+
+/* Edit-Button (Blue) */
+.button.small-action.edit {
+    background-color: #004080;
+}
+.button.small-action.edit:hover {
+    background-color: #0059b3;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Delete-Button (Red) */
+.button.small-action.delete {
+    background-color: #cc0000;
+}
+.button.small-action.delete:hover {
+    background-color: #ff3333;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Save-Button (Green) */
+.button.small-action.save {
+    background-color: #008000;
+}
+.button.small-action.save:hover {
+    background-color: #009000;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Cancel-Button (Grey) */
+.button.small-action.cancel {
+    background-color: #555555;
+}
+.button.small-action.cancel:hover {
+    background-color: #556655;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+.button.small-action.yellow {
+    background-color: #fbf799;
+    color: black;
+}
+
+.button.small-action.yellow:hover {
+    background-color: #fff85d;
+    color: black;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+.button.small-action.blue {
+    background-color: #95c9fd;
+    color: black;
+}
+
+.button.small-action.blue:hover {
+    background-color: #3499fb;
+    color: black;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+/* Active Styles for Small-Actions */
+.button.small-action:active, a.small-action:active {
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
+}
+
+
+/* ====================================================================
+    PAGINATION STYLES
+    ==================================================================== */
+.pagination {
+    /* Ensures spacing above the element (default: 10px) */
+    margin-top: 10px; 
+    /* Provides necessary clearance below the pagination element (20px as required) */
+    margin-bottom: 20px; 
+    /* Ensures it uses the full width for consistency */
+    width: 100%; 
+    /* Ensures no horizontal overflow */
+    overflow-x: hidden;
+    /* Ensures button text is aligned */
+    text-align: left;
+    /* Adds internal padding to align with other content */
+    padding: 0 10px; 
+}
+
+/* ====================================================================
+    TABLES & GRIDS
+    ==================================================================== */
+
+table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
     white-space: nowrap;
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 8px;
+}
+
+.page-content .grid {
+    display: block;
+    grid-template-columns: none;
+    grid-gap: 0;
+}
+
+.page-content .grid > article {
+    display: block;
+    width: 100%;
+    min-height: auto;
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.image-grid {
+    grid-template-columns: repeat(1, 1fr) !important;
+    gap: 0.8rem;
+    padding: 0 5px;
+}
+
+.media-item {
+    height: 250px !important;
+    border-radius: 4px;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.media-item.media-item-manager-overlay img {
+    height: 200px !important;
+    margin-bottom: 5px;
+}
+
+/* ============================================================
+    MANAGER-VIEW ADJUSTMENTS (Table to Card View)
+    ============================================================ */
+
+#rescan-container fieldset {
+    display: block;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#rescan-container div[data-form] {
+    display: block !important;
+    width: 100%;
+    margin-right: 0 !important;
+    margin-bottom: 15px;
+}
+
+#progress-feedback-container-3,
+#progress-feedback-container-4 {
+    width: 100% !important;
+    text-align: left !important;
+    padding-right: 50px !important;
+}
+
+.paginated {
+    overflow-x: hidden;
+    width: 100%;
+    padding: 0 10px;
+}
+
+/* TABLE FIXES (Only for legacy tables that still exist) */
+.paginated table {
+    /* Ensures content can wrap inside the card view */
+    white-space: normal !important;
+    border: none;
+    width: 100%;
+}
+
+.paginated table thead {
+    display: none;
+}
+
+.paginated table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #404040;
+    padding: 10px;
+    /* OVERFLOW FIX: Allow long text/paths to break */
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.paginated table td {
+    display: block;
+    width: 100%;
+    border: none;
+    padding: 5px 0;
+    text-align: left !important;
+    /* OVERFLOW FIX: Allow long text/paths to break */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Action Cell Fix (Legacy Table Structure) */
+.paginated table tbody tr td:last-child {
+    white-space: normal !important;
+    padding-top: 10px;
+    border-top: 1px dashed #555;
+    /* Removed Flexbox to simplify stacking */
+    display: block;
+    width: 100% !important;
+}
+
+/* Action Button Fix (Legacy Table Structure) */
+.paginated table td:last-child a.button.small-action,
+.paginated table td:last-child form button {
+    display: block !important;
+    width: 100% !important;
+    margin: 5px 0 !important;
+    /* Ensures no float issues */
+    float: none !important;
+    /* Ensures padding/border doesn't cause overflow */
+    box-sizing: border-box !important;
+}
+
+.list-cards {
+    /* CARD CENTERING FIX */
+    max-width: 600px; /* Optional: Sets maximum card width for desktop */
+    margin: 0 auto; /* Centers the whole card container */
+    padding: 0 10px;
+    overflow: hidden;
+}
+
+.card {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #404040;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.details {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #555;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column; /* Force vertical stacking */
+    gap: 10px; /* Space between buttons */
+}
+
+.actions a.button.small-action,
+.actions form button {
+    /* Ensures buttons take full width and stack */
+    display: block;
+    width: 100%;
+    margin: 0; /* Remove default button margins */
+}
+
+
+/* ============================================================
+    FINAL WIDTH OVERFLOW FIX
+    ============================================================ */
+
+/* 1. Fieldset/Page-Content Containment */
+fieldset, .page-content {
+    box-sizing: border-box !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    width: 100% !important;
+}
+
+/* 2. Grid-Korrektur: Stacking */
+.backup-content-wrapper .form-group {
+    grid-template-columns: 1fr;
+}
+
+/* 3. Grid Cell Fix: min-width: 0 is CRITICAL for Progress Bar and Button Containment */
+.backup-content-wrapper .form-group > div {
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 4. Element Correction: Button and Progress Bar */
+.backup-content-wrapper .form-group > div button,
+.backup-content-wrapper .form-group > div progress {
+    display: block;
+    float: none;
+    max-width: 100%;
+    width: 100%;
+}
+
+
+/* Optional: Two columns for slightly wider mobile devices/small tablets */
+@media screen and (min-width: 480px) {
+    .image-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
 }
