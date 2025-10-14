@@ -13,8 +13,8 @@
                 <option value="owner" <?php if ($this->user[0]['role'] == 'owner') echo 'selected'; ?>>Owner</option>
             </select>
             <br /><br />
-            <input type="submit">
-            <input type="button" onclick="javascript:window.location = '<?php echo BASE_URI; ?>user';" value="Cancel">
+            <input class="button small-action save" type="submit">
+            <input class="button small-action cancel" type="button" onclick="javascript:window.location = '<?php echo BASE_URI; ?>user';" value="Cancel">
         </form>
     </div>
 </fieldset>
