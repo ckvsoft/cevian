@@ -41,7 +41,6 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
         $instructions = [];
 
         foreach ($contentList as $item) {
-// Logic: Determine the correct partial path based on the item type.
             $partialPath = match ($item['type'] ?? 'media') {
                 'album' => 'gallery/partials/album-item',
                 'image', 'media' => 'gallery/partials/image-item',
@@ -50,7 +49,6 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             };
 
             if ($partialPath) {
-// Collect the instruction (view path and data)
                 $instructions[] = [
                     'view' => $partialPath,
                     'data' => ['item' => $item]
@@ -77,7 +75,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             $subAlbumNames = $model->getSubAlbums($albumPath);
             foreach ($subAlbumNames as $name) {
                 $fullAlbumPath = empty($albumPath) ? $name : $albumPath . '/' . $name;
-                $thumb = $model->getRandomThumbnailUrl($fullAlbumPath, true) ?? BASE_URI . 'inc/images/folder_placeholder.jpg';
+                $thumb = $model->getRandomThumbnailUrl($fullAlbumPath, true) ?? BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
                 $contentList[] = [
                     'type' => 'album',
