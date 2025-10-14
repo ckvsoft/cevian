@@ -19,8 +19,8 @@ class Backup extends ckvsoft\mvc\BaseController
         $this->renderPage([
             ['view' => '/inc/header', 'data' => ['title' => 'Backup']],
             ['view' => 'backup/index', 'data' => [
-                    'images' => isset($imagesBackup[0]['modified']) ? $imagesBackup[0]['modified'] : null,
-                    'database' => isset($databaseBackup[0]['modified']) ? $databaseBackup[0]['modified'] : null,
+                    'images' => isset($imagesBackup) ? $imagesBackup : null,
+                    'database' => isset($databaseBackup) ? $databaseBackup : null,
                 ]],
             ['view' => '/inc/footer'],
         ]);
@@ -110,9 +110,6 @@ class Backup extends ckvsoft\mvc\BaseController
 
             $this->model = $this->loadModel('backup', null, $data['directory'], "backup/images");
             $result = $this->model->backupImages(1);
-
-            // Logging
-            error_log("Result: " . print_r($result, true));
 
             // JSON-Ausgabe an den Client
             if ($result === false) {
