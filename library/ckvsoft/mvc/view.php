@@ -13,8 +13,11 @@ class View extends \stdClass
 
     public function __construct(bool $debugCssJsAnalyse = false)
     {
-        $user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
-        $this->mobile = (strpos($user_agent ?? '', 'Mobile') !== false);
+        $http_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $user_agent = strip_tags($http_user_agent);
+        if (strpos($user_agent, 'Mobile') !== false) {
+            $this->mobile = true;
+        }
         $this->cssjsDebug = $debugCssJsAnalyse;
     }
 
