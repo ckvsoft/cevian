@@ -2,13 +2,11 @@
 
 namespace ckvsoft\mvc;
 
-use ckvsoft\Request;
 use ckvsoft\mvc\Config;
 
 class BaseController extends \ckvsoft\mvc\Controller
 {
 
-    protected Request $request;
     protected string $baseCss;
     protected string $baseScripts;
     protected object $menuHelper;
@@ -16,12 +14,6 @@ class BaseController extends \ckvsoft\mvc\Controller
     public function __construct()
     {
         parent::__construct();
-
-        // Request kapseln
-        $this->request = new Request();
-
-        // Mobile-Erkennung
-        $this->mobile = $this->request->isMobile();
     }
 
     /**
