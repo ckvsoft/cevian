@@ -105,13 +105,15 @@ class Manager extends BaseController
             $data = $this->input->fetch();
 
             if (!empty($data)) {
-                // POST submission detected - attempt to update
                 $ownerId = $data['owner_user_id'] === '' ? null : (int) $data['owner_user_id'];
+                $updateData = [
+                    'owner_user_id' => $ownerId,
+                    'permissions_level' => (int) $data['permissions_level']
+                ];
 
-                $success = $managerModel->updateAlbumPermissions(// DELEGATION
+                $success = $managerModel->updateAlbumPermissions(
                         $data['album_id'],
-                        $ownerId,
-                        (int) $data['permissions_level']
+                        $updateData
                 );
 
                 if ($success) {
