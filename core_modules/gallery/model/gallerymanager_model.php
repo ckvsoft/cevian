@@ -269,6 +269,8 @@ class GalleryManager_Model extends Gallery_Model
     public function getAvailableAlbumPaths(): array
     {
         $albumPaths = [];
+        $albumPaths[] = '';
+
         try {
             if (!is_dir($this->basePath)) {
                 return [];
@@ -318,6 +320,9 @@ class GalleryManager_Model extends Gallery_Model
             $progress = new \ckvsoft\Progress(0, $progressId, $this->db);
             $progress->updateProgress(0);
         }
+
+        $rootPathInDb = '';
+        $this->ensureRootAlbumExists($rootPathInDb, $currentUserId);
 
         $fsPaths = $this->getAvailableAlbumPaths();
 
@@ -410,6 +415,43 @@ class GalleryManager_Model extends Gallery_Model
         }
 
         return $results;
+    }
+
+    /**
+     * Ensures the primary album root directory (gallery base path) is registered as an album
+     * in the gallery_albums table, if it's not already present.
+     *
+     * @param string $rootAlbumPath The path representation for the root album (e.g., '/').
+     * @param int $userId The user ID to assign as the creator/owner.
+     * @return void
+     */
+    private function ensureRootAlbumExists(string $rootAlbumPath, int $userId): void
+    {
+        $this->db->beginTransaction();
+
+        try {
+            // 1. Prüfen, ob der Root-Eintrag existiert
+            $rootAlbumExists = $this->db->selectOne(
+                    "SELECT album_id FROM gallery_albums WHERE album_path = :path",
+                    ['path' => $rootAlbumPath]
+            );
+
+            if (!$rootAlbumExists) {
+                // 2. Erstellen des Root-Eintrags
+                $this->db->insertUpdate('gallery_albums', [
+                    'album_path' => $rootAlbumPath,
+                    'title' => 'Root Gallery',
+                    'permissions_level' => 2,
+                    'owner_user_id' => $userId,
+                ]);
+                error_log("INFO: Root Album ('{$rootAlbumPath}') entry created in gallery_albums.");
+            }
+
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            error_log("ERROR: Failed to ensure Root Album existence: " . $e->getMessage());
+        }
     }
 
     /**
