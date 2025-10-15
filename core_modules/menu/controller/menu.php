@@ -113,33 +113,12 @@ class Menu extends ckvsoft\mvc\BaseController
 
     public function edit($id)
     {
-        $this->view->title = 'Edit Menuentry';
         $this->model = $this->loadModel("menu");
-        $this->view->menuList = $this->model->menuSingleList($id);
-        $menuhelper = $this->loadHelper("menu/menu");
-        $params = [
-            'method' => 'getCss',
-            'args' => ['/inc/css/style.css']
-        ];
-
-        if ($this->mobile) {
-            $params = [
-                'method' => 'getCss',
-                'args' => ['/inc/css/mobile.css']
-            ];
-        }
-
-        $css = "<style>" . $this->loadHelper("css", $params) . "</style>";
-
-        $script = '<script>' . $this->loadScript("/inc/js/ajax-list-pagination.js");
-        $script .= $this->loadScript("/inc/js/menuscript.js");
-        $script .= $this->loadScript("/inc/js/x-notify.js") . '</script>';
-
-        $menuhelper = $this->loadHelper("menu/menu");
-        $this->view->render('inc/header', ['base_css' => $css, 'base_scripts' => $script, 'menuitems' => $menuhelper->getMenu(0)]);
-
-        $this->view->render('menu/edit', ['script' => $script]);
-        $this->view->render('inc/footer');
+        $this->renderPage([
+            ['view' => '/inc/header', 'data' => ['title' => 'Edit Menuentry']],
+            ['view' => 'menu/edit', 'data' => ['menuList' => $this->model->menuSingleList($id)]],
+            ['view' => '/inc/footer'],
+        ]);
     }
 
     public function editSave($id)
