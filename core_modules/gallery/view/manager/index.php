@@ -92,6 +92,7 @@ $message = $this->data['message'] ?? null;
             <thead>
                 <tr>
                     <th>Album Path Name</th>
+                    <th>Title</th>
                     <th>User Name</th>
                     <th>Role</th>
                     <th>Views</th>
@@ -107,8 +108,12 @@ $message = $this->data['message'] ?? null;
                     <?php foreach ($this->albums as $album): ?>
                         <tr>
                             <td>
-                                <span class="mobile-label">Album Path Name:</span>
-                                <?= htmlspecialchars($album['album_path']) ?>
+                                <span class="mobile-label">Album Path:</span>
+                                <?= htmlspecialchars($album['album_path'] === '' ? '/' : $album['album_path']) ?>
+                            </td>
+                            <td>
+                                <span class="mobile-label">Title:</span>
+                                <?= htmlspecialchars($album['title'] ?? 'N/A') ?>
                             </td>
                             <td>
                                 <span class="mobile-label">User Name:</span>
