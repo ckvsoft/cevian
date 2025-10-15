@@ -344,8 +344,7 @@ class GalleryManager_Model extends Gallery_Model
                 $data = [
                     'album_path' => trim($path, '/'),
                     'permissions_level' => 2,
-                    'owner_user_id' => $ownerId,
-                    'owner_user_name' => ckvsoft\Auth::g
+                    'owner_user_id' => $ownerId
                 ];
 
                 $this->db->insert('gallery_albums', $data);
