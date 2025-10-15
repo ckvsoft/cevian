@@ -23,10 +23,16 @@ class Controller extends \stdClass
      */
     public function __construct()
     {
-        $user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_UNSAFE_RAW);
-        $user_agent = $user_agent !== null ? strip_tags($user_agent) : '';
-        if (strpos($user_agent, 'Mobile') !== false)
+        /**
+          $user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_UNSAFE_RAW);
+          $user_agent = $user_agent !== null ? strip_tags($user_agent) : '';
+         *
+         */
+        $http_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $user_agent = strip_tags($http_user_agent);
+        if (strpos($user_agent, 'Mobile') !== false) {
             $this->mobile = true;
+        }
     }
 
     public function loadModel($model, $module = null, ...$params)
