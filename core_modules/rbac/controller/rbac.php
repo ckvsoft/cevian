@@ -54,7 +54,7 @@ class Rbac extends BaseController
         $roles = $this->acl->getAllRoles('full');
 
         $this->renderPage([
-            ['view' => '/inc/header', 'data' => ['title' => 'Role Management']],
+            ['view' => '/inc/header', 'data' => ['title' => _('Role Management')]],
             ['view' => 'rbac/index', 'data' => ['roles' => $roles]],
             ['view' => '/inc/footer'],
         ]);
@@ -89,7 +89,7 @@ class Rbac extends BaseController
             $roleId = isset($data['role_id']) && is_numeric($data['role_id']) ? (int) $data['role_id'] : null;
 
             if ($roleName === '') {
-                throw new \Exception("Role name cannot be empty.");
+                throw new \Exception(_("Role name cannot be empty."));
             }
 
             $rbac = $this->getRbacModel();
@@ -140,22 +140,23 @@ class Rbac extends BaseController
         // NOTE: $rbac->getRolePerms() returns [permID => value (0, 1, or X)]
         $assignedPerms = $rbac->getRolePerms($id);
 
-        // NEU: Effektive Rechte holen (berücksichtigt Vererbung)
-        // Ergebnis: [permID => true/false]
+        // NEW: Get effective rights (considers inheritance)
+        // Result: [permID => true/false]
         $effectivePerms = $this->acl->getRoleEffectivePermissions($id);
 
         $this->renderPage([
-            ['view' => '/inc/header', 'data' => ['title' => 'Edit Role']],
+            ['view' => '/inc/header', 'data' => ['title' => _('Edit Role')]],
             ['view' => 'rbac/editrole', 'data' => [
                     'role' => $roleData,
                     'roles' => $roles
                 ]],
             // Permissions partial (separate form)
             ['view' => 'rbac/permissions', 'data' => [
-                    'allPerms' => $rbac->getAllPermissions('full'), // Alle definierten Rechte
-                    'assigned' => $assignedPerms, // Direkt zugewiesen ('0', '1', 'X')
-                    'effective' => $effectivePerms, // NEU: Effektiver Wert (true/false)
-                    'role' => $roleData
+                    'allPerms' => $rbac->getAllPermissions('full'), // All defined permissions
+                    'assigned' => $assignedPerms, // Directly assigned ('0', '1', 'X')
+                    'effective' => $effectivePerms, // NEW: Effective value (true/false)
+                    'role' => $roleData,
+                    'redirect' => "rbac/editRole/{$id}"
                 ]],
             ['view' => '/inc/footer'],
         ]);
@@ -180,7 +181,7 @@ class Rbac extends BaseController
             $parentId = isset($data['parentId']) && $data['parentId'] !== '' ? (int) $data['parentId'] : null;
 
             if ($roleName === '')
-                throw new \Exception("Role name cannot be empty.");
+                throw new \Exception(_("Role name cannot be empty."));
 
             $rbac = $this->getRbacModel();
 
@@ -214,7 +215,7 @@ class Rbac extends BaseController
     }
 
     // ---
-    ## 3. PERMISSION ACTIONS (CRUD)
+    // ## 3. PERMISSION ACTIONS (CRUD)
     // ---
 
     /**
@@ -235,7 +236,7 @@ class Rbac extends BaseController
         }
 
         $this->renderPage([
-            ['view' => '/inc/header', 'data' => ['title' => $id ? 'Edit Permission' : 'New Permission']],
+            ['view' => '/inc/header', 'data' => ['title' => $id ? _('Edit Permission') : _('New Permission')]],
             ['view' => 'rbac/editpermission', 'data' => ['perm' => $perm]],
             ['view' => '/inc/footer'],
         ]);
@@ -243,14 +244,14 @@ class Rbac extends BaseController
 
     public function permissions($roleId = null): void
     {
-        // Wir rendern nur den Container. Die eigentliche Liste wird
-        // per loadList() durch den JavaScript-Code nachgeladen.
+        // We only render the container. The actual list is
+        // loaded subsequently by the JavaScript code via loadList().
 
         $this->renderPage([
-            ['view' => '/inc/header', 'data' => ['title' => 'Permissions Definition']],
-            // Der Haupt-View-Container, der die AJAX-Liste und das Add/Edit-Formular hält.
+            ['view' => '/inc/header', 'data' => ['title' => _('Permissions Definition')]],
+            // The main view container, which holds the AJAX list and the Add/Edit form.
             ['view' => 'rbac/permissions_manage', 'data' => [
-                    'roleId' => $roleId // Kann für den Back-Link verwendet werden
+                    'roleId' => $roleId // Can be used for the back link
                 ]],
             ['view' => '/inc/footer'],
         ]);
@@ -267,18 +268,18 @@ class Rbac extends BaseController
         $this->view->render('rbac/permissions_table_snippet', ['permissions' => $permissions]);
     }
 
-    // ... editPermission bleibt ungenutzt, da wir den Single-Page-View verwenden ...
+    // ... editPermission remains unused because we are using the Single-Page View ...
 
     /**
      * Saves permission definition (create or update) via AJAX.
-     * Stellt sicher, dass die Antwort 'perm_id' enthält.
+     * Ensures the response contains 'id'.
      */
     public function editPermissionSave(): void
     {
         $input = new Input();
         try {
-            // ... (Ihre vorhandene Input- und Daten-Extraktions-Logik) ...
-            $input->post('id', false) // Verwende 'id' statt 'perm_id' für Konsistenz im Front-End-Formular
+            // ... (Your existing Input and data extraction logic) ...
+            $input->post('id', false) // Use 'id' instead of 'perm_id' for consistency in the front-end form
                     ->post('permName', true)
                     ->post('permKey', true)
                     ->post('permDescription', false)
@@ -290,10 +291,10 @@ class Rbac extends BaseController
             $permName = trim($data['permName']);
             $permKey = trim($data['permKey']);
             $permDesc = $data['permDescription'] ?? '';
-            $permId = (int) ($data['id'] ?? 0); // Hole ID aus 'id' Feld
+            $permId = (int) ($data['id'] ?? 0); // Get ID from 'id' field
 
             if (empty($permName) || empty($permKey)) {
-                throw new \Exception("Permission name and key are required.");
+                throw new \Exception(_("Permission name and key are required."));
             }
 
             $updateData = [
@@ -321,7 +322,7 @@ class Rbac extends BaseController
                 $resultId = $result;
             }
 
-            Output::success(['id' => $resultId]); // WICHTIG: Sende die ID zurück
+            Output::success(['id' => $resultId]); // IMPORTANT: Send the ID back
         } catch (\Exception $e) {
             Output::error(['general' => $e->getMessage()]);
         }
@@ -349,7 +350,7 @@ class Rbac extends BaseController
     }
 
     // ---
-    ## 4. ASSIGNMENT ACTIONS
+    // ## 4. ASSIGNMENT ACTIONS
     // ---
 
     /**
@@ -366,7 +367,7 @@ class Rbac extends BaseController
 
             $roleId = (int) ($data['role_id'] ?? 0);
             if ($roleId <= 0)
-                throw new \Exception("Invalid role id");
+                throw new \Exception(_("Invalid role id"));
 
             $perms = [];
             foreach ($data as $k => $v) {
