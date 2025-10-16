@@ -84,7 +84,7 @@ class GalleryManager_Model extends Gallery_Model
             $fullPath = $this->basePath . $album['album_path'];
 
             try {
-                // Nur oberstes Verzeichnis scannen, kein rekursiv
+                // Scan top level directory only, not recursive
                 $dirIterator = new \DirectoryIterator($fullPath);
 
                 foreach ($dirIterator as $item) {
@@ -96,18 +96,18 @@ class GalleryManager_Model extends Gallery_Model
                     $ext = strtolower($origExt);
                     $nameNoExt = $item->getBasename('.' . $origExt);
 
-                    // Thumbnails überspringen
+                    // Skip thumbnails
                     if (str_ends_with($nameNoExt, '_thumb')) {
                         continue;
                     }
 
-                    // Nur unterstützte Bild-/Video-Extensions zählen
+                    // Count only supported image/video extensions
                     if (in_array($ext, $imageExt) || in_array($ext, $videoExt)) {
                         $totalCount++;
                     }
                 }
             } catch (\Exception $e) {
-                // Directory nicht lesbar, ignorieren
+                // Directory not readable, ignore
                 error_log("Cannot read directory {$fullPath}: " . $e->getMessage());
             }
         }
@@ -169,7 +169,7 @@ class GalleryManager_Model extends Gallery_Model
                 $ext = strtolower($origExt);
                 $nameNoExt = $item->getBasename('.' . $origExt);
 
-                // Thumbnails und nicht unterstützte Dateitypen überspringen
+                // Skip thumbnails and unsupported file types
                 if (str_ends_with($nameNoExt, '_thumb')) {
                     continue;
                 }
@@ -179,7 +179,7 @@ class GalleryManager_Model extends Gallery_Model
 
                 $fileName = $file;
 
-                // Prüfen, ob Datei bereits in DB vorhanden ist
+                // Check if file already exists in DB
                 $existing = $this->db->selectOne(
                         "SELECT id FROM gallery_media_stats WHERE album_id = :aid AND file_name = :file",
                         ['aid' => $albumId, 'file' => $fileName]
@@ -206,7 +206,7 @@ class GalleryManager_Model extends Gallery_Model
 
         $progress->updateProgress();
 
-        // 3. Orphaned DB-Einträge und Thumbnails aufräumen
+        // 3. Clean up orphaned DB entries and thumbnails
         $dbMediaEntries = $this->db->select("SELECT id, album_id, file_name FROM gallery_media_stats");
         error_log("progress current: " . $progress->getCurrent());
 
@@ -315,7 +315,7 @@ class GalleryManager_Model extends Gallery_Model
             'deleted_albums' => [],
         ];
 
-        // 1. Progress Initialisierung (Wenn ID vorhanden)
+        // 1. Progress Initialization (If ID is present)
         if ($progressId !== null) {
             $progress = new \ckvsoft\Progress(0, $progressId, $this->db);
             $progress->updateProgress(0);
@@ -330,7 +330,7 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(30);
         }
 
-        // --- Phase 2: DB-Daten holen und vergleichen (ca. 40%) ---
+        // --- Phase 2: Fetch and compare DB data (approx. 40%) ---
         $dbAlbums = $this->db->select("SELECT album_id, album_path FROM `gallery_albums`");
         $dbPaths = array_column($dbAlbums, 'album_path');
         $dbPathToId = array_column($dbAlbums, 'album_id', 'album_path');
@@ -339,7 +339,7 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(40);
         }
 
-        // --- Phase 3: Neue Alben hinzufügen (ca. 60%) ---
+        // --- Phase 3: Add new albums (approx. 60%) ---
         $pathsToAdd = array_diff($fsPaths, $dbPaths);
 
         foreach ($pathsToAdd as $path) {
@@ -365,7 +365,7 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(60);
         }
 
-        // --- Phase 4: Veraltete Alben löschen (ca. 90%) ---
+        // --- Phase 4: Delete obsolete albums (approx. 90%) ---
         $pathsToDelete = array_diff($dbPaths, $fsPaths);
 
         if (!empty($pathsToDelete)) {
@@ -409,7 +409,7 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(90);
         }
 
-        // 2. Progress Finalisierung (100%)
+        // 2. Progress Finalization (100%)
         if ($progressId !== null) {
             $progress->updateProgress(100);
         }
@@ -430,14 +430,14 @@ class GalleryManager_Model extends Gallery_Model
         $this->db->beginTransaction();
 
         try {
-            // 1. Prüfen, ob der Root-Eintrag existiert
+            // 1. Check if the root entry exists
             $rootAlbumExists = $this->db->selectOne(
                     "SELECT album_id FROM gallery_albums WHERE album_path = :path",
                     ['path' => $rootAlbumPath]
             );
 
             if (!$rootAlbumExists) {
-                // 2. Erstellen des Root-Eintrags
+                // 2. Create the root entry
                 $this->db->insertUpdate('gallery_albums', [
                     'album_path' => $rootAlbumPath,
                     'title' => 'Root Gallery',
@@ -518,21 +518,70 @@ class GalleryManager_Model extends Gallery_Model
     }
 
     /**
-     * Updates the access permissions and/or owner for a specific album ID.
-     * @param int $albumId The ID of the album to update.
-     * @param array $data Associative array containing update fields (e.g., 'permissions_level', 'owner_user_id').
-     * @return bool True on successful update, false otherwise.
+     * Updates the title, access permissions, and/or owner for a specific album.
+     * Executes a single update for the current album (including title) and a subsequent
+     * recursive update for descendant albums (excluding title), if required.
      */
-    public function updateAlbumPermissions(int $albumId, array $data): bool
+    public function updateAlbumPermissions(int $albumId, array $data, array $options = []): bool
     {
-        $allowedFields = ['permissions_level', 'owner_user_id'];
-        $updateData = array_intersect_key($data, array_flip($allowedFields));
+        $allowedFields = ['title', 'permissions_level', 'owner_user_id'];
+        $filteredData = array_intersect_key($data, array_flip($allowedFields));
 
-        if (empty($updateData)) {
+        if (empty($filteredData)) {
+            return true;
+        }
+
+        $success = $this->db->update('gallery_albums', $filteredData, 'album_id = :id', ['id' => $albumId]);
+
+        if (!$success) {
             return false;
         }
 
-        return $this->db->update('gallery_albums', $updateData, 'album_id = :id', ['id' => $albumId]);
+        $applyOwner = $options['apply_owner_to_subfolders'] ?? false;
+        $applyPermissions = $options['apply_permissions_to_subfolders'] ?? false;
+
+        if ($applyOwner || $applyPermissions) {
+
+            // Prepare recursive data (Owner and/or Permissions, but NO title)
+            $updateDataForRecursive = $filteredData;
+            unset($updateDataForRecursive['title']);
+
+            if (!$applyOwner) {
+                unset($updateDataForRecursive['owner_user_id']);
+            }
+            if (!$applyPermissions) {
+                unset($updateDataForRecursive['permissions_level']);
+            }
+
+            if (empty($updateDataForRecursive)) {
+                return (bool) $success;
+            }
+
+            $album = $this->getAlbumById($albumId);
+            if (!$album) {
+                return false;
+            }
+
+            $basePath = trim($album['album_path'], '/');
+
+            if (!empty($basePath)) {
+                // WHERE clause finds only sub-albums, as the path must contain characters after the trailing '/'.
+                $whereCondition = 'album_path LIKE :pathPrefix';
+                $bindings = [
+                    'pathPrefix' => "{$basePath}/%"
+                ];
+
+                try {
+                    // Update only the descendants with the recursive values (Owner/Permissions).
+                    $success = $this->db->update('gallery_albums', $updateDataForRecursive, $whereCondition, $bindings);
+                } catch (\Exception $e) {
+                    error_log("Recursive album update failed: " . $e->getMessage());
+                    return false;
+                }
+            }
+        }
+
+        return (bool) $success;
     }
 
 // ------------------------------------------------------------------
@@ -564,30 +613,27 @@ class GalleryManager_Model extends Gallery_Model
             return null;
         }
 
-        // Füge die URL- und Thumb-Links hinzu (Nutzt die Logik aus Gallery_Model/Manager)
+        // Add URL and thumbnail links (using logic from Gallery_Model/Manager)
         $item['url'] = BASE_URI . 'gallery/media/' . $item['album_path'] . '/' . urlencode($item['file']);
 
-        // Annahme: getMediaThumbLink ist entweder in Gallery_Model oder muss hier implementiert werden.
-        // Da wir von Gallery_Model erben, nutzen wir hier das manuelle Erstellen des Thumb-Links,
-        // analog zur Logik in der getMediaByAlbum Methode.
-
+        // Determine the thumbnail file name
         $pathInfo = pathinfo($item['file']);
         $nameNoExt = $pathInfo['filename'];
         $ext = strtolower($pathInfo['extension']);
 
         $thumbFile = null;
         if (in_array($ext, self::SUPPORTED_IMAGE_EXT)) {
-            // Bilder nutzen die gleiche Extension für den Thumb
+            // Images use the same extension for the thumbnail
             $thumbFile = $nameNoExt . '_thumb.' . $ext;
         } elseif (in_array($ext, self::SUPPORTED_VIDEO_EXT)) {
-            // Videos nutzen den vordefinierten Thumb (z.B. .jpg)
+            // Videos use the predefined thumbnail (e.g., .jpg)
             $thumbFile = $nameNoExt . '_thumb.jpg';
         }
 
         if ($thumbFile) {
             $item['thumburl'] = BASE_URI . 'gallery/media/' . $item['album_path'] . '/' . urlencode($thumbFile);
         } else {
-            // Fallback-Logik, falls kein Thumb-Link ermittelt werden kann
+            // Fallback logic if no thumb link can be determined
             $item['thumburl'] = $item['url'];
         }
 
@@ -603,10 +649,10 @@ class GalleryManager_Model extends Gallery_Model
      */
     public function deleteMediaItem(int $mediaId): bool
     {
-        // TODO: 1. DB-Eintrag holen (um Dateipfade zu ermitteln)
-        // TODO: 2. Hauptdatei und Thumbnail löschen (unlink)
-        // TODO: 3. DB-Eintrag aus gallery_media_stats löschen
-        // Fürs Erste: Dummy-Rückgabe, bis die Logik implementiert ist
+        // TODO: 1. Fetch DB entry (to determine file paths)
+        // TODO: 2. Delete main file and thumbnail (unlink)
+        // TODO: 3. Delete DB entry from gallery_media_stats
+        // For now: Dummy return until logic is implemented
         return true;
     }
 
