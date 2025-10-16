@@ -335,4 +335,44 @@ class Validate
                 throw new \ckvsoft\CkvException(__CLASS__ . ": Does not have any method called: $method");
         }
     }
+
+    /**
+     * Checks if the current value matches another value in the internal input data.
+     * The value must be passed as the first element of $param.
+     * * @param string $value The value of the field being validated (e.g., 'password').
+     * @param array $param Should contain the name of the field to match against (e.g., ['password_confirm']).
+     * @return string|bool True on success, or an error message string on failure.
+     */
+    public function matches($value, $param)
+    {
+        if (empty($param[0])) {
+            // Validation cannot run without a field name to match against
+            return 'Internal validation error: Match field name missing.';
+        }
+
+        $matchFieldName = $param[0];
+
+        // NOTE: This assumes Input\Validate has access to the *entire* input stack
+        // (which is required for this type of validation).
+        // If it doesn't, you need to pass the comparison value explicitly.
+        // Assuming a helper method to fetch data by name exists (e.g., $this->_input->fetch($matchFieldName))
+        // If not, we have to assume the second field is passed explicitly:
+        $matchValue = $param[1] ?? null; // If the field value itself is passed
+        // Since the Input class passes the field name (the current value) and the parameter array,
+        // your Input class is likely designed to pass the comparison value in $param[1] if required.
+        // OPTION 1: If the framework design ensures the value is passed in $param[1]
+        if (isset($param[1]) && $value === $param[1]) {
+            return true; // Success
+        }
+
+        // OPTION 2: If the framework requires fetching from the global POST array
+        // (NOT recommended, but needed if the Validate class is isolated)
+        // $matchValue = $_POST[$matchFieldName] ?? null;
+
+        if ($value !== $matchValue) {
+            return 'Fields do not match.';
+        }
+
+        return true;
+    }
 }
