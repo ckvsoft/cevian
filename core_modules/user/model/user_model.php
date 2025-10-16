@@ -42,7 +42,7 @@ class User_Model extends \ckvsoft\mvc\Model
 
     public function userSingleList($userid)
     {
-        return $this->db->select('SELECT user_id, email, role FROM user WHERE user_id = :user_id', array('user_id' => $userid));
+        return $this->db->select('SELECT user_id, email, username, role FROM user WHERE user_id = :user_id', array('user_id' => $userid));
     }
 
     /**
