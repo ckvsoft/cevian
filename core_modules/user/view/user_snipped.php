@@ -31,24 +31,25 @@ $baseUri = BASE_URI; // Use the base URI constant
     <?php if (!empty($userList)): ?>
         <?php foreach ($userList as $user): ?>
 
-            <!-- Start of the User Card -->
             <div class="card" data-user-id="<?= htmlspecialchars($user['user_id']) ?>">
 
-                <!-- 1. User Details -->
                 <div class="user-details">
                     <p class="name">
-                        <strong>Id:</strong> <?= htmlspecialchars($user['user_id']); ?><br>
-                        <strong>Name:</strong> <?= htmlspecialchars($user['username']); ?><br>
-                        <strong>eMail:</strong> <?= htmlspecialchars($user['email']); ?>
+                        <strong><?= _('Name') ?>:</strong> <?= htmlspecialchars($user['username']); ?><br>
+                        <strong><?= _('eMail') ?>:</strong> <?= htmlspecialchars($user['email']); ?>
                     </p>
                 </div>
 
                 <div class="actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
 
-                    <a class="button small-action edit" href="<?= htmlspecialchars($baseUri . 'user/edit/' . $user['user_id']) ?>">Edit</a>
+                    <a class="button small-action edit" href="<?= htmlspecialchars($baseUri . 'user/edit/' . $user['user_id']) ?>">
+                        <?= _('Edit') ?>
+                    </a>
 
                     <?php if ($user['user_id'] > 1) { ?>
-                        <a class="button small-action delete" href="<?= htmlspecialchars($baseUri . 'user/delete/' . $user['user_id']) ?>">Delete</a>
+                        <a class="button small-action delete" href="<?= htmlspecialchars($baseUri . 'user/delete/' . $user['user_id']) ?>">
+                            <?= _('Delete') ?>
+                        </a>
                     <?php } ?>
 
                 </div>
@@ -59,7 +60,7 @@ $baseUri = BASE_URI; // Use the base URI constant
 
     <?php else: ?>
 
-        <p>Keine Benutzer gefunden.</p>
+        <p><?= _('No users found.') ?></p>
 
     <?php endif; ?>
 
