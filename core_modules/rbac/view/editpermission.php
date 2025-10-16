@@ -22,26 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+$isEditMode = !empty($this->perm['id']);
+$defaultRedirect = 'rbac/permissions';
 ?>
 <fieldset style="margin-top: 30px;">
     <div data-form="permissionForm" data-json="1">
-        <legend>Edit Permission: <?= htmlspecialchars($this->perm['permName']); ?></legend>
-        <form action="<?= BASE_URI ?>rbac/editPermissionSave" method="post" id="permissionForm" data-redirect="rbac/permissions">
+        <legend><?= _($isEditMode ? 'Edit Permission' : 'Create Permission') ?>: <?= htmlspecialchars($this->perm['permName'] ?? '') ?></legend>
+
+        <form action="<?= BASE_URI ?>rbac/editPermissionSave" method="post" id="permissionForm" data-redirect="<?= $defaultRedirect ?>">
             <input type="hidden" name="perm_id" value="<?= $this->perm['id'] ?? '' ?>">
 
-            <label for="permName">Permission Name:</label>
+            <label for="permName"><?= _('Permission Name') ?>:</label>
             <input type="text" id="permName" name="permName" value="<?= htmlspecialchars($this->perm['permName'] ?? '') ?>" required><br />
 
-            <label for="permKey">Permission Key:</label>
+            <label for="permKey"><?= _('Permission Key') ?>:</label>
             <input type="text" id="permKey" name="permKey" value="<?= htmlspecialchars($this->perm['permKey'] ?? '') ?>" required><br />
 
-            <label for="permDescription">Description:</label>
+            <label for="permDescription"><?= _('Description') ?>:</label>
             <textarea style="width: 240px; height: 55px;" id="permDescription" name="permDescription"><?= htmlspecialchars($this->perm['permDescription'] ?? '') ?></textarea><br />
 
             <div style="margin-top:10px;">
-                <button class="button small-action save" type="submit"><?= empty($this->perm['id']) ? 'Create' : 'Save' ?></button>
-                <?php if (!empty($this->perm['id'])) { ?>
-                    <button class="button small-action delete" type="button" onclick="deletePermission(<?= $this->perm['id'] ?>)">Delete</button>
+                <button class="button small-action save" type="submit">
+                    <?= _($isEditMode ? 'Save' : 'Create') ?>
+                </button>
+
+                <input class="button small-action cancel"
+                       type="button"
+                       onclick="javascript:window.location = '<?= BASE_URI . $defaultRedirect ?>';"
+                       value="<?= _('Cancel') ?>">
+
+                <?php if ($isEditMode) { ?>
+                    <button class="button small-action delete" type="button" onclick="deletePermission(<?= $this->perm['id'] ?>)">
+                        <?= _('Delete') ?>
+                    </button>
                 <?php } ?>
             </div>
         </form>
@@ -49,14 +63,21 @@
 </fieldset>
 
 <script>
+    /**
+     * Handles the asynchronous deletion of a permission entry.
+     * @param {number} id - The ID of the permission to delete.
+     */
     function deletePermission(id) {
-        if (!confirm("Really delete this permission?"))
+        // Confirmation dialog translated
+        if (!confirm("<?= _('Really delete this permission?') ?>"))
             return;
+
         fetch("<?= BASE_URI ?>rbac/deletePermission/" + id)
                 .then(r => r.json())
                 .then(d => {
                     if (d.success)
-                        location.href = "<?= BASE_URI ?>rbac/permissions";
+                        // Redirect translated
+                        location.href = "<?= BASE_URI . $defaultRedirect ?>";
                     else
                         alert(JSON.stringify(d.error || d));
                 }).catch(e => alert(e));
