@@ -28,9 +28,9 @@
  * Manages Permission Definitions (Add, Edit, List).
  * Uses AJAX framework for form submissions and list refreshing.
  */
-// BASE_URI ist in der BaseController-Klasse definiert und verfügbar.
+// BASE_URI is defined and available from the BaseController class.
 $listUrl = BASE_URI . 'rbac/permissionList';
-$addUrl = BASE_URI . 'rbac/editPermissionSave'; // Ein einziger Save-Endpunkt
+$addUrl = BASE_URI . 'rbac/editPermissionSave'; // A single save endpoint
 ?>
 <fieldset>
     <div id="addPermissionContainer"
@@ -39,35 +39,35 @@ $addUrl = BASE_URI . 'rbac/editPermissionSave'; // Ein einziger Save-Endpunkt
          data-url="<?= $listUrl ?>"
          data-json="1">
 
-        <legend id="formTitle">Add New Permission</legend>
+        <legend id="formTitle"><?= _('Add New Permission') ?></legend>
 
         <form action="<?= $addUrl ?>" method="post" id="addPermissionForm">
             <input type="hidden" name="id" id="permId" value="">
 
-            <label for="permKey">Permission Key (z.B. 'user_create')</label>
+            <label for="permKey"><?= _('Permission Key') ?> (<?= _('e.g.') ?> 'user_create')</label>
             <input type="text" name="permKey" id="permKey" class="form-control" required><br />
 
-            <label for="permName">Display Name (z.B. 'Create User')</label>
+            <label for="permName"><?= _('Display Name') ?> (<?= _('e.g.') ?> 'Create User')</label>
             <input type="text" name="permName" id="permName" class="form-control" required><br />
 
-            <label for="permDescription">Description</label>
+            <label for="permDescription"><?= _('Description') ?></label>
             <textarea style="width: 240px; height: 55px;" name="permDescription" id="permDescription" class="form-control"></textarea><br />
 
             <button type="submit" class="button small-action save" id="submitPermButton">
-                <i class="fas fa-plus"></i> Add Permission
+                <?= _('Add Permission') ?>
             </button>
             <button type="button" class="button small-action cancel" id="cancelPermButton" style="display:none;">
-                Cancel Edit
+                <?= _('Cancel Edit') ?>
             </button>
         </form>
     </div>
 </fieldset>
 
 <fieldset style="margin-top: 30px;">
-    <legend>Existing Permissions</legend>
+    <legend><?= _('Existing Permissions') ?></legend>
     <div id="permissionListContainer"
          class="ajax-list"
          data-list="<?= $listUrl ?>">
-        <p>Loading...</p>
+        <p><?= _('Loading...') ?></p>
     </div>
 </fieldset>
