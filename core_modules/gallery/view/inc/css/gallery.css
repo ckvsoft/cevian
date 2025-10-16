@@ -169,7 +169,7 @@
 
 .breadcrumb a {
     text-decoration: none;
-    color: #007bff;
+    color: #E84C11;
 }
 
 .breadcrumb a:hover {
@@ -183,7 +183,7 @@
 
 .breadcrumb .current-album {
     font-weight: 600;
-    color: #222;
+    color: #FFF;
 }
 
 .back-link {
