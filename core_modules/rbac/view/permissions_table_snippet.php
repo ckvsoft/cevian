@@ -29,61 +29,40 @@
  */
 if (empty($this->permissions)) :
     ?>
-    <div class="info-message">No permissions defined yet.</div>
+    <div class="info-message"><?= _('No permissions defined yet.') ?></div>
     <?php
     return;
 endif;
 
-// Konstante für die Basis-URI
+// Constant for the base URI
 $baseUri = BASE_URI;
 ?>
 
 <div class="list-cards">
     <?php foreach ($this->permissions as $perm) : ?>
 
-        <!-- Start of Permission Card -->
         <div class="card permission-card" data-perm-id="<?= htmlspecialchars($perm['id']) ?>">
 
-            <!-- 1. Permission Details Group -->
             <div class="permission-details">
 
-                <!-- ID Line -->
                 <p class="detail-line">
-                    <strong>ID:</strong> <?= htmlspecialchars($perm['id']) ?>
+                    <strong><?= _('Key') ?>:</strong> <?= htmlspecialchars($perm['permKey']) ?>
                 </p>
 
-                <!-- Key Line -->
                 <p class="detail-line">
-                    <strong>Key:</strong> <?= htmlspecialchars($perm['permKey']) ?>
+                    <strong><?= _('Name') ?>:</strong> <?= htmlspecialchars($perm['permName']) ?>
                 </p>
 
-                <!-- Name Line -->
                 <p class="detail-line">
-                    <strong>Name:</strong> <?= htmlspecialchars($perm['permName']) ?>
-                </p>
-
-                <!-- Description Line -->
-                <p class="detail-line">
-                    <strong>Description:</strong> <?= htmlspecialchars($perm['permDescription']) ?>
+                    <strong><?= _('Description') ?>:</strong> <?= htmlspecialchars($perm['permDescription']) ?>
                 </p>
 
             </div>
-            <!-- End .permission-details -->
+            <div class="actions column">
 
-            <!-- 2. Actions Group (Stacked Buttons for mobile editing) -->
-            <!-- Inline style ensures buttons are stacked vertically and sized correctly -->
-            <div class="actions" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-
-                <!-- Edit Button (Width limited to 150px) -->
-                <a class="button small-action edit"
-                   style="width: 150px; text-align: center;"
-                   href="<?= htmlspecialchars($baseUri . 'rbac/editPermission/' . $perm['id']) ?>">Edit</a>
+                <a class="button small-action edit" href="<?= htmlspecialchars($baseUri . 'rbac/editPermission/' . $perm['id']) ?>"><?= _('Edit') ?></a>
 
             </div>
-            <!-- End .actions -->
-
         </div>
-        <!-- End of Permission Card -->
-
     <?php endforeach; ?>
 </div>
