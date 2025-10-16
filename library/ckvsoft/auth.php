@@ -107,8 +107,8 @@ class Auth
      */
     public static function getUserPermissionLevel(): int
     {
-        if (self::hasRole("admin")) {
-            return 2; // Admin
+        if (self::hasRole("admin") || self::getUserId() == 1) {
+            return 3; // Admin
         }
 
         if (self::loginStatus()) {
