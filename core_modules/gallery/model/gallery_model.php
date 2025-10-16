@@ -18,9 +18,15 @@ class Gallery_Model extends ckvsoft\mvc\Model
     private string $basePath;
     private string $albumsBaseUrl;
 
-    // CONSOLIDATED CONSTANTS: Used by both Gallery_Model and GalleryManager_Model
+// CONSOLIDATED CONSTANTS: Used by both Gallery_Model and GalleryManager_Model
     public const SUPPORTED_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     public const SUPPORTED_VIDEO_EXT = ['mp4', 'webm', 'ogg'];
+    public const PERMISSION_LEVELS = [
+        0 => 'Public (Everyone)',
+        1 => 'Restricted (Members)',
+        2 => 'Private (Owner Only)',
+        3 => 'Admin (Administrator)',
+    ];
     private const DEFAULT_VIDEO_THUMB_URL = BASE_URI . 'gallery/media/default/video_thumb.jpg';
     private const DEFAULT_IMAGE_THUMB_URL = BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
@@ -29,14 +35,14 @@ class Gallery_Model extends ckvsoft\mvc\Model
         parent::__construct();
 
         $relativePath = trim(Config::get('paths.albums_relative_path') ?? 'public/albums/', '/');
-        // Calculate the absolute path to the albums base directory
+// Calculate the absolute path to the albums base directory
         $this->basePath = __DIR__ . '/../../../' . $relativePath . '/';
         $this->albumsBaseUrl = BASE_URI . $relativePath . '/';
     }
 
-    // ------------------------------------------------------------------
-    // PATH & ID LOOKUP (ESSENTIAL FOR FRONTEND)
-    // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// PATH & ID LOOKUP (ESSENTIAL FOR FRONTEND)
+// ------------------------------------------------------------------
 
     /**
      * Retrieves the album path for a given album ID.
@@ -84,7 +90,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
             return (int) $albumId;
         }
 
-        // Fallback for Race Condition
+// Fallback for Race Condition
         $album = $this->db->selectOne(
                 "SELECT `album_id` FROM `gallery_albums` WHERE `album_path` = :path",
                 ['path' => $normalizedPath]
@@ -97,9 +103,9 @@ class Gallery_Model extends ckvsoft\mvc\Model
         throw new CkvException("Could not determine or create album_id for path '{$normalizedPath}'.");
     }
 
-    // ------------------------------------------------------------------
-    // PERMISSION CHECK & VIEW COUNTER
-    // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// PERMISSION CHECK & VIEW COUNTER
+// ------------------------------------------------------------------
 
     /**
      * Checks permission for an album.
@@ -108,8 +114,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
      */
     public function checkAlbumPermissions(string $albumPath): array|false
     {
-        $userLevel = Auth::getUserPermissionLevel();
-
+        $userLevel = Auth::getUserPermissionLevel(); // Liefert nun 3 für Admin
         $normalizedPath = trim($albumPath, '/');
         $album = $this->db->selectOne(
                 "SELECT `permissions_level`, `album_id`, `owner_user_id` FROM `gallery_albums` WHERE `album_path` = :path",
@@ -123,13 +128,15 @@ class Gallery_Model extends ckvsoft\mvc\Model
         $requiredLevel = (int) $albumData['permissions_level'];
         $currentUserId = Auth::getUserId();
 
-        // Check level permission
-        if ($userLevel >= $requiredLevel) {
+        if ($userLevel >= 3) {
             return $albumData;
         }
 
-        // Check owner override
-        if ($currentUserId !== null && (int) $currentUserId === (int) $albumData['owner_user_id']) {
+        if ($currentUserId !== null && (string) $currentUserId === (string) $albumData['owner_user_id']) {
+            return $albumData;
+        }
+
+        if ($userLevel >= $requiredLevel) {
             return $albumData;
         }
 
@@ -174,20 +181,20 @@ class Gallery_Model extends ckvsoft\mvc\Model
 
         $currentUserId = Auth::getUserId();
         $nameNoExt = pathinfo($fileName, PATHINFO_FILENAME);
-        // The original logic checks only the lowercase filename part
+// The original logic checks only the lowercase filename part
         $isThumbnail = str_ends_with(strtolower($nameNoExt), '_thumb');
 
         if (!$isThumbnail) {
             $this->incrementViewCounter($albumName, $fileName, $currentUserId);
         }
 
-        // Correctly construct the absolute path
+// Correctly construct the absolute path
         return rtrim($this->basePath, '/') . '/' . trim($albumName, '/') . '/' . $fileName;
     }
 
-    // ------------------------------------------------------------------
-    // ALBUM AND MEDIA LISTING
-    // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// ALBUM AND MEDIA LISTING
+// ------------------------------------------------------------------
 
     /**
      * Retrieves all albums available in the root folder.
@@ -265,7 +272,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
     {
         $allMedia = $this->getMediaByAlbum($albumName, $recursive, false);
 
-        // Filter out items using default placeholder URLs
+// Filter out items using default placeholder URLs
         $itemsWithThumbs = array_filter($allMedia, fn($item) =>
                 isset($item['thumburl']) &&
                 $item['thumburl'] !== self::DEFAULT_VIDEO_THUMB_URL &&
@@ -291,9 +298,9 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return ucwords(strtolower($nameCleaned));
     }
 
-    // ------------------------------------------------------------------
-    // PRIVATE HELPER METHODS (CONSOLIDATED LOGIC)
-    // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// PRIVATE HELPER METHODS (CONSOLIDATED LOGIC)
+// ------------------------------------------------------------------
 
     /**
      * CONSOLIDATED LOGIC: Creates a single media item array from file info.
@@ -314,7 +321,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
             return null;
         }
 
-        // --- PATH ENCODING (Centralized Logic from original scans) ---
+// --- PATH ENCODING (Centralized Logic from original scans) ---
         $fullUrlPath = trim($currentAlbumPath . '/' . $file, '/');
         $pathSegments = explode('/', $fullUrlPath);
         $encodedPath = implode('/', array_map('urlencode', $pathSegments));
@@ -331,7 +338,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
             $thumbFileName = $nameNoExt . '_thumb.' . $origExt;
             $thumbFile = $currentDirectory . '/' . $thumbFileName;
 
-            // Thumbnail path encoding
+// Thumbnail path encoding
             $thumbUrlPath = trim($currentAlbumPath . '/' . $thumbFileName, '/');
             $thumbSegments = explode('/', $thumbUrlPath);
             $encodedThumbPath = implode('/', array_map('urlencode', $thumbSegments));
@@ -339,11 +346,11 @@ class Gallery_Model extends ckvsoft\mvc\Model
 
             if (!file_exists($thumbFile)) {
                 $finalThumbUrl = self::DEFAULT_IMAGE_THUMB_URL; // Fallback to default path
-                // Attempt to create the thumbnail (Original logic)
+// Attempt to create the thumbnail (Original logic)
                 try {
                     $image = new Image($filePath, $thumbFileName, $currentDirectory . '/');
                     if ($image->resize()) {
-                        // If successful, reset to the correct URL
+// If successful, reset to the correct URL
                         $finalThumbUrl = BASE_URI . 'gallery/media/' . $encodedThumbPath;
                     }
                 } catch (\Exception $e) {
@@ -357,7 +364,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
             $thumbFileName = $nameNoExt . '_thumb.jpg';
             $thumbFile = $currentDirectory . '/' . $thumbFileName;
 
-            // Thumbnail path encoding
+// Thumbnail path encoding
             $thumbUrlPath = trim($currentAlbumPath . '/' . $thumbFileName, '/');
             $thumbSegments = explode('/', $thumbUrlPath);
             $encodedVideoThumbPath = implode('/', array_map('urlencode', $thumbSegments));
@@ -405,7 +412,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
             $file = $item->getFilename();
             $currentDirectory = $item->getPath();
 
-            // Calculate the relative album path for the media item
+// Calculate the relative album path for the media item
             $relativePath = str_replace($this->basePath, '', $item->getPathname());
             $albumPath = pathinfo($relativePath, PATHINFO_DIRNAME);
             $cleanAlbumPath = ($albumPath === '.' || $albumPath === false) ? '' : $albumPath;
