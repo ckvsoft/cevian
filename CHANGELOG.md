@@ -1,3 +1,23 @@
+# [0.12.0](https://github.com/ckvsoft/cevian/compare/v0.11.0...v0.12.0) (2025-10-16)
+
+
+### Bug Fixes
+
+* **auth:** Correct and elevate admin permission level ([55e573e](https://github.com/ckvsoft/cevian/commit/55e573e6edd7b9958e8f8a6f68acee6dfa41a553))
+* **user:** Include username in userSingleList query ([249d4ea](https://github.com/ckvsoft/cevian/commit/249d4ea8d3350a8776f4c9d17c0e9be19835324c))
+
+
+### Features
+
+* **gallery/manager:** Implement internationalization for permissions and add subfolder inheritance flags ([269968f](https://github.com/ckvsoft/cevian/commit/269968ffcd4296c8c0213158582c076de46e4051))
+* **gallery/manager:** Implement recursive album permission/owner update and refine media fetching ([090aac5](https://github.com/ckvsoft/cevian/commit/090aac5374c61d830004ea66b0818629cfb8b454))
+* **gallery/view:** Enhance album edit view with title field, i18n, and subfolder inheritance options ([992af15](https://github.com/ckvsoft/cevian/commit/992af15722ebea37511bdae8cca39a8bd8456b29))
+* **i18n:** Introduce gettext fallback functions for internationalization ([69c9ba2](https://github.com/ckvsoft/cevian/commit/69c9ba22f757166a7fb1872d43a0f4ba63fb05c6))
+* **user/view:** Add 'Clear' button to user creation form ([a2603bb](https://github.com/ckvsoft/cevian/commit/a2603bb4019b525c7d1628efa8f53bfc18ce7c70))
+* **validation:** Implement 'matches' rule for cross-field comparison ([5420897](https://github.com/ckvsoft/cevian/commit/5420897365e43430bf5d414ed4d85c423dee8b8e))
+
+
+
 # [0.11.0](https://github.com/ckvsoft/cevian/compare/v0.10.0...v0.11.0) (2025-10-15)
 
 
@@ -71,37 +91,6 @@
 * **multilogin:** Correct column name in MultiLoginManager insert ([397e543](https://github.com/ckvsoft/cevian/commit/397e543bd3c264c76b667c9e69254daec7b2ce02))
 * **schema:** Enhance SQL structure by adding primary and unique keys inline ([ff03351](https://github.com/ckvsoft/cevian/commit/ff0335187787a2c6d8dd0caaa0def1e22666936a))
 * **sql:** Add InnoDB engine and explicit charset/collation to migration 0.7.0 ([6e54f64](https://github.com/ckvsoft/cevian/commit/6e54f641dba49ecaafaf96508837a04ab490e9a6))
-
-
-
-## [0.8.2](https://github.com/ckvsoft/cevian/compare/v0.8.0...v0.8.2) (2025-10-06)
-
-
-### Bug Fixes
-
-* add missing framework name ([807b25f](https://github.com/ckvsoft/cevian/commit/807b25faf3cae329e4a3ff7b3fa0bf6753a17c38))
-* cleanup ([219a1ec](https://github.com/ckvsoft/cevian/commit/219a1ec88140f833e91d74884c489e05a0694c94))
-* Decode URI segments and refine routing setup ([7fca986](https://github.com/ckvsoft/cevian/commit/7fca986d924f9762a9e641d718929679876906cb))
-* missing username ([355f99f](https://github.com/ckvsoft/cevian/commit/355f99f0f5e0c7830e6294d1fdb691a44aa75297))
-* next one. hope it works now ([256a855](https://github.com/ckvsoft/cevian/commit/256a855a40678bde8ab9d3f2b768ef69bf5f06c3))
-* typo ([aae8368](https://github.com/ckvsoft/cevian/commit/aae83683437bb536511538b31c7faa9afba398cb))
-* typo from automatic create ([7414e1c](https://github.com/ckvsoft/cevian/commit/7414e1c52d6fca3a676b01dfcc8f78c27b605eca))
-* user_roles ([8a0f12b](https://github.com/ckvsoft/cevian/commit/8a0f12bf6545eb4054827cd6acf749a37581f7c3))
-
-
-### Features
-
-* **config:** Add default path for public albums ([dbd9a7b](https://github.com/ckvsoft/cevian/commit/dbd9a7b94778be4f29b37e353d2faa5fe982477a))
-* **controller:** Implement model file fallback to core modules ([d6a4bae](https://github.com/ckvsoft/cevian/commit/d6a4baeeb8acbe3719423575fe09ccace4527b5a))
-* Create Gallery_Model for file system album management ([20102fa](https://github.com/ckvsoft/cevian/commit/20102fa26128c1506f94ada5ad46ed7a4d20b3c0))
-* **css:** Add gallery.css for grid layout and media styling ([3e85f8e](https://github.com/ckvsoft/cevian/commit/3e85f8ebb43727eaef47f72e76c7d3494e29b496))
-* **css:** Allow explicit module name for loading CSS ([fca0d17](https://github.com/ckvsoft/cevian/commit/fca0d172ccef458d100277a816de56257d8c270c))
-* **gallery:** Add view partials for album and media items ([6b37f2b](https://github.com/ckvsoft/cevian/commit/6b37f2bba961b2d1a04d52d24245b812b5ccc7f1))
-* **gallery:** Implement gallery index view with pagination and breadcrumbs ([7b7a9ec](https://github.com/ckvsoft/cevian/commit/7b7a9ecc73f9868db6e9ab963102e4f634bbb5f7))
-* Implement dot-notation getter for configuration values ([f0395ee](https://github.com/ckvsoft/cevian/commit/f0395ee4af44aba15ba1fae8e35a9abff3884068))
-* Introduce Gallery controller for public album viewing ([852fbab](https://github.com/ckvsoft/cevian/commit/852fbabf76c5f69f494033e7cabb45c2aff30a7f))
-* Introduce Gallery_Helper to centralize album logic ([ec446c2](https://github.com/ckvsoft/cevian/commit/ec446c2766cf1f334c3d7cbda8c34233948b104a))
-* Unify pagination logic for tables and image grids ([c066809](https://github.com/ckvsoft/cevian/commit/c06680932921911629090e5b0950811cc0666a6d))
 
 
 
