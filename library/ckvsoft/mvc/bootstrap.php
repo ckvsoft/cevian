@@ -11,22 +11,22 @@ class Bootstrap extends \stdClass
     private $_controllerDefault = 'index';
 
     /**
-     * @var string $_uriController The controller to call
+     * @var string $_uriController The controller name requested via URI
      */
     private $_uriController;
 
     /**
-     * @var string $_uriSubController The controller to call
+     * @var string $_uriSubController The sub-controller name requested via URI (if applicable)
      */
     private $_uriSubController;
 
     /**
-     * @var string $_uriMethod The method call
+     * @var string $_uriMethod The method to call on the controller
      */
     private $_uriMethod;
 
     /**
-     * @var array $this->_uriValue Values beyond the controller/method
+     * @var array $this->_uriValue Values beyond the controller/method, used as method arguments
      */
     private $_uriValue = array();
 
@@ -36,7 +36,7 @@ class Bootstrap extends \stdClass
     private $_pathModel;
 
     /**
-     * @var string $_pathModel Where the models are located
+     * @var string $_pathConfig Where the configuration files are located
      */
     private $_pathConfig;
 
@@ -51,17 +51,17 @@ class Bootstrap extends \stdClass
     private $_pathController;
 
     /**
-     * @var string $_pathController Where the controllers are located
+     * @var string $_pathHelper Where the helper files are located
      */
     private $_pathHelper;
 
     /**
-     * @var object $_basePath The basepath to include files from
+     * @var object $_basePath The base path to include files from (unused property, likely)
      */
     private $_basePath;
 
     /**
-     * @var string $uri The URI string
+     * @var string $uri The raw URI string requested by the user
      */
     public $uri;
 
@@ -71,12 +71,12 @@ class Bootstrap extends \stdClass
     public $uriSegments;
 
     /**
-     * @var string $downPath The ../ path count
+     * @var string $uriSlashPath The relative path string (e.g., '../', '../../')
      */
     public $uriSlashPath;
 
     /**
-     * @var object $_view The view object
+     * @var object $_view The view object instance
      */
     private $_view;
 
@@ -87,6 +87,42 @@ class Bootstrap extends \stdClass
      */
     public function __construct()
     {
+        // ------------------------------------------------------------------
+        // INTERNATIONALIZATION (i18n) FALLBACK
+        // Defines the translation function _() globally if the native gettext
+        // extension is not installed or loaded.
+        // ------------------------------------------------------------------
+        if (!function_exists('_')) {
+
+            /**
+             * Fallback translation function: Returns the original string.
+             * Used when gettext is unavailable.
+             *
+             * @param string $text The original string to be translated (the message ID).
+             * @return string
+             */
+            function _(string $text): string
+            {
+                return trim($text);
+            }
+
+        }
+
+        // Optional: Fallback for the plural form (ngettext)
+        if (!function_exists('ngettext')) {
+
+            /**
+             * Fallback plural function: Returns singular if count is 1, otherwise plural.
+             */
+            function ngettext(string $singular, string $plural, int $count): string
+            {
+                return ($count === 1) ? $singular : $plural;
+            }
+
+        }
+        // ------------------------------------------------------------------
+
+
         $uri = filter_input(INPUT_GET, 'uri');
 
         if ($uri !== null && $uri !== false) {
@@ -119,7 +155,7 @@ class Bootstrap extends \stdClass
         $urlToBuild = ($overrideUri == true) ? $overrideUri : $this->uri;
         $this->_buildComponents($urlToBuild);
 
-        /** The order of these are important */
+        /** The order of these is important */
         $this->_initController();
     }
 
@@ -188,7 +224,7 @@ class Bootstrap extends \stdClass
     }
 
     /**
-     * setPathBase - Required
+     * setPathRoot - Required
      *
      * @param type $path Location of the root path
      */
@@ -207,7 +243,7 @@ class Bootstrap extends \stdClass
     }
 
     /**
-     * setPathController - Default is 'controller/'
+     * setPathController - Default path is 'controller/'
      *
      * @param string $path Location for the controllers
      */
@@ -217,7 +253,7 @@ class Bootstrap extends \stdClass
     }
 
     /**
-     * setPathModel - Default is 'model/'
+     * setPathModel - Default path is 'model/'
      *
      * @param string $path Location for the models
      */
@@ -227,9 +263,9 @@ class Bootstrap extends \stdClass
     }
 
     /**
-     * setPathHelper - Default is 'helper/'
+     * setPathHelper - Default path is 'helper/'
      *
-     * @param string $path Location for the models
+     * @param string $path Location for the helpers
      */
     public function setPathHelper($path)
     {
@@ -237,9 +273,9 @@ class Bootstrap extends \stdClass
     }
 
     /**
-     * setPathView - Default is 'view/'
+     * setPathView - Default path is 'view/'
      *
-     * @param string $path Location for the models
+     * @param string $path Location for the views
      */
     public function setPathView($path)
     {
@@ -257,7 +293,7 @@ class Bootstrap extends \stdClass
     }
 
     /**
-     * _initUriSlashPath - Sets up the dot dot slash path length
+     * _initUriSlashPath - Sets up the relative path length (e.g., '../')
      */
     private function _initUriSlashPath()
     {
@@ -321,7 +357,7 @@ class Bootstrap extends \stdClass
                             "[%s] Misrouted asset request: %s (Asset not found or misrouted) | Referrer: %s | Agent: %s | URI: %s | Trace: %s\n",
                             $timestamp,
                             $this->uri,
-                            filter_input(INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL),
+                            filter_input(INPUT_SERVER, 'HTTP_REFERRER', FILTER_SANITIZE_URL),
                             strip_tags((string) filter_input(INPUT_SERVER, 'HTTP_USER_AGENT')),
                             filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL),
                             $traceString
@@ -358,7 +394,7 @@ class Bootstrap extends \stdClass
 
         // --- Initialize the view object ---
         $this->controller->view = new View(defined('CSS_JS_DEBUG') && CSS_JS_DEBUG === true);
-        $this->controller->view->setPath($this->_pathView); // Modulpfad
+        $this->controller->view->setPath($this->_pathView); // Module path
         $this->controller->view->setCoreModulePath($this->_pathRoot . CORE_MODULES_URI); // Core-Fallback
         // --- Call the requested method with parameters ---
         if (isset($this->_uriMethod)) {
