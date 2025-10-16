@@ -27,9 +27,13 @@
  * Gallery Manager Index View
  * @var array $albums
  * @var string $message Status message from controller
+ * @var array $permissionMap Übersetzte Zuordnung der Berechtigungsstufen
  */
 $baseUri = BASE_URI;
 $message = $this->data['message'] ?? null;
+// Annahme: $this->albums und $this->permissionMap werden vom Controller übergeben
+$albums = $this->albums ?? [];
+$permissionMap = $this->permissionMap ?? [];
 ?>
 
 <h1><?= htmlspecialchars($this->title) ?></h1>
@@ -39,7 +43,7 @@ $message = $this->data['message'] ?? null;
 </div>
 
 <fieldset class="rescan-fieldset">
-    <legend>Rescan Operations</legend>
+    <legend><?= _('Rescan Operations') ?></legend>
 
     <div class="rescan-group">
         <div data-form="rescan-form" class="rescan-form-container">
@@ -51,12 +55,12 @@ $message = $this->data['message'] ?? null;
 
                 <button type="submit"
                         id="progress-feedback-container-3"
-                        data-original-text="[Album Folder Rescan]"
+                        data-original-text="<?= _('[Album Folder Rescan]') ?>"
                         class="button small-action yellow"
-                        onclick="return confirm('Are you sure? This will synchronize the Albums DB with the filesystem.')">
+                        onclick="return confirm('<?= _('Are you sure? This will synchronize the Albums DB with the filesystem.') ?>')">
 
                     <span id="progress-text-3">
-                        [Album Folder Rescan]
+                        <?= _('[Album Folder Rescan]') ?>
                     </span>
                 </button>
             </form>
@@ -71,12 +75,12 @@ $message = $this->data['message'] ?? null;
 
                 <button type="submit"
                         id="progress-feedback-container-4"
-                        data-original-text="[All Media Rescan]"
+                        data-original-text="<?= _('[All Media Rescan]') ?>"
                         class="button small-action blue"
-                        onclick="return confirm('Are you sure? This will register ALL media files found in the filesystem into the media table. It might take a while!')">
+                        onclick="return confirm('<?= _('Are you sure? This will register ALL media files found in the filesystem into the media table. It might take a while!') ?>')">
 
                     <span id="progress-text-4">
-                        [All Media Rescan]
+                        <?= _('[All Media Rescan]') ?>
                     </span>
                 </button>
             </form>
@@ -85,64 +89,57 @@ $message = $this->data['message'] ?? null;
 </fieldset>
 
 <fieldset style="margin-top: 30px;">
-    <legend>Alben</legend>
+    <legend><?= _('Albums') ?></legend>
 
     <div class="paginated">
         <table>
             <thead>
                 <tr>
-                    <th>Album Path Name</th>
-                    <th>Title</th>
-                    <th>User Name</th>
-                    <th>Role</th>
-                    <th>Views</th>
-                    <th>Actions</th>
+                    <th><?= _('Album Path Name') ?></th>
+                    <th><?= _('Title') ?></th>
+                    <th><?= _('User Name') ?></th>
+                    <th><?= _('Role') ?></th>
+                    <th><?= _('Views') ?></th>
+                    <th><?= _('Actions') ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($this->albums)): ?>
+                <?php if (empty($albums)): ?>
                     <tr>
-                        <td colspan="5" style="text-align: center;">No albums found. Run Album Folder Rescan.</td>
+                        <td colspan="5" style="text-align: center;"><?= _('No albums found. Run Album Folder Rescan.') ?></td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($this->albums as $album): ?>
+                    <?php foreach ($albums as $album): ?>
                         <tr>
                             <td>
-                                <span class="mobile-label">Album Path:</span>
+                                <span class="mobile-label"><?= _('Album Path') ?>:</span>
                                 <?= htmlspecialchars($album['album_path'] === '' ? '/' : $album['album_path']) ?>
                             </td>
                             <td>
-                                <span class="mobile-label">Title:</span>
+                                <span class="mobile-label"><?= _('Title') ?>:</span>
                                 <?= htmlspecialchars($album['title'] ?? 'N/A') ?>
                             </td>
                             <td>
-                                <span class="mobile-label">User Name:</span>
-                                <?= htmlspecialchars($album['owner_username'] ?? 'System/N/A') ?> (ID: <?= $album['owner_user_id'] ?? 'NULL' ?>)
+                                <span class="mobile-label"><?= _('User Name') ?>:</span>
+                                <?= htmlspecialchars($album['owner_username'] ?? _('System/N/A')) ?> (ID: <?= $album['owner_user_id'] ?? 'NULL' ?>)
                             </td>
                             <td>
-                                <span class="mobile-label">Role:</span>
+                                <span class="mobile-label"><?= _('Role') ?>:</span>
                                 <?= $album['permissions_level'] ?>
-                                (<?=
-                                match ((int) $album['permissions_level']) {
-                                    0 => 'Public',
-                                    1 => 'User',
-                                    2 => 'Admin',
-                                    default => 'N/A'
-                                }
-                                ?>)
+                                (<?= htmlspecialchars($permissionMap[(int) $album['permissions_level']] ?? 'N/A') ?>)
                             </td>
                             <td>
-                                <span class="mobile-label">Views:</span>
+                                <span class="mobile-label"><?= _('Views') ?>:</span>
                                 <strong><?= number_format($album['total_media_views'] ?? 0, 0, ',', '.') ?></strong>
                             </td>
 
                             <td class="table-actions">
 
                                 <a class="button small-action edit" href="<?= htmlspecialchars($baseUri . 'gallery/manager/album_media/' . $album['album_id']) ?>">
-                                    Media
+                                    <?= _('Media') ?>
                                 </a>
                                 <a class="button small-action edit" href="<?= htmlspecialchars($baseUri . 'gallery/manager/edit/' . $album['album_id']) ?>">
-                                    Edit
+                                    <?= _('Edit') ?>
                                 </a>
 
                                 <form id="reset-views-<?= $album['album_id'] ?>"
@@ -150,10 +147,11 @@ $message = $this->data['message'] ?? null;
                                       action="<?= htmlspecialchars($baseUri . 'gallery/manager/reset_views/' . $album['album_id']) ?>"
                                       data-redirect="gallery/manager/index"
                                       class="inline-form"
-                                      style="display: inline-block;"> <button type="submit"
-                                                                        class="button small-action delete"
-                                                                        onclick="return confirm('Are you sure you want to reset the View Counter for Album ID <?= $album['album_id'] ?> to 0?')">
-                                        Reset Views
+                                      style="display: inline-block;">
+                                    <button type="submit"
+                                            class="button small-action delete"
+                                            onclick="return confirm('<?= sprintf(_('Are you sure you want to reset the View Counter for Album ID %s to 0?'), $album['album_id']) ?>')">
+                                                <?= _('Reset Views') ?>
                                     </button>
                                 </form>
                             </td>
