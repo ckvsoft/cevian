@@ -21,34 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-*, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box; /* Ensure padding doesn't affect overall width */
+
+/* ============================================================
+   0. RESET AND BOX-SIZING
+============================================================ */
+/* Added: table, tr, and td (already present) to the reset for consistency. 
+   Note: table was missing in CSS1's reset selector list. */
+*, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td, table, tr {
+    box-sizing: border-box; /* Ensures padding and border don't increase the element's overall width and height */
 }
 
 /* ============================================================
-    GLOBAL & BASE STYLES (Valid for all screen sizes)
+   1. GLOBAL & BASE STYLES
 ============================================================ */
 
+/* Page and Layout */
 body {
     background: #353535;
     color: #FFFFFF;
     font-family: "Lucida Grande",Verdana,Arial,sans-serif;
-    /* FIX: Global text alignment is left */
-    text-align: left; 
-    padding-top: 130px;
-    padding-bottom: 50px;
+    text-align: left;
+    padding-top: 130px; /* Space for fixed header */
+    padding-bottom: 50px; /* Space for fixed footer */
     margin-top: 10px;
 }
 
 /* Centers the entire content on the page */
 .container {
     /* max-width: 1200px; */
-    margin: 0 auto; /* BLOCK CENTERING */
+    margin: 0 auto; /* Block centering */
     width: 99%;
 }
 
+/* Fixed Header and Footer */
 .fixed-header, .fixed-footer{
     z-index: 5;
     width: 100%;
@@ -69,6 +74,7 @@ body {
     bottom: 0;
 }
 
+/* Typography and Headings */
 h1, h2, h3, h5, h5, h6 {
     color: #E84C11;
     font-size: 100%;
@@ -76,6 +82,7 @@ h1, h2, h3, h5, h5, h6 {
     margin-left: 20px;
 }
 
+/* Table Styles (Added from CSS2) */
 table {
     background: rgba(0, 0, 0, 0);
 }
@@ -90,10 +97,7 @@ td:last-child {
     width: 100%;
 }
 
-.logo {
-    text-align: left;
-}
-
+/* Navigation/Container Styles (Added from CSS2) */
 #flex-container {
     position: sticky;
     top: auto;
@@ -103,48 +107,96 @@ td:last-child {
     align-items: center;
 }
 
-/* Clear floats after the columns */
+/* Utility Classes */
+.logo {
+    text-align: left;
+}
+.success {
+    color: green;
+}
+.error {
+    color: red;
+}
+.image {
+    float: left;
+}
+.body {
+    float: left;
+    margin: 20px auto;
+}
+.entry li {
+    list-style-type: disc;
+    float: left;
+    margin-left: 20px;
+}
 .row:after {
     content: "";
     display: table;
     clear: both;
 }
+/* Utility for hiding mobile labels in paginated tables (Added from CSS2) */
+.paginated table .mobile-label {
+    display: none;
+}
+/* Force float clearing for <br> (Added from CSS2 to ensure effect) */
+br {
+    clear: left;
+}
 
+
+/* Links */
+a {
+    color: #E84C11;
+}
+a:hover {
+    color: #FFFFFF;
+}
+
+/* Status Message (Fixed Footer Notification) */
+#statusmessage {
+    position: fixed;
+    bottom: 0;
+    line-height: 25px;
+    color: black;
+    background-color: green;
+    margin-bottom: -50px;
+    padding: 10px 0;
+    font-weight: bold;
+    left: 0;
+    right: 0;
+    z-index: 5000;
+}
+#status {
+    background: #ffe0e1;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+    color: red;
+}
+
+/* ============================================================
+   2. FORM STYLES
+============================================================ */
+
+/* Fieldset and Legend */
 fieldset {
     background: rgba(0, 0, 0, 0);
     border-color: #e84c11;
     color: white;
 }
-
 legend {
     background-color: gray;
     color: white;
     padding: 5px 10px;
 }
 
-.success {
-    color: green;
+/* General Form Structure */
+form {
+    display: table-cell;
 }
+/* form br rule is now redundant as 'br' is defined globally above */
 
-.error {
-    color: red;
-}
-
-.image {
-    float: left;
-}
-
-.body {
-    float: left;
-    margin: 20px auto;
-}
-
-.entry li {
-    list-style-type: disc;
-    float: left;
-    margin-left: 20px;
-}
-
+/* Global Input/Textarea/Select Styling */
 textarea {
     color: navy;
     margin-left: 20px;
@@ -152,15 +204,103 @@ textarea {
     border: 1px solid #cccccc;
     padding: 0.5em;
 }
-
-textarea:focus,input:focus{
+textarea:focus, input:focus {
     background: #FFC;
 }
-
 textarea:invalid, input:invalid {
     border: 1px solid red;
 }
 
+/* Specific Input/Select Field Styling */
+/* NOTE: This rule causes <input type="button"> and <input type="submit"> to become wide! */
+input, select {
+    display: block;
+    width: 250px;
+    float: left;
+    margin-bottom: 10px;
+}
+form input, form select {
+    margin: 5px 0 0 10px;
+    padding: 4px 6px;
+}
+.checkbox {
+    width: auto;
+    margin-top: 10px;
+}
+.combobox {
+    display: block;
+    width: 120px;
+    float: left;
+    margin-bottom: 10px;
+}
+
+/* Button Submit Utility (Added from CSS2) */
+.buttonSubmit {
+    width: 100%;
+    margin-left: auto;
+}
+
+/* Labels */
+label {
+    display: block;
+    text-align: right;
+    float: left;
+    width: 140px;
+    padding-right: 20px;
+}
+form label {
+    float: left;
+    clear: left;
+    /* width: 100px */;
+    margin: 9px 0 0;
+    text-align: right;
+}
+#right label select {
+    display: inline-block;
+    text-align: right;
+}
+
+/* Form Group (Grid Layout) */
+.form-group {
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    /* grid-template-columns: 100%; */
+    align-items: center;
+    grid-gap: 20px;
+    margin-bottom: 15px;
+    width: auto;
+    clear: both;
+}
+.form-group label {
+    text-align: left;
+    width: auto;
+    padding-right: 0;
+    margin: 0;
+    white-space: nowrap;
+}
+.form-group select,
+.form-group input {
+    width: 100%;
+    margin: 0;
+}
+.backup-content-wrapper {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.backup-content-wrapper .form-group > div button,
+.backup-content-wrapper .form-group > div progress {
+    width: 100%;
+    display: block;
+    float: none;
+}
+
+
+/* ============================================================
+   3. BUTTON STYLES
+============================================================ */
+
+/* General Large Button (.button) */
 .button {
     display: inline-block;
     padding: 5px 15px;
@@ -174,16 +314,15 @@ textarea:invalid, input:invalid {
     border-radius: 5px;
     box-shadow: 3px 3px black;
     margin-right: 15px;
+    margin-bottom: 10px;
     float: left;
 }
-
 .button span {
     cursor: pointer;
     display: inline-block;
     position: relative;
     transition: 0.5s;
 }
-
 .button span:after {
     content: '\00bb';
     position: absolute;
@@ -192,22 +331,19 @@ textarea:invalid, input:invalid {
     right: -20px;
     transition: 0.5s;
 }
-
 .button:hover span {
     padding-right: 20px;
 }
-
 .button:hover span:after {
     opacity: 1;
     right: 0;
 }
-
 .button:active {
     box-shadow: 4px 4px #666;
     transform: translateY(4px);
 }
 
-/* General Small-Action Styling */
+/* Small Action Button Base (.button.small-action) */
 .button.small-action {
     font-size: 14px;
     padding: 3px 8px;
@@ -218,68 +354,57 @@ textarea:invalid, input:invalid {
     cursor: pointer;
     color: #fff;            /* white text standard */
     text-align: center;
-    float: none;            /* inline side by side */
+    float: none;            /* inline side by side (fixes float: left from .button) */
+    min-width: 80px;            /* Minimum width set for all small actions (<a> and <button>) */
 }
 
-/* Edit Button (Blue) */
+/* Small Action Button Colors & Hover States */
 .button.small-action.edit {
     background-color: #004080; /* dark blue */
 }
-
 .button.small-action.edit:hover {
     background-color: #0059b3; /* lighter blue on hover */
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
-
-/* Delete Button (Red) */
 .button.small-action.delete {
     background-color: #cc0000; /* red */
 }
-
 .button.small-action.delete:hover {
     background-color: #ff3333; /* light red on hover */
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
-
 .button.small-action.save {
     background-color: #008000;
 }
-
 .button.small-action.save:hover {
     background-color: #009000;
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
-
 .button.small-action.cancel {
     background-color: #555555;
 }
-
 .button.small-action.cancel:hover {
     background-color: #556655;
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
-
 .button.small-action.yellow {
     background-color: #fbf799;
     color: black;
 }
-
 .button.small-action.yellow:hover {
     background-color: #fff85d;
     color: black;
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
-
 .button.small-action.blue {
     background-color: #95c9fd;
     color: black;
 }
-
 .button.small-action.blue:hover {
     background-color: #3499fb;
     color: black;
@@ -287,40 +412,26 @@ textarea:invalid, input:invalid {
     transform: translateY(2px);
 }
 
+/* Pagination Nav Buttons */
 .button.small-action.pagination-nav {
     background-color: #333333; /* Dark Gray for Active Nav Button */
 }
-
 .button.small-action.pagination-nav:hover:not(:disabled) {
     background-color: #555555;
     box-shadow: 2px 2px #666;
     transform: translateY(2px);
 }
-
-
-/* DISABLED State (Overrides inherited active styles) */
 .pagination-nav:disabled {
     /* Styles when the button is disabled (e.g., on Page 1 or Last Page) */
     opacity: 0.5;
     cursor: not-allowed;
     box-shadow: none;
     background-color: #dddddd; /* Lighter background for inactive */
-    color: #999999;             /* Gray text */
+    color: #999999;            /* Gray text */
     transform: none;           /* Remove any hover/active transformation */
 }
 
-.paginated table .mobile-label {
-    display: none;
-}
-
-a {
-    color: #E84C11;
-}
-a:hover {
-    color: #FFFFFF;
-}
-
-/* General Small-Action Styling for Links */
+/* General Small-Action Styling for Links (<a> tags) */
 a.small-action {
     display: inline-block;
     font-size: 14px;
@@ -336,20 +447,24 @@ a.small-action {
     float: none;
 }
 
-#status {
-    background: #ffe0e1;
-    padding: 10px;
-    border-radius: 4px;
-    display: none;
-    color: red;
+/* FIX: Override for wide <input> buttons (Submit, Reset, Button) */
+/* This rule fixes the conflict with the global 'input, select' rule (width: 250px) */
+input[type="submit"].small-action,
+input[type="reset"].small-action,
+input[type="button"].small-action {
+    display: inline-block; /* Overrides 'display: block' */
+    width: auto;           /* Overrides 'width: 250px' */
+    float: none;           /* Ensures inline arrangement */
+    min-width: 80px;       /* Sets the desired minimum width */
 }
 
-/** subnav **/
+/* ============================================================
+   4. NAVIGATION (Subnav) STYLES
+============================================================ */
 #primary_nav_wrap
 {
     margin-top: 0px;
 }
-
 #primary_nav_wrap ul
 {
     list-style: none;
@@ -359,7 +474,6 @@ a.small-action {
     padding: 0;
     color: white;
 }
-
 #primary_nav_wrap ul a
 {
     color: white;
@@ -369,7 +483,6 @@ a.small-action {
     line-height: 32px;
     padding: 0 15px;
 }
-
 #primary_nav_wrap ul li
 {
     position: relative;
@@ -378,33 +491,27 @@ a.small-action {
     padding: 0;
     border-right: 1px solid #bbb;
 }
-
 #primary_nav_wrap ul li.current-menu-item
 {
     background: #ddd;
 }
-
 #primary_nav_wrap ul ul li
 {
     float: none;
     width: 200px;
     border-right: 0;
 }
-
 #primary_nav_wrap ul li:last-child {
     border-right: none;
 }
-
 #primary_nav_wrap ul li:hover:not(.active)
 {
     background: black;
 }
-
 #primary_nav_wrap ul ul li:hover:not(.active)
 {
     background: #d1d1d1;
 }
-
 #primary_nav_wrap ul ul
 {
     position: absolute;
@@ -418,45 +525,37 @@ a.small-action {
     transition: opacity 600ms, visibility 600ms;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 }
-
 #primary_nav_wrap ul ul a
 {
     color: black;
     line-height: 120%;
     padding: 10px 15px;
 }
-
 #primary_nav_wrap ul ul ul
 {
     top: 0;
     left: 100%;
 }
-
 #primary_nav_wrap ul ul a:hover > li:not(.active)
 {
     background: #d1d1d1;
 }
-
 #primary_nav_wrap ul li:hover > ul
 {
     visibility: visible;
     opacity: 1;
 }
-
 #primary_nav_stretch {
     display: inline-block;
     background: #333;
     width: 100%;
 }
-
 #primary_nav_wrap .active {
     background: #e84c11;
 }
-
 #primary_nav_wrap .subactive {
     background: #4CAF50;
 }
-
 #primary_nav_wrap .parentactive {
     background: repeating-linear-gradient(
         60deg,
@@ -466,90 +565,15 @@ a.small-action {
         #333333 20px
         );
 }
-
 #primary_nav_wrap li.has-child > a:after {
     content: '\2609';
 }
 
-/** statusmessage test **/
-#statusmessage {
-    position: fixed;
-    bottom: 0;
-    line-height: 25px;
-    color: black;
-    background-color: green;
-    margin-bottom: -50px;
-    padding: 10px 0;
-    font-weight: bold;
-    left: 0;
-    right: 0;
-    z-index: 5000;
-}
+/* ============================================================
+   5. GRID AND CARD STYLES
+============================================================ */
 
-/* Forms */
-form {
-    display: table-cell;
-}
-
-form br {
-    clear: left;
-}
-
-form label {
-    float: left;
-    clear: left;
-    width: 100px;
-    margin: 9px 0 0;
-    text-align: right;
-}
-
-form input, form select {
-    margin: 5px 0 0 10px;
-    padding: 4px 6px;
-}
-
-#right label select {
-    display: inline-block;
-    text-align: right;
-}
-
-.checkbox {
-    width: auto;
-    margin-top: 10px;
-}
-
-input, select {
-    display: block;
-    width: 250px;
-    float: left;
-    margin-bottom: 10px;
-}
-
-label {
-    display: block;
-    text-align: right;
-    float: left;
-    width: 140px;
-    padding-right: 20px;
-}
-
-.combobox {
-    display: block;
-    width: 120px;
-    float: left;
-    margin-bottom: 10px;
-}
-
-br {
-    clear: left;
-}
-
-.buttonSubmit {
-    width: 100%;
-    margin-left: auto;
-}
-
-/** Grid **/
+/* Grid Variables */
 :root {
     --page-header-bgColor: #242e42;
     --page-header-bgColor-hover: #1d2636;
@@ -567,6 +591,7 @@ br {
     --box-shadow: 0 0 10px -2px rgba(0, 0, 0, 0.55);
 }
 
+/* Grid Container */
 .page-content {
     background: rgba(0, 0, 0, 0);
     width: 98%;
@@ -587,74 +612,26 @@ br {
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
 }
-
 .page-content .grid > article:first-child,
 .page-content .grid > article:last-child {
 }
 
-.form-group {
-    display: grid; 
-    grid-template-columns: 160px 1fr;
-    align-items: center; 
-    grid-gap: 20px; 
-    margin-bottom: 15px; 
-    width: auto; 
-    clear: both;
-}
 
-.form-group label {
-    text-align: left; 
-    width: auto; 
-    padding-right: 0;
-    margin: 0;
-    white-space: nowrap; 
-}
-
-.form-group select,
-.form-group input {
-    width: 100%;      
-    margin: 0; 
-}
-.backup-content-wrapper {
-    max-width: 600px; 
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.backup-content-wrapper .form-group > div button,
-.backup-content-wrapper .form-group > div progress {
-    width: 100%;
-    display: block; 
-    float: none;
-}
-
-
-/* ============================================================
-    CARD LIST & CARD STYLES (ADAPTED TO YOUR TEMPLATE CLASSES)
-    
-    .list-cards  ->  The wrapping container
-    .card        ->  The individual card element
-    .user-details -> The content area (Details)
-    .actions     ->  The action area (Buttons)
-============================================================ */
-
-/* CONTAINER: .list-cards (or .paginated.list-cards) */
+/* List-Card Layout */
 .list-cards {
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     width: 100%;
-    padding: 15px 0; 
+    padding: 15px 0;
     box-sizing: border-box;
 }
 
-/* INDIVIDUAL CARD: .card */
 .card {
-    /* Desktop: Makes the card itself a horizontal Flex container (side-by-side) */
-    display: flex; 
-    align-items: center; 
-    /* NO justify-content: space-between anymore! */
-    background-color: #404040; 
+    /* Desktop: Horizontal Flex container (side-by-side) */
+    display: flex;
+    align-items: center;
+    background-color: #404040;
     border: 1px solid #444;
     border-radius: 5px;
     padding: 15px;
@@ -662,25 +639,29 @@ br {
     box-sizing: border-box;
 }
 
-/* CONTENT: .user-details (or other detail classes) */
-/* Allows the content to take up only the space it needs, plus margin */
+/* Card Content Area */
 .user-details,
 .card > div:not(.actions) {
-    flex-grow: 0; /* Important: only takes the space needed by the content */
-    flex-shrink: 0; 
-    margin-right: 20px; /* Space between content and buttons */
-    /* If you want the content to be the minimum width possible: */
+    flex-grow: 0; /* Takes only the space needed by the content */
+    flex-shrink: 0;
+    margin-right: 20px;
     min-width: 0;
+    margin-top: auto;
 }
 
-/* ACTIONS: .actions (Your Buttons) */
+/* Card Actions (Button Container) */
 .actions {
-    /* Desktop: Actions (Buttons) are arranged horizontally */
+    /* Desktop: Actions (Buttons) arranged horizontally */
     display: flex;
-    gap: 10px; 
-    flex-shrink: 0; 
-    /* CRITICAL: Pushes this block as far right as possible, eliminating large gaps */
-    margin-right: auto; 
+    gap: 10px;
+    flex-shrink: 0;
+    margin-right: auto; /* Pushes the block as far right as possible */
+}
+
+.actions.column {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
 }
 
 /* Button styling within the Actions */
@@ -693,13 +674,11 @@ br {
 
 
 /* ============================================================
-    MEDIA QUERY (MOBILE: Responsiveness for all elements)
-    
-    The mobile rules also use YOUR class names: .card and .actions
+   6. RESPONSIVENESS (MEDIA QUERY)
 ============================================================ */
 @media screen and (max-width: 768px) {
-    
-    /* 1. BODY: Adjust padding for mobile header/footer */
+
+    /* Body Padding Adjustment */
     body {
         padding-top: 60px; /* Less space at the top */
         padding-bottom: 120px; /* More space for fixed footer */
@@ -707,17 +686,16 @@ br {
         padding-right: 10px;
     }
 
-    /* 2. Important: On mobile devices, the container must use 100% width */
+    /* Container Width */
     .container {
         padding: 0 10px;
     }
-    
-    /* 3. Make hamburger menu visible and hide navigation */
+
+    /* Navigation (Mobile Menu Display) */
     .hamburger-menu {
         display: block !important;
         visibility: visible !important;
     }
-
     .topnav {
         display: none;
         position: fixed;
@@ -730,18 +708,14 @@ br {
         overflow-y: auto;
     }
 
-    /* ---------------------------------------------------- */
-    /* MOBILE CARD STYLING (Card Stacking)                  */
-    /* ---------------------------------------------------- */
-    
-    /* CARD (.card): Vertical stacking of content */
+    /* MOBILE CARD STYLING (Card Stacking) */
     .card {
         flex-direction: column; /* Details above Actions */
         align-items: flex-start; /* Align left */
         padding: 10px;
     }
-    
-    /* CONTENT (.user-details): Full width and separator line */
+
+    /* Mobile Card Content */
     .user-details,
     .card > div:not(.actions) {
         width: 100%;
@@ -751,7 +725,7 @@ br {
         border-bottom: 1px dashed #555;
     }
 
-    /* ACTIONS (.actions): Stack buttons vertically */
+    /* Mobile Card Actions */
     .actions {
         flex-direction: column; /* Buttons are stacked one below the other */
         width: 100%; /* Important so buttons take full width */
@@ -759,10 +733,10 @@ br {
         margin-left: auto;
     }
 
-    /* Buttons take full width */
+    /* Mobile Buttons */
     .actions .button.small-action,
     .actions form button {
         display: block;
-        width: 100%;
+        width: 100%; /* Buttons take full width */
     }
 }
