@@ -40,7 +40,7 @@ body {
     background: #353535;
     color: #FFFFFF;
     font-family: "Lucida Grande",Verdana,Arial,sans-serif;
-    text-align: left;
+    text-align: center;
     padding-top: 130px; /* Space for fixed header */
     padding-bottom: 50px; /* Space for fixed footer */
     margin-top: 10px;
@@ -245,7 +245,7 @@ label {
     display: block;
     text-align: right;
     float: left;
-    width: 140px;
+    width: 160px;
     padding-right: 20px;
 }
 form label {
@@ -640,15 +640,20 @@ input[type="button"].small-action {
 }
 
 /* Card Content Area */
-.user-details,
+.card-details,
 .card > div:not(.actions) {
     flex-grow: 0; /* Takes only the space needed by the content */
     flex-shrink: 0;
     margin-right: 20px;
     min-width: 0;
     margin-top: auto;
+    text-align: left;
 }
 
+.detail-line
+{
+    margin-bottom: auto;
+}
 /* Card Actions (Button Container) */
 .actions {
     /* Desktop: Actions (Buttons) arranged horizontally */
@@ -716,7 +721,7 @@ input[type="button"].small-action {
     }
 
     /* Mobile Card Content */
-    .user-details,
+    .card-details,
     .card > div:not(.actions) {
         width: 100%;
         margin-right: 0;
