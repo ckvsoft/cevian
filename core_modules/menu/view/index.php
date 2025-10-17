@@ -28,7 +28,7 @@
             <input type="hidden" name="is_public" value="-1">
             <input class="checkbox" type="checkbox" name="is_public" value="1"><br />
 
-            <br /><br />
+            <br />
 
             <input class="button small-action save" type="submit" value="<?= _('Create Menuentry') ?>">
 
