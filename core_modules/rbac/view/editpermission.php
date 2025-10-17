@@ -27,8 +27,8 @@ $isEditMode = !empty($this->perm['id']);
 $defaultRedirect = 'rbac/permissions';
 ?>
 <fieldset style="margin-top: 30px;">
+    <legend><?= _($isEditMode ? 'Edit Permission' : 'Create Permission') ?>: <?= htmlspecialchars($this->perm['permName'] ?? '') ?></legend>
     <div data-form="permissionForm" data-json="1">
-        <legend><?= _($isEditMode ? 'Edit Permission' : 'Create Permission') ?>: <?= htmlspecialchars($this->perm['permName'] ?? '') ?></legend>
 
         <form action="<?= BASE_URI ?>rbac/editPermissionSave" method="post" id="permissionForm" data-redirect="<?= $defaultRedirect ?>">
             <input type="hidden" name="perm_id" value="<?= $this->perm['id'] ?? '' ?>">
@@ -47,16 +47,17 @@ $defaultRedirect = 'rbac/permissions';
                     <?= _($isEditMode ? 'Save' : 'Create') ?>
                 </button>
 
-                <input class="button small-action cancel"
-                       type="button"
-                       onclick="javascript:window.location = '<?= BASE_URI . $defaultRedirect ?>';"
-                       value="<?= _('Cancel') ?>">
-
                 <?php if ($isEditMode) { ?>
                     <button class="button small-action delete" type="button" onclick="deletePermission(<?= $this->perm['id'] ?>)">
                         <?= _('Delete') ?>
                     </button>
                 <?php } ?>
+
+                <input class="button small-action cancel"
+                       type="button"
+                       onclick="javascript:window.location = '<?= BASE_URI . $defaultRedirect ?>';"
+                       value="<?= _('Cancel') ?>">
+
             </div>
         </form>
     </div>
