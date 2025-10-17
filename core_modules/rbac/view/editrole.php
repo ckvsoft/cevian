@@ -2,8 +2,8 @@
 $defaultRedirect = 'rbac';
 ?>
 <fieldset>
+    <legend><?= _('Edit Role') ?>: <?= htmlspecialchars($this->role['roleName']); ?></legend>
     <div data-form="editRoleForm" data-json="1">
-        <legend><?= _('Edit Role') ?>: <?= htmlspecialchars($this->role['roleName']); ?></legend>
 
         <form action="<?= BASE_URI ?>rbac/editRoleSave" method="post" id="editRoleForm" data-redirect="<?= $defaultRedirect ?>">
             <input type="hidden" name="role_id" value="<?= $this->role['id'] ?>">
