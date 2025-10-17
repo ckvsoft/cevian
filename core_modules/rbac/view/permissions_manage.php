@@ -33,32 +33,31 @@ $listUrl = BASE_URI . 'rbac/permissionList';
 $addUrl = BASE_URI . 'rbac/editPermissionSave'; // A single save endpoint
 ?>
 <fieldset>
+    <legend id="formTitle"><?= _('Add New Permission') ?></legend>
+
     <div id="addPermissionContainer"
          class="ajax-form-container"
          data-form="addPermissionForm"
          data-url="<?= $listUrl ?>"
          data-json="1">
 
-        <legend id="formTitle"><?= _('Add New Permission') ?></legend>
 
         <form action="<?= $addUrl ?>" method="post" id="addPermissionForm">
             <input type="hidden" name="id" id="permId" value="">
 
-            <label for="permKey"><?= _('Permission Key') ?> (<?= _('e.g.') ?> 'user_create')</label>
-            <input type="text" name="permKey" id="permKey" class="form-control" required><br />
+            <label for="permKey"><?= _('Permission Key') ?>:</label>
+            <input type="text" name="permKey" id="permKey" class="form-control" required placeholder=" <?= _('e.g.') ?> <?= _('user_create') ?>"><br />
 
-            <label for="permName"><?= _('Display Name') ?> (<?= _('e.g.') ?> 'Create User')</label>
-            <input type="text" name="permName" id="permName" class="form-control" required><br />
+            <label for="permName"><?= _('Display Name') ?>:</label>
+            <input type="text" name="permName" id="permName" class="form-control" required placeholder="<?= _('e.g.') ?> <?= _('Create User') ?>"><br />
 
-            <label for="permDescription"><?= _('Description') ?></label>
+            <label for="permDescription"><?= _('Description') ?>:</label>
             <textarea style="width: 240px; height: 55px;" name="permDescription" id="permDescription" class="form-control"></textarea><br />
 
-            <button type="submit" class="button small-action save" id="submitPermButton">
-                <?= _('Add Permission') ?>
-            </button>
-            <button type="button" class="button small-action cancel" id="cancelPermButton" style="display:none;">
-                <?= _('Cancel Edit') ?>
-            </button>
+            <br />
+
+            <input class="button small-action save" type="submit" value="<?= _('Add Permission') ?>">
+            <input class="button small-action cancel" type="reset" value="<?= _('Clear') ?>">
         </form>
     </div>
 </fieldset>
