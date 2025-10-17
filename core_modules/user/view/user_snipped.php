@@ -33,7 +33,7 @@ $baseUri = BASE_URI; // Use the base URI constant
 
             <div class="card" data-user-id="<?= htmlspecialchars($user['user_id']) ?>">
 
-                <div class="user-details">
+                <div class="card-details">
                     <p class="name">
                         <strong><?= _('Name') ?>:</strong> <?= htmlspecialchars($user['username']); ?><br>
                         <strong><?= _('eMail') ?>:</strong> <?= htmlspecialchars($user['email']); ?>
