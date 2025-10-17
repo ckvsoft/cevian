@@ -38,7 +38,7 @@ $baseUri = BASE_URI;
             ?>
             <div class="card role-card depth-<?= $role['depth'] ?>" data-role-id="<?= htmlspecialchars($role['id']) ?>">
 
-                <div class="role-details" style="padding-left: <?= $paddingLeft ?>;">
+                <div class="card-details" style="padding-left: <?= $paddingLeft ?>;">
 
                     <p class="detail-line">
                         <strong><?= _('Role') ?>:</strong> <?= $labelPrefix . htmlspecialchars($role['roleName']) ?>
