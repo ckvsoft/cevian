@@ -52,9 +52,9 @@ class Menu extends ckvsoft\mvc\BaseController
             // Translate status strings
             $is_public_status = $item['is_public'] == 1 ? _('Yes') : _('No');
 
-            $html .= '<div class="card menu-card depth-' . $depth . '" data-menu-id="' . htmlspecialchars($item['id']) . '">';
+            $html .= '<div class="card depth-' . $depth . '" data-menu-id="' . htmlspecialchars($item['id']) . '">';
 
-            $html .= '<div class="menu-details" style="padding-left: ' . $paddingLeft . ';">';
+            $html .= '<div class="card-details" style="padding-left: ' . $paddingLeft . ';">';
 
             /*
              * Original commented section (ID)
