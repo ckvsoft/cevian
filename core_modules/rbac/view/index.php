@@ -5,22 +5,24 @@
 
     <div data-form="roleForm" class="ajax-form-container" data-url="rbac/roleList" data-json="1">
         <form id="roleForm" action="<?= BASE_URI ?>rbac/saveRole" method="post" autocomplete="off">
-            <label for="roleName"><?= _('Role Name') ?></label>
+            <label for="roleName"><?= _('Role Name') ?>:</label>
             <input type="text" id="roleName" name="roleName" required><br />
 
-            <div <div id="right">
-                    <label for="parentRole"><?= _('Parent Role (optional)') ?></label>
-                    <select id="parentRole" name="parentId">
-                        <option value="">-- <?= _('None') ?> --</option>
-                        <?php foreach (($this->roles ?? []) as $role): ?>
-                            <option value="<?= $role['id'] ?>"><?= str_repeat('— ', $role['depth']) . htmlspecialchars($role['roleName']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+            <div id="right">
+                <label for="parentRole"><?= _('Parent Role (optional)') ?>:</label>
+                <select id="parentRole" name="parentId">
+                    <option value="">-- <?= _('None') ?> --</option>
+                    <?php foreach (($this->roles ?? []) as $role): ?>
+                        <option value="<?= $role['id'] ?>"><?= str_repeat('— ', $role['depth']) . htmlspecialchars($role['roleName']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-                <br /><br />
+            <br /><br />
 
-                <button type="submit" class="button small-action save"><?= _('Create Role') ?></button>
+            <button type="submit" class="button small-action save"><?= _('Create Role') ?></button>
+            <input class="button small-action cancel" type="reset" value="<?= _('Clear') ?>">
+
         </form>
     </div>
 </fieldset>
