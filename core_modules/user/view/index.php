@@ -15,7 +15,9 @@
             <select name="role">
                 <option value="owner">Owner</option>
                 <option value="admin">Admin</option>
-            </select><br /><br />
+            </select>
+
+            <br /><br />
 
             <input class="button small-action save" type="submit" value="Create User">
             <input class="button small-action cancel" type="reset" value="<?= _('Clear') ?>">
