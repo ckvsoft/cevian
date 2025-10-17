@@ -41,9 +41,9 @@ $baseUri = BASE_URI;
 <div class="list-cards">
     <?php foreach ($this->permissions as $perm) : ?>
 
-        <div class="card permission-card" data-perm-id="<?= htmlspecialchars($perm['id']) ?>">
+        <div class="card" data-perm-id="<?= htmlspecialchars($perm['id']) ?>">
 
-            <div class="permission-details">
+            <div class="card-details">
 
                 <p class="detail-line">
                     <strong><?= _('Key') ?>:</strong> <?= htmlspecialchars($perm['permKey']) ?>
