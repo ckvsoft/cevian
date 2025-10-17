@@ -289,13 +289,11 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * Fortschritt abfragen
-     *
      * @param int $id Progress-Bar ID
      * @return array
      */
     public function progress($id): array
     {
-        return $this->db->select("SELECT percent FROM progress_bars WHERE id = :id", ['id' => $id]);
+        return \ckvsoft\Progress::getStatus($id, $this->db);
     }
 }
