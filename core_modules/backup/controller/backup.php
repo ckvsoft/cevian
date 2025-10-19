@@ -125,47 +125,70 @@ class Backup extends ckvsoft\mvc\BaseController
     public function progress($progress_id)
     {
         $progressData = $this->loadModel('backup')->progress($progress_id);
+
         header('Content-Type: application/json');
-        echo json_encode(isset($progressData[0]) ? $progressData[0] : []);
+        echo json_encode($progressData);
     }
 
     public function listImageDirs()
     {
         $baseDir = realpath(__DIR__ . '/../../../');
-        $exclude = ['library', 'var/backup'];
+        $exclude = ['core_modules', 'library', 'var/backup'];
 
-        $dirs = [];
-
-        $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($baseDir, RecursiveDirectoryIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
+        $foundDirs = [];
+        $fileIterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($baseDir, RecursiveDirectoryIterator::SKIP_DOTS)
         );
 
-        foreach ($iterator as $file) {
-            if ($file->isDir()) {
-                $relativePath = str_replace($baseDir . DIRECTORY_SEPARATOR, '', $file->getPathname());
+        foreach ($fileIterator as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
 
-                foreach ($exclude as $ex) {
-                    if (strpos($relativePath, $ex) === 0) {
-                        continue 2; // direkt nächste Iteration
-                    }
+            $fullPath = $file->getPathname();
+            $relativePath = ltrim(str_replace($baseDir, '', $fullPath), DIRECTORY_SEPARATOR);
+
+            $isExcluded = false;
+            foreach ($exclude as $ex) {
+                if (strpos($relativePath, $ex) === 0) {
+                    $isExcluded = true;
+                    break;
+                }
+            }
+            if ($isExcluded) {
+                continue;
+            }
+
+            if (@getimagesize($fullPath) !== false) {
+                $dirPath = dirname($relativePath);
+
+                if (!empty($dirPath) && $dirPath !== '.') {
+                    $foundDirs[$dirPath] = true;
                 }
 
-                foreach (scandir($file->getPathname()) as $f) {
-                    if ($f[0] === '.')
-                        continue; // versteckte Dateien ignorieren
+                $parts = explode(DIRECTORY_SEPARATOR, $dirPath);
+                array_pop($parts);
 
-                    $filePath = $file->getPathname() . DIRECTORY_SEPARATOR . $f;
+                while (count($parts) >= 0) {
+                    $parentPath = implode(DIRECTORY_SEPARATOR, $parts);
 
-                    if (is_file($filePath) && @getimagesize($filePath) !== false) {
-                        $dirs[] = $relativePath;
-                        break; // reicht, wenn 1 Bild im Ordner existiert
+                    if (!empty($parentPath)) {
+                        $foundDirs[$parentPath] = true;
                     }
+
+                    if (count($parts) === 0) {
+                        break;
+                    }
+
+                    array_pop($parts);
                 }
             }
         }
 
+        $dirs = array_keys($foundDirs);
+        sort($dirs);
+
         header('Content-Type: application/json');
-        echo json_encode(['dirs' => array_values(array_unique($dirs))]);
+        echo json_encode(['dirs' => array_values($dirs)]);
     }
 }
