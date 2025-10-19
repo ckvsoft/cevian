@@ -206,26 +206,30 @@ class Gallery_Model extends ckvsoft\mvc\Model
     }
 
     /**
-     * Retrieves sub-albums for a given album path based on filesystem scan.
+     * Retrieves sub-albums for a given album path based on DATABASE scan and permission check.
+     * Only returns albums the current user is permitted to view.
      * @param string $albumName The album path (relative to the base path).
-     * @return array List of sub-album names.
+     * @return array List of permitted sub-album names.
      */
     public function getSubAlbums(string $albumName): array
     {
-        $albumDir = rtrim($this->basePath, '/') . '/' . trim($albumName, '/');
-        $subAlbums = [];
 
-        if (is_dir($albumDir) && $handle = opendir($albumDir)) {
-            while (($entry = readdir($handle)) !== false) {
-                if ($entry !== '.' && $entry !== '..' && is_dir($albumDir . '/' . $entry)) {
-                    $subAlbums[] = $entry;
-                }
+        $basePath = trim($albumName, '/');
+
+        $potentialSubAlbumNames = $this->_getDirectSubAlbumPathsFromDB($basePath);
+
+        $permittedSubAlbums = [];
+
+        foreach ($potentialSubAlbumNames as $subAlbumName) {
+            $fullSubAlbumPath = empty($basePath) ? $subAlbumName : $basePath . '/' . $subAlbumName;
+
+            if ($this->checkAlbumPermissions($fullSubAlbumPath) !== false) {
+                $permittedSubAlbums[] = $subAlbumName;
             }
-            closedir($handle);
         }
 
-        sort($subAlbums);
-        return $subAlbums;
+        sort($permittedSubAlbums);
+        return $permittedSubAlbums;
     }
 
     /**
@@ -461,5 +465,52 @@ class Gallery_Model extends ckvsoft\mvc\Model
         }
 
         return $mergedMedia;
+    }
+
+    /**
+     * Retrieves the direct sub-album paths for a given album path from the database.
+     * @param string $albumPath The parent album path (empty string for root).
+     * @return array List of direct sub-album paths.
+     */
+    private function _getDirectSubAlbumPathsFromDB(string $albumPath): array
+    {
+        $normalizedPath = trim($albumPath, '/');
+
+        $searchPathPrefix = empty($normalizedPath) ? '' : $normalizedPath . '/';
+
+        $sql = "SELECT `album_path` FROM `gallery_albums` WHERE `album_path` LIKE :pathPrefix";
+        $bindings = ['pathPrefix' => "{$searchPathPrefix}%"];
+
+        $allDescendantPaths = $this->db->select($sql, $bindings);
+        $paths = array_column($allDescendantPaths, 'album_path');
+
+        $directSubAlbums = [];
+        $expectedPathDepth = count(explode('/', $searchPathPrefix));
+
+        foreach ($paths as $path) {
+            if ($path === $normalizedPath) {
+                continue;
+            }
+
+            $pathSegments = explode('/', $path);
+            if (count($pathSegments) === $expectedPathDepth) {
+                $albumName = end($pathSegments);
+                $directSubAlbums[] = $albumName;
+            }
+        }
+
+        if (empty($normalizedPath)) {
+            $sql = "SELECT `album_path` FROM `gallery_albums`";
+            $allPaths = $this->db->select($sql);
+
+            foreach (array_column($allPaths, 'album_path') as $path) {
+                if (strpos($path, '/') === false && !empty($path)) {
+                    $directSubAlbums[] = $path;
+                }
+            }
+        }
+
+
+        return array_unique($directSubAlbums);
     }
 }
