@@ -21,10 +21,10 @@ class Backup_Model extends \ckvsoft\mvc\Model
     private $count;
 
     /**
-     * Konstruktor
+     * Constructor
      *
-     * @param string $source_folder Quellordner für Images
-     * @param string $destination_folder Zielordner für Backup
+     * @param string $source_folder Source folder for images
+     * @param string $destination_folder Destination folder for the backup
      */
     public function __construct($source_folder = "", $destination_folder = "")
     {
@@ -36,10 +36,10 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * Letztes Backup abrufen
+     * Retrieve the last backup timestamp
      *
      * @param int $id Progress-Bar ID
-     * @return string|null Timestamp des letzten Backups
+     * @return string|null Timestamp of the last backup
      */
     public function lastBackup($id)
     {
@@ -52,10 +52,10 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * Datenbank sichern
+     * Backup the database
      *
      * @param int $progress_id Progress-Bar ID
-     * @return string JSON-Daten aller Tabellen
+     * @return string JSON data of all tables
      */
     public function backupDatabase($progress_id)
     {
@@ -63,7 +63,7 @@ class Backup_Model extends \ckvsoft\mvc\Model
         $backup = [];
         $rowcount = 0;
 
-        // Gesamtzahl Zeilen für Progress-Bar berechnen
+        // Calculate total number of rows for the progress bar
         foreach ($tables as $tableName) {
             $countResult = $this->db->select("SELECT COUNT(*) as rowcount FROM $tableName");
             if (!empty($countResult) && isset($countResult[0]['rowcount'])) {
@@ -81,11 +81,11 @@ class Backup_Model extends \ckvsoft\mvc\Model
             $tableArray['fields'] = [];
             $tableArray['rows'] = [];
 
-            // Tabellenstruktur sichern
+            // Backup table structure
             $row2 = $this->db->select("SHOW CREATE TABLE $tableName");
             $tableArray['create_table_sql'] = (!empty($row2) && isset($row2[0]['Create Table'])) ? $row2[0]['Create Table'] : '';
 
-            // Spaltennamen und Daten übernehmen
+            // Get column names and data
             if (!empty($result) && isset($result[0]) && is_array($result[0])) {
                 $tableArray['fields'] = array_keys($result[0]);
                 $tableArray['rows'] = $result;
@@ -93,11 +93,10 @@ class Backup_Model extends \ckvsoft\mvc\Model
 
             $backup[] = $tableArray;
 
-            // Fortschritt hochzählen
+            // Increment progress
             if (!empty($result)) {
                 foreach ($result as $row) {
                     $this->progress->increment();
-                    usleep(300);
                 }
             }
         }
@@ -106,10 +105,10 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * Images sichern
+     * Backup images
      *
      * @param int $progress_id Progress-Bar ID
-     * @return bool Erfolg
+     * @return bool Success status
      */
     public function backupImages($progress_id): bool
     {
@@ -120,12 +119,12 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * Rekursives Kopieren von Dateien
+     * Recursive file copying (Differential Backup)
      *
-     * @param string $source_folder Quellordner
-     * @param string $destination_folder Zielordner
-     * @param object $progress Progress-Objekt
-     * @return bool Erfolg
+     * @param string $source_folder Source folder
+     * @param string $destination_folder Destination folder
+     * @param object $progress Progress object
+     * @return bool Success status
      */
     private function recurseCopy($source_folder, $destination_folder, $progress): bool
     {
@@ -161,8 +160,10 @@ class Backup_Model extends \ckvsoft\mvc\Model
             if (!@getimagesize($srcPath))
                 continue;
 
+            // Check if file is already backed up and hasn't changed (filemtime <= log timestamp)
             if (isset($backup_log[$relPath]) && filemtime($srcPath) <= $backup_log[$relPath])
                 continue;
+
             if (!file_exists(dirname($dstPath)))
                 mkdir(dirname($dstPath), 0777, true);
             if (!copy($srcPath, $dstPath))
@@ -170,7 +171,6 @@ class Backup_Model extends \ckvsoft\mvc\Model
 
             $backup_log[$relPath] = filemtime($srcPath);
             $progress->increment();
-            usleep(300);
         }
 
         file_put_contents($logFile, json_encode($backup_log));
@@ -178,55 +178,68 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * Dateien zählen
-     *
-     * @return int Anzahl Dateien
-     */
-    private function countFilesInFolder($folder): int
-    {
-        $backup_log = [];
-        $logFile = rtrim($this->destination_folder, "/") . "/" . $this->backup_log_file;
-        if (file_exists($logFile))
-            $backup_log = json_decode(file_get_contents($logFile), true);
-
-        $files = scandir($folder);
-        $total_files = 0;
-
-        foreach ($files as $filename) {
-            if (in_array($filename, ['.', '..']))
-                continue;
-            $filepath = rtrim($folder, "/") . "/" . $filename;
-
-            if (is_dir($filepath)) {
-                $total_files += $this->countFilesInFolder($filepath);
-            } else {
-                if (!@getimagesize($filepath))
-                    continue;
-                if (isset($backup_log[$filename]) && filemtime($filepath) <= $backup_log[$filename])
-                    continue;
-                $total_files++;
-            }
-        }
-
-        return $total_files;
-    }
-
-    /**
-     * Hilfsfunktion: zählt alle zu kopierenden Dateien
+     * Helper function: Counts all files that ACTUALLY NEED TO BE COPIED
+     * (Differential counting based on backup log).
      *
      * @return int
      */
     public function countFilesToCopy(): int
     {
-        return $this->countFilesInFolder($this->source_folder);
+        $total_files_to_copy = 0;
+
+        // Load backup log
+        $backup_log = [];
+        $logFile = rtrim($this->destination_folder, "/") . "/" . $this->backup_log_file;
+        if (file_exists($logFile)) {
+            $backup_log = json_decode(file_get_contents($logFile), true);
+        }
+
+        // Get base directory for relative path calculation
+        $baseDir = realpath($this->source_folder);
+
+        // Iterate over all files in the source folder (recursively)
+        $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($this->source_folder, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                continue;
+            }
+
+            $srcPath = $file->getPathname();
+            // Critical: Get the relative path (used as key in the log)
+            $relPath = ltrim(str_replace($baseDir, '', $srcPath), DIRECTORY_SEPARATOR);
+
+            // 1. Is it an image?
+            if (!@getimagesize($srcPath)) {
+                continue;
+            }
+
+            // 2. Check if the file is already backed up and unchanged
+            // Condition: filemtime (source) > backup_log (last backup) -> MUST be copied
+            if (isset($backup_log[$relPath]) && filemtime($srcPath) <= $backup_log[$relPath]) {
+                // File is unchanged, skip counting
+                continue;
+            }
+
+            // If reached here, the file needs to be copied
+            $total_files_to_copy++;
+        }
+
+        return $total_files_to_copy;
     }
 
+    // NOTE: The previous private function countFilesInFolder($folder) has been replaced
+    // by the corrected logic in countFilesToCopy() and removed.
+
     /**
-     * Daten in Datei speichern
+     * Save data to a file
      *
-     * @param string $data JSON-Daten
-     * @param string $file_name Dateiname
-     * @return bool|string true oder Fehlermeldung
+     * @param string $data JSON data
+     * @param string $file_name Filename
+     * @return bool|string true or error message
      */
     public function saveToFile($data, $file_name)
     {
@@ -247,16 +260,16 @@ class Backup_Model extends \ckvsoft\mvc\Model
     }
 
     /**
-     * JSON-Daten importieren
+     * Import JSON data into the database
      *
-     * @param string $json_data JSON-Daten
+     * @param string $json_data JSON data
      * @return bool
      */
     public function importJSON($json_data): bool
     {
         $tables = json_decode($json_data, true);
         if (empty($tables))
-            throw new \ckvsoft\CkvException("Import Error: JSON ist leer oder ungültig.");
+            throw new \ckvsoft\CkvException("Import Error: JSON is empty or invalid.");
 
         foreach ($tables as $table) {
             if (!isset($table['name'], $table['fields'], $table['rows']))
@@ -280,7 +293,7 @@ class Backup_Model extends \ckvsoft\mvc\Model
                 }
 
                 $query = "INSERT INTO `$tableName` (" . implode(',', $keys) . ")
-                          VALUES (" . implode(',', $values) . ")";
+                              VALUES (" . implode(',', $values) . ")";
                 $this->db->query($query);
             }
         }
