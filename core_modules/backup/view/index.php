@@ -3,10 +3,8 @@
 $baseUri = BASE_URI;
 ?>
 
-<h1><?= htmlspecialchars($this->title) ?></h1>
-
 <fieldset>
-    <legend><?= _('Backup') ?></legend>
+    <legend><?= htmlspecialchars($this->title) ?></legend>
     <section class="page-content">
         <section class="grid">
             <article>
