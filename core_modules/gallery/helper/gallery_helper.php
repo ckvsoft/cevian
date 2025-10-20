@@ -59,8 +59,8 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
     }
 
     /**
-     *
-     * @param Gallery_Model $model
+     * Prepares the grid items (sub-albums and media) for the given album path.
+     * * @param Gallery_Model $model
      * @param string $albumPath The path to the album (e.g., 'events/wedding')
      * @param bool $includeSubAlbums Whether sub-albums should be included
      * @param bool $recursive
@@ -72,14 +72,20 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
         $contentList = [];
 
         if ($includeSubAlbums) {
-            $subAlbumNames = $model->getSubAlbums($albumPath);
-            foreach ($subAlbumNames as $name) {
-                $fullAlbumPath = empty($albumPath) ? $name : $albumPath . '/' . $name;
+            $subAlbums = $model->getSubAlbums($albumPath);
+            foreach ($subAlbums as $album) {
+
+                // FIX: Use the 'path' key directly, as it contains the FULL path from the model.
+                $fullAlbumPath = $album['path'];
+
+                // FIX: Use the 'title' key directly, falling back to a formatted name if null.
+                $albumTitle = $album['title'] ?? $model->formatMediaName($album['name']);
+
                 $thumb = $model->getRandomThumbnailUrl($fullAlbumPath, true) ?? BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
                 $contentList[] = [
                     'type' => 'album',
-                    'name' => $model->formatMediaName($name),
+                    'name' => $albumTitle,
                     'url' => BASE_URI . 'gallery/index/' . $fullAlbumPath,
                     'path' => $fullAlbumPath,
                     'thumbnailUrl' => $thumb,
@@ -102,5 +108,45 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
         }
 
         return $this->collectGalleryItemInstructions($contentList);
+    }
+
+    /**
+     * Prepares the structured data necessary to display a breadcrumb trail.
+     * Fetches the actual album titles from the database for each path segment.
+     * * @param Gallery_Model $model The Gallery Model instance.
+     * @param string $currentAlbumPath The path to the current album (e.g., 'events/wedding').
+     * @return array List of path segments with their DB title and full path.
+     */
+    public function getBreadcrumbData(Gallery_Model $model, string $currentAlbumPath): array
+    {
+        if (empty($currentAlbumPath) || $currentAlbumPath === 'ALL_ALBUMS') {
+            return [];
+        }
+
+        $segments = explode('/', trim($currentAlbumPath, '/'));
+        $pathMap = [];
+        $pathAccumulator = '';
+
+        foreach ($segments as $segment) {
+            if (empty($segment))
+                continue;
+
+            // Accumulate the full path for lookup
+            $pathAccumulator = trim($pathAccumulator . '/' . $segment, '/');
+
+            // Check permissions/fetch data (this includes the title)
+            // Note: This requires a DB call per segment, but correctly fetches the title.
+            $albumData = $model->checkAlbumPermissions($pathAccumulator);
+
+            // Get the title from DB or fall back to the segment name
+            $title = $albumData['title'] ?? $segment;
+
+            $pathMap[] = [
+                'name' => $segment, // The original folder name
+                'title' => $title, // The title from the DB
+                'path' => $pathAccumulator // The full path (e.g., 'events/hochzeit')
+            ];
+        }
+        return $pathMap;
     }
 }
