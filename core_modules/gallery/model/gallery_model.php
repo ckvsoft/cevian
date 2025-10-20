@@ -3,14 +3,17 @@
 // gallery/model/Gallery_Model.php
 
 use ckvsoft\mvc\Config;
-use ckvsoft\Image; // Assuming ckvsoft\Image is the class used for thumbnail generation
-use ckvsoft\DbExpr; // Required for incrementViewCounter
+use ckvsoft\Image;
+use ckvsoft\DbExpr;
 use ckvsoft\Auth;
 use ckvsoft\CkvException;
 
 /**
- * The main model responsible for gallery access, path calculations, file scanning,
- * permission checks, and view counting.
+ * Main gallery model responsible for:
+ * - Path calculations
+ * - File scanning
+ * - Permission checks
+ * - View counting
  */
 class Gallery_Model extends ckvsoft\mvc\Model
 {
@@ -18,37 +21,34 @@ class Gallery_Model extends ckvsoft\mvc\Model
     private string $basePath;
     private string $albumsBaseUrl;
 
-// CONSOLIDATED CONSTANTS: Used by both Gallery_Model and GalleryManager_Model
+    // Supported file types
     public const SUPPORTED_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     public const SUPPORTED_VIDEO_EXT = ['mp4', 'webm', 'ogg'];
+    // Permission levels
     public const PERMISSION_LEVELS = [
         0 => 'Public (Everyone)',
         1 => 'Restricted (Members)',
         2 => 'Private (Owner Only)',
         3 => 'Admin (Administrator)',
     ];
+    // Default thumbnails
     private const DEFAULT_VIDEO_THUMB_URL = BASE_URI . 'gallery/media/default/video_thumb.jpg';
     private const DEFAULT_IMAGE_THUMB_URL = BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
     public function __construct()
     {
         parent::__construct();
-
         $relativePath = trim(Config::get('paths.albums_relative_path') ?? 'public/albums/', '/');
-// Calculate the absolute path to the albums base directory
+
+        // Absolute path to albums
         $this->basePath = __DIR__ . '/../../../' . $relativePath . '/';
         $this->albumsBaseUrl = BASE_URI . $relativePath . '/';
     }
 
-// ------------------------------------------------------------------
-// PATH & ID LOOKUP (ESSENTIAL FOR FRONTEND)
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    // PATH & ID LOOKUP
+    // ------------------------------------------------------------------
 
-    /**
-     * Retrieves the album path for a given album ID.
-     * @param int $albumId
-     * @return string|null The album path or null if not found.
-     */
     public function getAlbumPathById(int $albumId): ?string
     {
         $result = $this->db->selectOne(
@@ -58,13 +58,6 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return $result['album_path'] ?? null;
     }
 
-    /**
-     * Gets the album ID by path, or creates a new entry if not found during access.
-     * @param string $albumPath The path of the album.
-     * @param int|null $currentUserId Optional ID of the user creating the album.
-     * @return int The ID of the album.
-     * @throws \ckvsoft\CkvException If the album ID cannot be retrieved or created.
-     */
     private function getAlbumIdByPath(string $albumPath, ?int $currentUserId = null): int
     {
         $normalizedPath = trim($albumPath, '/');
@@ -78,24 +71,23 @@ class Gallery_Model extends ckvsoft\mvc\Model
             return (int) $album['album_id'];
         }
 
+        // Insert new album if not exists (This is needed by incrementViewCounter)
         $data = [
             'album_path' => $normalizedPath,
-            'permissions_level' => 2, // Default to admin
-            'owner_user_id' => $currentUserId, // Assign owner here
+            'permissions_level' => 2, // Default to private/admin
+            'owner_user_id' => $currentUserId,
         ];
 
         $albumId = $this->db->insertUpdate('gallery_albums', $data);
-
         if ($albumId > 0) {
             return (int) $albumId;
         }
 
-// Fallback for Race Condition
+        // Fallback in case of race condition
         $album = $this->db->selectOne(
                 "SELECT `album_id` FROM `gallery_albums` WHERE `album_path` = :path",
                 ['path' => $normalizedPath]
         );
-
         if (!empty($album)) {
             return (int) $album['album_id'];
         }
@@ -103,55 +95,54 @@ class Gallery_Model extends ckvsoft\mvc\Model
         throw new CkvException("Could not determine or create album_id for path '{$normalizedPath}'.");
     }
 
-// ------------------------------------------------------------------
-// PERMISSION CHECK & VIEW COUNTER
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    // PERMISSIONS & VIEW COUNTER
+    // ------------------------------------------------------------------
 
     /**
-     * Checks permission for an album.
-     * @param string $albumPath The album path.
-     * @return array|false The album data array upon success, otherwise false.
+     * Checks if the current user has permission to view a specific album.
+     * @param string $albumPath The path of the album.
+     * @return array|false Returns the full album data if permitted, false otherwise.
      */
     public function checkAlbumPermissions(string $albumPath): array|false
     {
-        $userLevel = Auth::getUserPermissionLevel(); // Liefert nun 3 für Admin
+        $userLevel = Auth::getUserPermissionLevel();
         $normalizedPath = trim($albumPath, '/');
+
         $album = $this->db->selectOne(
-                "SELECT `permissions_level`, `album_id`, `owner_user_id` FROM `gallery_albums` WHERE `album_path` = :path",
+                "SELECT `permissions_level`, `album_id`, `title`, `owner_user_id`
+           FROM `gallery_albums` WHERE `album_path` = :path",
                 ['path' => $normalizedPath]
         );
 
         if (empty($album))
-            return false;
+            return false; // Album must exist in DB to be accessible
 
         $albumData = $album;
+
+        // Title fallback to folder name if not set in DB
+        $albumData['title'] = $albumData['title'] ?? basename($normalizedPath);
+
         $requiredLevel = (int) $albumData['permissions_level'];
         $currentUserId = Auth::getUserId();
 
-        if ($userLevel >= 3) {
+        // Admin check (Level 3) is explicitly removed, as requested by the user.
+        // if ($userLevel >= 3) return $albumData;
+        // Owner Check
+        if ($currentUserId !== null && (string) $currentUserId === (string) $albumData['owner_user_id'])
             return $albumData;
-        }
 
-        if ($currentUserId !== null && (string) $currentUserId === (string) $albumData['owner_user_id']) {
+        // Regular Permissions Check (Public/Restricted)
+        if ($userLevel >= $requiredLevel)
             return $albumData;
-        }
-
-        if ($userLevel >= $requiredLevel) {
-            return $albumData;
-        }
 
         return false;
     }
 
-    /**
-     * Increments the view counter for the given media file.
-     * @param string $albumPath The path to the album (e.g., 'events/hochzeit').
-     * @param string $fileName The filename (e.g., 'image.jpg').
-     * @param int|null $currentUserId Optional ID of the user accessing the medium.
-     */
     public function incrementViewCounter(string $albumPath, string $fileName, ?int $currentUserId = null): void
     {
         try {
+            // getAlbumIdByPath might create a new entry if one doesn't exist
             $albumId = $this->getAlbumIdByPath($albumPath, $currentUserId);
         } catch (CkvException $e) {
             error_log("Database error during album ID retrieval: " . $e->getMessage());
@@ -166,84 +157,71 @@ class Gallery_Model extends ckvsoft\mvc\Model
         ]);
     }
 
-    /**
-     * Returns the absolute file path for a medium and increments view counter.
-     * @param string $albumName The album path.
-     * @param string $fileName The medium's filename.
-     * @return string|null The absolute path to the file, or NULL if access is denied.
-     */
     public function getFilePath(string $albumName, string $fileName): ?string
     {
         $albumData = $this->checkAlbumPermissions($albumName);
-
         if ($albumData === false)
             return null;
 
         $currentUserId = Auth::getUserId();
         $nameNoExt = pathinfo($fileName, PATHINFO_FILENAME);
-// The original logic checks only the lowercase filename part
         $isThumbnail = str_ends_with(strtolower($nameNoExt), '_thumb');
 
         if (!$isThumbnail) {
             $this->incrementViewCounter($albumName, $fileName, $currentUserId);
         }
 
-// Correctly construct the absolute path
         return rtrim($this->basePath, '/') . '/' . trim($albumName, '/') . '/' . $fileName;
     }
 
-// ------------------------------------------------------------------
-// ALBUM AND MEDIA LISTING
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    // ALBUM & MEDIA LISTING
+    // ------------------------------------------------------------------
 
-    /**
-     * Retrieves all albums available in the root folder.
-     * @return array List of album names.
-     */
     public function getAllAlbums(): array
     {
         return $this->getSubAlbums('');
     }
 
     /**
-     * Retrieves sub-albums for a given album path based on DATABASE scan and permission check.
-     * Only returns albums the current user is permitted to view.
+     * Retrieves sub-albums for a given album path based on database lookup and permission check.
+     * Returns an array of permitted sub-albums, including 'name', 'path', and 'title'.
+     *
      * @param string $albumName The album path (relative to the base path).
-     * @return array List of permitted sub-album names.
+     * @return array List of permitted sub-albums, each as an associative array.
      */
     public function getSubAlbums(string $albumName): array
     {
-
         $basePath = trim($albumName, '/');
-
+        // Get all direct sub-album names from the DB (e.g., ['album1', 'album2'])
         $potentialSubAlbumNames = $this->_getDirectSubAlbumPathsFromDB($basePath);
-
         $permittedSubAlbums = [];
 
         foreach ($potentialSubAlbumNames as $subAlbumName) {
+            // Reconstruct the full path to check permissions and fetch data
             $fullSubAlbumPath = empty($basePath) ? $subAlbumName : $basePath . '/' . $subAlbumName;
 
-            if ($this->checkAlbumPermissions($fullSubAlbumPath) !== false) {
-                $permittedSubAlbums[] = $subAlbumName;
+            // Fetch the full album data (including 'title') and check permissions
+            $albumData = $this->checkAlbumPermissions($fullSubAlbumPath);
+
+            // If access is granted:
+            if ($albumData !== false) {
+                $permittedSubAlbums[] = [
+                    'name' => $subAlbumName, // e.g., 'album1' (local folder name)
+                    'path' => $fullSubAlbumPath, // e.g., 'events/album1' (full path, crucial for the helper)
+                    'title' => $albumData['title'], // Title fetched from DB/Fallback
+                ];
             }
         }
 
-        sort($permittedSubAlbums);
+        // Sort by local name
+        usort($permittedSubAlbums, fn($a, $b) => strcmp($a['name'], $b['name']));
         return $permittedSubAlbums;
     }
 
-    /**
-     * Retrieves media files for an album from the filesystem, optionally merging with DB stats.
-     * @param string $albumName The album path.
-     * @param bool $recursive Whether to scan subdirectories.
-     * @param bool $random Whether to shuffle the results.
-     * @param bool $includeStats Whether to fetch and merge DB stats.
-     * @return array List of media items.
-     */
     public function getMediaByAlbum(string $albumName, bool $recursive = false, bool $random = false, bool $includeStats = false): array
     {
         $albumDir = rtrim($this->basePath, '/') . '/' . trim($albumName, '/');
-
         if (!is_dir($albumDir))
             return [];
 
@@ -266,17 +244,10 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return $media;
     }
 
-    /**
-     * Retrieves a random thumbnail URL for a given album.
-     * @param string $albumName The album path.
-     * @param bool $recursive Whether to check sub-albums recursively.
-     * @return string|null The URL of the random thumbnail, or null.
-     */
     public function getRandomThumbnailUrl(string $albumName, bool $recursive = false): ?string
     {
         $allMedia = $this->getMediaByAlbum($albumName, $recursive, false);
 
-// Filter out items using default placeholder URLs
         $itemsWithThumbs = array_filter($allMedia, fn($item) =>
                 isset($item['thumburl']) &&
                 $item['thumburl'] !== self::DEFAULT_VIDEO_THUMB_URL &&
@@ -290,11 +261,6 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return $itemsWithThumbs[$randomIndex]['thumburl'];
     }
 
-    /**
-     * Formats a filename (without extension) into a human-readable title.
-     * @param string $fileName The original filename.
-     * @return string
-     */
     public function formatMediaName(string $fileName): string
     {
         $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
@@ -302,18 +268,10 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return ucwords(strtolower($nameCleaned));
     }
 
-// ------------------------------------------------------------------
-// PRIVATE HELPER METHODS (CONSOLIDATED LOGIC)
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    // PRIVATE HELPERS
+    // ------------------------------------------------------------------
 
-    /**
-     * CONSOLIDATED LOGIC: Creates a single media item array from file info.
-     * This method contains all file type checking, URL encoding, and thumbnail logic.
-     * @param string $file The filename (e.g., 'image.jpg').
-     * @param string $currentDirectory The absolute path to the directory containing the file.
-     * @param string $currentAlbumPath The relative album path (e.g., 'events/wedding').
-     * @return array|null The formatted media array or null if unsupported.
-     */
     private function _createMediaItem(string $file, string $currentDirectory, string $currentAlbumPath): ?array
     {
         $origExt = pathinfo($file, PATHINFO_EXTENSION);
@@ -325,10 +283,8 @@ class Gallery_Model extends ckvsoft\mvc\Model
             return null;
         }
 
-// --- PATH ENCODING (Centralized Logic from original scans) ---
         $fullUrlPath = trim($currentAlbumPath . '/' . $file, '/');
-        $pathSegments = explode('/', $fullUrlPath);
-        $encodedPath = implode('/', array_map('urlencode', $pathSegments));
+        $encodedPath = implode('/', array_map('urlencode', explode('/', $fullUrlPath)));
 
         $mediaItem = [
             'file' => $file,
@@ -338,25 +294,19 @@ class Gallery_Model extends ckvsoft\mvc\Model
 
         if (in_array($ext, self::SUPPORTED_IMAGE_EXT)) {
             $mediaItem['type'] = 'image';
-
             $thumbFileName = $nameNoExt . '_thumb.' . $origExt;
             $thumbFile = $currentDirectory . '/' . $thumbFileName;
 
-// Thumbnail path encoding
             $thumbUrlPath = trim($currentAlbumPath . '/' . $thumbFileName, '/');
-            $thumbSegments = explode('/', $thumbUrlPath);
-            $encodedThumbPath = implode('/', array_map('urlencode', $thumbSegments));
-            $finalThumbUrl = BASE_URI . 'gallery/media/' . $encodedThumbPath; // Default to expected path
+            $encodedThumbPath = implode('/', array_map('urlencode', explode('/', $thumbUrlPath)));
+            $finalThumbUrl = BASE_URI . 'gallery/media/' . $encodedThumbPath;
 
             if (!file_exists($thumbFile)) {
-                $finalThumbUrl = self::DEFAULT_IMAGE_THUMB_URL; // Fallback to default path
-// Attempt to create the thumbnail (Original logic)
+                $finalThumbUrl = self::DEFAULT_IMAGE_THUMB_URL;
                 try {
                     $image = new Image($filePath, $thumbFileName, $currentDirectory . '/');
-                    if ($image->resize()) {
-// If successful, reset to the correct URL
+                    if ($image->resize())
                         $finalThumbUrl = BASE_URI . 'gallery/media/' . $encodedThumbPath;
-                    }
                 } catch (\Exception $e) {
                     error_log("Thumbnail creation failed for {$file}: " . $e->getMessage());
                 }
@@ -364,26 +314,20 @@ class Gallery_Model extends ckvsoft\mvc\Model
             $mediaItem['thumburl'] = $finalThumbUrl;
         } elseif (in_array($ext, self::SUPPORTED_VIDEO_EXT)) {
             $mediaItem['type'] = 'video';
-
             $thumbFileName = $nameNoExt . '_thumb.jpg';
             $thumbFile = $currentDirectory . '/' . $thumbFileName;
 
-// Thumbnail path encoding
             $thumbUrlPath = trim($currentAlbumPath . '/' . $thumbFileName, '/');
-            $thumbSegments = explode('/', $thumbUrlPath);
-            $encodedVideoThumbPath = implode('/', array_map('urlencode', $thumbSegments));
+            $encodedVideoThumbPath = implode('/', array_map('urlencode', explode('/', $thumbUrlPath)));
 
             $mediaItem['thumburl'] = file_exists($thumbFile) ? BASE_URI . 'gallery/media/' . $encodedVideoThumbPath : self::DEFAULT_VIDEO_THUMB_URL;
         } else {
-            return null; // Should not happen due to initial check
+            return null;
         }
 
         return $mediaItem;
     }
 
-    /**
-     * Helper: Scans a single directory non-recursively for media items.
-     */
     private function _scanDirectory(string $directory, string $albumName): array
     {
         $media = [];
@@ -394,16 +338,12 @@ class Gallery_Model extends ckvsoft\mvc\Model
                 continue;
 
             $mediaItem = $this->_createMediaItem($file, $directory, $albumPath);
-            if ($mediaItem !== null) {
+            if ($mediaItem !== null)
                 $media[] = $mediaItem;
-            }
         }
         return $media;
     }
 
-    /**
-     * Helper: Scans a directory and all subdirectories recursively for media items.
-     */
     private function _scanDirectoryRecursive(string $directory, string $rootAlbumName): array
     {
         $media = [];
@@ -416,25 +356,17 @@ class Gallery_Model extends ckvsoft\mvc\Model
             $file = $item->getFilename();
             $currentDirectory = $item->getPath();
 
-// Calculate the relative album path for the media item
             $relativePath = str_replace($this->basePath, '', $item->getPathname());
             $albumPath = pathinfo($relativePath, PATHINFO_DIRNAME);
             $cleanAlbumPath = ($albumPath === '.' || $albumPath === false) ? '' : $albumPath;
 
             $mediaItem = $this->_createMediaItem($file, $currentDirectory, $cleanAlbumPath);
-            if ($mediaItem !== null) {
+            if ($mediaItem !== null)
                 $media[] = $mediaItem;
-            }
         }
         return $media;
     }
 
-    /**
-     * Helper: Merges the media file list (from filesystem scan) with database view counts.
-     * @param int $albumId The ID of the album.
-     * @param array $mediaList The file list array generated by scanDirectory/scanDirectoryRecursive.
-     * @return array The merged media list.
-     */
     private function _mergeViewsWithMedia(int $albumId, array $mediaList): array
     {
         $dbStats = $this->db->select("
@@ -468,48 +400,45 @@ class Gallery_Model extends ckvsoft\mvc\Model
     }
 
     /**
-     * Retrieves the direct sub-album paths for a given album path from the database.
-     * @param string $albumPath The parent album path (empty string for root).
-     * @return array List of direct sub-album paths.
+     * Retrieves the direct sub-album paths from the database.
+     * @param string $albumPath The path of the parent album.
+     * @return array List of direct sub-album names (e.g., ['album1', 'album2']).
      */
     private function _getDirectSubAlbumPathsFromDB(string $albumPath): array
     {
         $normalizedPath = trim($albumPath, '/');
-
         $searchPathPrefix = empty($normalizedPath) ? '' : $normalizedPath . '/';
 
         $sql = "SELECT `album_path` FROM `gallery_albums` WHERE `album_path` LIKE :pathPrefix";
         $bindings = ['pathPrefix' => "{$searchPathPrefix}%"];
-
         $allDescendantPaths = $this->db->select($sql, $bindings);
         $paths = array_column($allDescendantPaths, 'album_path');
 
         $directSubAlbums = [];
+        // Determine the expected number of path segments for direct children
         $expectedPathDepth = count(explode('/', $searchPathPrefix));
 
         foreach ($paths as $path) {
-            if ($path === $normalizedPath) {
+            if ($path === $normalizedPath)
                 continue;
-            }
 
             $pathSegments = explode('/', $path);
+            // Check if the path has exactly one more segment than the parent path
             if (count($pathSegments) === $expectedPathDepth) {
-                $albumName = end($pathSegments);
-                $directSubAlbums[] = $albumName;
+                $directSubAlbums[] = end($pathSegments);
             }
         }
 
+        // Root folder fallback for direct children (albums without '/')
         if (empty($normalizedPath)) {
             $sql = "SELECT `album_path` FROM `gallery_albums`";
             $allPaths = $this->db->select($sql);
 
             foreach (array_column($allPaths, 'album_path') as $path) {
-                if (strpos($path, '/') === false && !empty($path)) {
+                if (strpos($path, '/') === false && !empty($path))
                     $directSubAlbums[] = $path;
-                }
             }
         }
-
 
         return array_unique($directSubAlbums);
     }
