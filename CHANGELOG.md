@@ -1,3 +1,14 @@
+# [0.13.0](https://github.com/ckvsoft/cevian/compare/v0.12.0...v0.13.0) (2025-10-20)
+
+
+### Features
+
+* **backup/view:** Implement i18n support and enhance image backup robustness ([3b812b3](https://github.com/ckvsoft/cevian/commit/3b812b3d7f0d13306f5e25c14ebd860972e7d6ab))
+* **gallery/helper:** Implement breadcrumb data helper and use DB album titles ([24fbc75](https://github.com/ckvsoft/cevian/commit/24fbc759c69fdee23aafc14baac0f993308e46d5))
+* **gallerymanager/model:** Add initial title generation during sync and enhance recursive updates ([120f5a8](https://github.com/ckvsoft/cevian/commit/120f5a8717c3b54ece263e1ff4b5b862751aeab6))
+
+
+
 # [0.12.0](https://github.com/ckvsoft/cevian/compare/v0.11.0...v0.12.0) (2025-10-16)
 
 
@@ -80,17 +91,6 @@
 * **gallery:** Add simple-lightbox JavaScript for interactive media viewing ([16a7b0c](https://github.com/ckvsoft/cevian/commit/16a7b0cd76bd4300ee2ec62ac737ebda69022d33))
 * **gallery:** Implement media view counter and dynamic album tracking ([32b61ec](https://github.com/ckvsoft/cevian/commit/32b61ec6c03f92451848892771e4a201ecf63ca2))
 * **schema:** Finalize database schema with gallery and core updates ([37c4863](https://github.com/ckvsoft/cevian/commit/37c4863c8dbcdaf241967089b06cc6e215b50cdc))
-
-
-
-## [0.8.3](https://github.com/ckvsoft/cevian/compare/v0.8.2...v0.8.3) (2025-10-07)
-
-
-### Bug Fixes
-
-* **multilogin:** Correct column name in MultiLoginManager insert ([397e543](https://github.com/ckvsoft/cevian/commit/397e543bd3c264c76b667c9e69254daec7b2ce02))
-* **schema:** Enhance SQL structure by adding primary and unique keys inline ([ff03351](https://github.com/ckvsoft/cevian/commit/ff0335187787a2c6d8dd0caaa0def1e22666936a))
-* **sql:** Add InnoDB engine and explicit charset/collation to migration 0.7.0 ([6e54f64](https://github.com/ckvsoft/cevian/commit/6e54f641dba49ecaafaf96508837a04ab490e9a6))
 
 
 
