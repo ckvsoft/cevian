@@ -82,7 +82,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
                 $contentList[] = [
                     'type' => 'album',
                     'name' => $albumTitle,
-                    'url' => BASE_URI . $baseControllerPath . '/' . urlencode($fullAlbumPath),
+                    'url' => BASE_URI . $baseControllerPath . '/' . $fullAlbumPath,
                     'path' => $fullAlbumPath,
                     'thumbnailUrl' => $thumb,
                 ];
