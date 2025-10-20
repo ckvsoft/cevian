@@ -31,19 +31,31 @@ class Gallery extends ckvsoft\mvc\BaseController
     public function index(string ...$albumNameParts)
     {
         $albumName = trim(implode('/', $albumNameParts), '/');
+
+        $galleryModel = $this->loadModel('gallery', "gallery");
         $galleryHelper = $this->loadHelper('gallery/gallery');
-        $itemInstructions = $galleryHelper->getAlbumGridInstructions($this->loadModel('gallery', "gallery"), $albumName, true);
+
+        $itemInstructions = $galleryHelper->getAlbumGridInstructions($galleryModel, $albumName, true);
 
         $galleryHtml = '';
-
         foreach ($itemInstructions as $instruction) {
             $galleryHtml .= $this->view->render($instruction['view'], $instruction['data'], true);
         }
 
+        $breadcrumbData = $galleryHelper->getBreadcrumbData($galleryModel, $albumName);
+        $currentAlbumTitle = 'All Albums';
+
+        if (!empty($breadcrumbData)) {
+            // Der Titel des aktuellen Albums ist der Titel des letzten Breadcrumb-Elements
+            $currentAlbumTitle = end($breadcrumbData)['title'];
+        }
+
+        // 4. Prepare Data for View
         $data = [
             'currentAlbum' => empty($albumName) ? 'ALL_ALBUMS' : $albumName,
-            'title' => empty($albumName) ? 'All Albums' : 'Album: ' . $albumName,
-            'galleryHtml' => $galleryHtml, // Der fertige HTML-String
+            'title' => empty($albumName) ? 'All Albums' : $currentAlbumTitle,
+            'galleryHtml' => $galleryHtml,
+            'breadcrumbData' => $breadcrumbData, // Übergabe an das View
         ];
 
         $this->render('gallery/index', $data);
