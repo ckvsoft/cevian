@@ -1,33 +1,29 @@
 <?php
-/** @var string $title */
-/** @var string $currentAlbum */
-/** @var string $galleryHtml */
 $isRootView = ($this->currentAlbum === 'ALL_ALBUMS');
 $basePath = BASE_URI . 'gallery/index';
 ?>
 
-<!-- Breadcrumb -->
 <div class="breadcrumb-container">
     <?php if ($isRootView): ?>
         <h2><?= htmlspecialchars($this->title) ?></h2>
     <?php else: ?>
-        <?php
-        $segments = explode('/', $this->currentAlbum);
-        $pathAccumulator = '';
-        ?>
         <nav class="breadcrumb" aria-label="breadcrumb">
             <a href="<?= htmlspecialchars($basePath) ?>">Home</a>
-            <?php foreach ($segments as $index => $segment): ?>
+
+            <?php foreach ($this->breadcrumbData as $index => $item): // Iteration über die vorgefertigten Titel-Daten ?>
                 <span class="separator">/</span>
                 <?php
-                $pathAccumulator .= '/' . urlencode($segment);
-                $isLast = ($index === array_key_last($segments));
+                $segmentTitle = $item['title'];
+                $pathAccumulator = $item['path'];
+
+                $isLast = ($index === array_key_last($this->breadcrumbData));
                 ?>
+
                 <?php if ($isLast): ?>
-                    <span class="current-album"><?= htmlspecialchars($segment) ?></span>
+                    <span class="current-album"><?= htmlspecialchars($segmentTitle) ?></span>
                 <?php else: ?>
-                    <a href="<?= htmlspecialchars($basePath . $pathAccumulator) ?>">
-                        <?= htmlspecialchars($segment) ?>
+                    <a href="<?= htmlspecialchars($basePath . '/' . urlencode($pathAccumulator)) ?>">
+                        <?= htmlspecialchars($segmentTitle) ?>
                     </a>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -35,7 +31,6 @@ $basePath = BASE_URI . 'gallery/index';
     <?php endif; ?>
 </div>
 
-<!-- Back link -->
 <?php if (!$isRootView): ?>
     <?php
     $segments = explode('/', $this->currentAlbum);
@@ -48,7 +43,6 @@ $basePath = BASE_URI . 'gallery/index';
     </p>
 <?php endif; ?>
 
-<!-- Gallery grid -->
 <div id="gallery-list-container" class="paginated" data-per-page="9">
     <div class="image-grid">
         <?= $this->galleryHtml ?>
