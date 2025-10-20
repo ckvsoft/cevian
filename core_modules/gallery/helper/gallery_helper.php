@@ -67,7 +67,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
      * @param bool $random
      * @return array The complete list of instructions, ready for the Controller to execute.
      */
-    public function getAlbumGridInstructions(Gallery_Model $model, string $albumPath, bool $includeSubAlbums = true, bool $recursive = false, bool $random = false): array
+    public function getAlbumGridInstructions(Gallery_Model $model, string $albumPath, bool $includeSubAlbums = true, bool $recursive = false, bool $random = false, string $baseControllerPath = 'gallery/index'): array // 💡 NEUER PARAMETER
     {
         $contentList = [];
 
@@ -75,18 +75,14 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             $subAlbums = $model->getSubAlbums($albumPath);
             foreach ($subAlbums as $album) {
 
-                // FIX: Use the 'path' key directly, as it contains the FULL path from the model.
                 $fullAlbumPath = $album['path'];
-
-                // FIX: Use the 'title' key directly, falling back to a formatted name if null.
                 $albumTitle = $album['title'] ?? $model->formatMediaName($album['name']);
-
                 $thumb = $model->getRandomThumbnailUrl($fullAlbumPath, true) ?? BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
                 $contentList[] = [
                     'type' => 'album',
                     'name' => $albumTitle,
-                    'url' => BASE_URI . 'gallery/index/' . $fullAlbumPath,
+                    'url' => BASE_URI . $baseControllerPath . '/' . urlencode($fullAlbumPath),
                     'path' => $fullAlbumPath,
                     'thumbnailUrl' => $thumb,
                 ];
