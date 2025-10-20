@@ -345,9 +345,15 @@ class GalleryManager_Model extends Gallery_Model
         foreach ($pathsToAdd as $path) {
             try {
                 $ownerId = $currentUserId ?? 1;
+                $trimmedPath = trim($path, '/');
+
+                // 💡 NEUE LOGIK: Titel generieren
+                $folderName = basename($trimmedPath);
+                $generatedTitle = $this->formatMediaName($folderName);
 
                 $data = [
-                    'album_path' => trim($path, '/'),
+                    'album_path' => $trimmedPath,
+                    'title' => $generatedTitle, // NEU: Den generierten Titel setzen
                     'permissions_level' => 2,
                     'owner_user_id' => $ownerId
                 ];
@@ -366,6 +372,8 @@ class GalleryManager_Model extends Gallery_Model
         }
 
         // --- Phase 4: Delete obsolete albums (approx. 90%) ---
+        // ... (Der Rest der Methode bleibt unverändert) ...
+
         $pathsToDelete = array_diff($dbPaths, $fsPaths);
 
         if (!empty($pathsToDelete)) {
@@ -564,20 +572,31 @@ class GalleryManager_Model extends Gallery_Model
 
             $basePath = trim($album['album_path'], '/');
 
-            if (!empty($basePath)) {
-                // WHERE clause finds only sub-albums, as the path must contain characters after the trailing '/'.
+            // 💡 NEUE LOGIK: WHERE-Klausel für rekursive Updates anpassen
+            if ($basePath === '') {
+                // Wenn es das Root-Album ist, aktualisiere ALLE Alben außer dem Root-Album selbst.
+                // Wir nehmen an, dass das Root-Album (album_path = '') immer die ID ungleich $albumId hat,
+                // aber um sicherzugehen, schließen wir es über den Pfad aus.
+                $whereCondition = 'album_path != :rootPath';
+                $bindings = [
+                    'rootPath' => ''
+                ];
+            } else {
+                // Wenn es ein Unterordner ist, aktualisiere alle Unterordner, die mit diesem Pfad beginnen.
+                // Beachten Sie, dass die ursprüngliche Logik "{$basePath}/%" nur ECHTE Unterordner erfasst,
+                // was hier auch weiterhin richtig ist.
                 $whereCondition = 'album_path LIKE :pathPrefix';
                 $bindings = [
                     'pathPrefix' => "{$basePath}/%"
                 ];
+            }
 
-                try {
-                    // Update only the descendants with the recursive values (Owner/Permissions).
-                    $success = $this->db->update('gallery_albums', $updateDataForRecursive, $whereCondition, $bindings);
-                } catch (\Exception $e) {
-                    error_log("Recursive album update failed: " . $e->getMessage());
-                    return false;
-                }
+            try {
+                // Update only the descendants with the recursive values (Owner/Permissions).
+                $success = $this->db->update('gallery_albums', $updateDataForRecursive, $whereCondition, $bindings);
+            } catch (\Exception $e) {
+                error_log("Recursive album update failed: " . $e->getMessage());
+                return false;
             }
         }
 
