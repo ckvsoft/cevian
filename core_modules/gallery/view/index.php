@@ -22,7 +22,7 @@ $basePath = BASE_URI . 'gallery/index';
                 <?php if ($isLast): ?>
                     <span class="current-album"><?= htmlspecialchars($segmentTitle) ?></span>
                 <?php else: ?>
-                    <a href="<?= htmlspecialchars($basePath . '/' . urlencode($pathAccumulator)) ?>">
+                    <a href="<?= htmlspecialchars($basePath . '/' . $pathAccumulator) ?>">
                         <?= htmlspecialchars($segmentTitle) ?>
                     </a>
                 <?php endif; ?>
