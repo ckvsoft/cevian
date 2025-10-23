@@ -30,10 +30,12 @@ $baseUri = BASE_URI;
 <div class="paginated-list list-cards">
     <?php if (!empty($this->roles)): ?>
         <?php
+        // Iterate over the list of roles
         foreach ($this->roles as $role) {
             // Calculate indentation for the tree structure (20px per depth)
             $indentSize = 20;
             $paddingLeft = ($role['depth'] * $indentSize) . 'px';
+            // Add a prefix arrow for child roles
             $labelPrefix = ($role['depth'] > 0) ? '↳ ' : '';
             ?>
             <div class="card role-card depth-<?= $role['depth'] ?>" data-role-id="<?= htmlspecialchars($role['id']) ?>">
