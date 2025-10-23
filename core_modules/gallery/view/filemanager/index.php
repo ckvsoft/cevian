@@ -837,7 +837,7 @@
 
             if (item.type === 'album' || item.name === '..') {
                 iconHTML = item.name === '..' ? '⬆️' : '📁';
-                nameText = item.name === '..' ? '.. (Parent Folder)' : item.name;
+                nameText = item.name === '..' ? '.. <?= _('(Parent Folder)') ?>' : item.name;
                 if (item.name === '..') {
                     li.classList.add('isParent');
                     metadata.style.minWidth = '140px'; // Platz für Metadaten freihalten
@@ -917,7 +917,6 @@
                     li.addEventListener('dragenter', handleDragEnter);
                     li.addEventListener('dragleave', handleDragLeave);
 
-                    // CRITICAL FIX 3: Stop propagation to prevent double execution via the panel's drop listener.
                     li.addEventListener('drop', (e) => {
                         e.stopPropagation();
                         handleDrop(e);
