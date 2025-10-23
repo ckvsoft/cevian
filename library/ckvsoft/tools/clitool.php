@@ -75,7 +75,7 @@ class CliTool
 
         // Command to find relevant PHP files and pipe their paths to xgettext
         // Note: xgettext arguments must not be quoted if they contain the keyword pattern
-        $findCommand = "find {$safeRootPath} -type f -regex '.*\\.\\(php\\|phtml\\)$'";
+        $findCommand = "find {$safeRootPath} -type f -regex '.*\\.\\(php\\|js\\)$'";
 
         $xgettextCommand = "xgettext --from-code=UTF-8 --language=PHP ";
         $xgettextCommand .= "--keyword='{$functions}' ";
