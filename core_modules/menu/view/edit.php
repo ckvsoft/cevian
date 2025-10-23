@@ -5,6 +5,7 @@
 
             <label for="id">ID:</label>
             <input type="text" id="id" value="<?php echo $this->menuList[0]['id']; ?>" readonly><br />
+
             <label for="label"><?php echo _('Label'); ?>:</label>
             <input type="text" id="label" name="label" value="<?php echo $this->menuList[0]['label']; ?>" required><br />
 
