@@ -14,28 +14,41 @@ echo "<link rel=\"shortcut icon\" href=\"" . BASE_URI . "favicon.ico\" type=\"im
 echo "<link rel=\"icon\" href=\"" . BASE_URI . "favicon.ico\" type=\"image/x-icon\">";
 
 echo "<script>";
-echo "  function displayMessage(type, title, message) {";
+echo "  /**";
+echo "   * Handles message display. Takes type, title, message, and optional details array.";
+echo "   * Calls with 3 arguments will still work as expected (details defaults to empty array).";
+echo "   */";
+echo "  function displayMessage(type, title, message, details = []) {";
 echo "    const Notify = new XNotify(\"BottomRight\");";
+echo "    let finalDescription = message;";
+
+// Sicherstellen, dass Details in HTML umgewandelt werden, um [object Object] zu vermeiden.
+echo "    if (Array.isArray(details) && details.length > 0) {";
+echo "      finalDescription += \"<br><br><strong>Details:</strong><ul><li>\" + details.join('</li><li>') + \"</li></ul>\";";
+echo "    } else if (typeof details === 'object' && details !== null && Object.keys(details).length > 0) {";
+echo "      finalDescription += \"<br><br><strong>Details (Object):</strong> <pre>\" + JSON.stringify(details, null, 2) + \"</pre>\";";
+echo "    }";
+
 echo "    switch (type) {";
 echo "      case 'success':";
 echo "        Notify.success({";
 echo "          title: title,";
-echo "          description: message,";
+echo "          description: finalDescription,"; // Korrekt: finalDescription
 echo "          duration: 5000";
 echo "        });";
 echo "      break;";
 echo "      case 'error':";
 echo "        Notify.error({";
 echo "          title: title,";
-echo "          description: message,";
-echo "          duration: 5000,";
+echo "          description: finalDescription,"; // Korrekt: finalDescription
+echo "          duration: 5000";
 echo "        });";
 echo "      break;";
 echo "      default:";
 echo "        Notify.info({";
 echo "          title: title,";
-echo "          description: message,";
-echo "          duration: 5000,";
+echo "          description: finalDescription,"; // Korrekt: finalDescription
+echo "          duration: 5000";
 echo "        });";
 echo "    }";
 echo "  }";
