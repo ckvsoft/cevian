@@ -1,5 +1,29 @@
 <?php
 
+/*
+ * The MIT License
+ *
+ * Copyright 2025 chris.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 namespace ckvsoft\mvc;
 
 class Bootstrap extends \stdClass
@@ -88,10 +112,10 @@ class Bootstrap extends \stdClass
     public function __construct()
     {
         // ------------------------------------------------------------------
-        // INTERNATIONALIZATION (i18n) FALLBACK
-        // Defines the translation function _() globally if the native gettext
-        // extension is not installed or loaded.
+        // INTERNATIONALIZATION (i18n) FALLBACK AND HELPER DEFINITIONS
+        // Defines the translation functions globally.
         // ------------------------------------------------------------------
+        // 1. STANDARD TRANSLATION (Single message, default domain)
         if (!function_exists('_')) {
 
             /**
@@ -108,11 +132,12 @@ class Bootstrap extends \stdClass
 
         }
 
-        // Optional: Fallback for the plural form (ngettext)
+        // 2. STANDARD PLURAL TRANSLATION (Plural message, default domain)
         if (!function_exists('ngettext')) {
 
             /**
              * Fallback plural function: Returns singular if count is 1, otherwise plural.
+             * Used when gettext is unavailable.
              */
             function ngettext(string $singular, string $plural, int $count): string
             {
@@ -120,6 +145,68 @@ class Bootstrap extends \stdClass
             }
 
         }
+
+        // 3. ABBREVIATION FOR STANDARD PLURAL TRANSLATION
+        if (!function_exists('_n')) {
+
+            /**
+             * Abbreviation for the standard plural function (ngettext).
+             * * @param string $singular The singular message ID.
+             * @param string $plural The plural message ID.
+             * @param int $count The number to determine the plural form.
+             * @return string The translated singular or plural string.
+             */
+            function _n(string $singular, string $plural, int $count): string
+            {
+                return ngettext($singular, $plural, $count);
+            }
+
+        }
+
+        // 4. MODULE-SPECIFIC TRANSLATION (Single message, auto-detected domain)
+        if (!function_exists('__')) {
+
+            /**
+             * Module translation helper. Automatically determines the module domain
+             * by analyzing the call stack and translates the message using dgettext.
+             *
+             * @param string $message The message ID to translate.
+             * @return string The translated string.
+             */
+            function __(string $message): string
+            {
+                if (class_exists('\\ckvsoft\\I18n')) {
+                    return \ckvsoft\I18n::getModuleMessage($message);
+                }
+                // Fallback to standard translation if I18n class is not available
+                return _($message);
+            }
+
+        }
+
+        // 5. MODULE-SPECIFIC PLURAL TRANSLATION (Plural message, auto-detected domain)
+        if (!function_exists('__n')) {
+
+            /**
+             * Module plural translation helper. Automatically determines the module domain
+             * and translates the plural message using dngettext.
+             *
+             * @param string $singular The singular message ID.
+             * @param string $plural The plural message ID.
+             * @param int $count The number to determine the plural form.
+             * @return string The translated singular or plural string.
+             */
+            function __n(string $singular, string $plural, int $count): string
+            {
+                if (class_exists('\\ckvsoft\\I18n')) {
+                    return \ckvsoft\I18n::getModulePluralMessage($singular, $plural, $count);
+                }
+                // Fallback to standard plural translation if I18n class is not available
+                return _n($singular, $plural, $count);
+            }
+
+        }
+
         // ------------------------------------------------------------------
 
 
@@ -141,6 +228,12 @@ class Bootstrap extends \stdClass
     {
         if (!isset($this->_pathRoot))
             die('You must run setPathRoot($path)');
+
+        // --- I18n INITIALIZATION (MUST be called after setPathRoot) ---
+        if (class_exists('\\ckvsoft\\I18n')) {
+            \ckvsoft\I18n::init($this->_pathRoot);
+        }
+        // ---------------------------------------------------------------
 
         $updater = new \ckvsoft\Update\Updater();
 
@@ -398,22 +491,17 @@ class Bootstrap extends \stdClass
         $this->controller->view->setCoreModulePath($this->_pathRoot . CORE_MODULES_URI); // Core-Fallback
         // --- Call the requested method with parameters ---
         if (isset($this->_uriMethod)) {
-            if (!empty($this->_uriValue)) {
-                switch (count($this->_uriValue)) {
-                    case 1: $this->controller->{$this->_uriMethod}($this->_uriValue[0]);
-                        break;
-                    case 2: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1]);
-                        break;
-                    case 3: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2]);
-                        break;
-                    case 4: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2], $this->_uriValue[3]);
-                        break;
-                    case 5: $this->controller->{$this->_uriMethod}($this->_uriValue[0], $this->_uriValue[1], $this->_uriValue[2], $this->_uriValue[3], $this->_uriValue[4]);
-                        break;
-                    default: call_user_func_array([$this->controller, $this->_uriMethod], $this->_uriValue);
-                }
+            $method = $this->_uriMethod;
+            $params = $this->_uriValue;
+
+            // Verwenden Sie call_user_func_array für alle Parameter.
+            // Dies stellt sicher, dass die Variadic-Funktion (...$pathParts) im Controller
+            // das Array $params korrekt empfängt.
+            if (!empty($params)) {
+                call_user_func_array([$this->controller, $method], $params);
             } else {
-                $this->controller->{$this->_uriMethod}();
+                // Ruft die Methode ohne Argumente auf
+                $this->controller->{$method}();
             }
         } else {
             $this->controller->index();
