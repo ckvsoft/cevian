@@ -183,7 +183,10 @@ class Controller extends \stdClass
         foreach ($paths as $fullpath) {
             $fullpath = preg_replace('#/+#', '/', $fullpath);
             if (file_exists($fullpath)) {
-                return file_get_contents($fullpath);
+                ob_start();
+                require $fullpath;
+                return ob_get_clean();
+                // return file_get_contents($fullpath);
             }
         }
 
