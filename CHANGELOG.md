@@ -1,3 +1,27 @@
+# [0.14.0](https://github.com/ckvsoft/cevian/compare/v0.13.0...v0.14.0) (2025-10-23)
+
+
+### Features
+
+* **auth/view:** Enhance login form security, UX, and internationalization ([87f2e02](https://github.com/ckvsoft/cevian/commit/87f2e02e401b09a5769ed9584a05182fe9e5259d))
+* **cli:** Add Command Line Interface (CLI) tool for i18n management ([9b1e679](https://github.com/ckvsoft/cevian/commit/9b1e6793ff013e8d3b7b7ac85379ead48a4538ec))
+* **config:** Add default locale setting ([b025e87](https://github.com/ckvsoft/cevian/commit/b025e875df9a743e29ff3232a4f6daf1b01d04d8))
+* **core/tools:** Implement CliTool class for I18n automation ([0ca2116](https://github.com/ckvsoft/cevian/commit/0ca2116f78026f2595c36137e0e232a1f840b001))
+* **core/util:** Add SizeConverter class for byte/human-readable conversions ([cd5c0ed](https://github.com/ckvsoft/cevian/commit/cd5c0ed320ed4a27fae111cff0e053c6e7554850))
+* **core:** Introduce I18n class for centralized Gettext and locale management ([939ee37](https://github.com/ckvsoft/cevian/commit/939ee374670cda2c09045b69c6f8658b61984406))
+* **filemanager/model:** Implement Filemanager Model with ownership checks ([f0d0e92](https://github.com/ckvsoft/cevian/commit/f0d0e92a9fef50d34333a3d2bb9a664ef0a5bd6e))
+* **filemanager:** Initial implementation of the Filemanager Controller ([7cdb3e8](https://github.com/ckvsoft/cevian/commit/7cdb3e845f2714dc929e933f54bf3cd130444947))
+* **gallery/filemanager:** Implement Two-Panel UI with Drag & Drop Move/Upload and Selection Logic ([e748000](https://github.com/ckvsoft/cevian/commit/e7480008925ec653f05a155fb6c226642b3188de))
+* **gallery/view:** Display extended media metadata in detail view ([d78db9c](https://github.com/ckvsoft/cevian/commit/d78db9c330ae52369bfc89bddf913581a1a1ae69))
+
+
+### Reverts
+
+* **gallery/helper:** Remove URL encoding for album paths in grid links ([4fbc887](https://github.com/ckvsoft/cevian/commit/4fbc8873beabc3808e1272f3b79dc5c4b50b11ba))
+* **gallery/helper:** Remove URL encoding for album paths in grid links ([2b5ea26](https://github.com/ckvsoft/cevian/commit/2b5ea265f3266414f0eadf0b8f89028159cf1513))
+
+
+
 # [0.13.0](https://github.com/ckvsoft/cevian/compare/v0.12.0...v0.13.0) (2025-10-20)
 
 
@@ -72,25 +96,6 @@
 ### Performance Improvements
 
 * **backup:** Drastically reduce usleep duration for faster backups ([6f8641b](https://github.com/ckvsoft/cevian/commit/6f8641b8ba15cd0d73cba313b19499234c882dd6))
-
-
-
-# [0.9.0](https://github.com/ckvsoft/cevian/compare/v0.8.3...v0.9.0) (2025-10-08)
-
-
-### Bug Fixes
-
-* **bootstrap:** Expand asset logging and clarify error message ([e25537c](https://github.com/ckvsoft/cevian/commit/e25537cd28d50c2b3579fbf66fac5ddaa0885ced))
-* **gallery:** Ensure correct parameter passing for recursive and random media fetching ([87dfd88](https://github.com/ckvsoft/cevian/commit/87dfd888bfd9dc676c73988c6b2e3ed063cf3903))
-
-
-### Features
-
-* **database:** Add gallery tables for album and media statistics ([efd8bef](https://github.com/ckvsoft/cevian/commit/efd8beff58cea528e588c6f4354f4f6d110ba14c))
-* **gallery:** Add simple-lightbox CSS styling for media viewer ([9ea125f](https://github.com/ckvsoft/cevian/commit/9ea125f769641632f003f4c75d17f1a6bacb9955))
-* **gallery:** Add simple-lightbox JavaScript for interactive media viewing ([16a7b0c](https://github.com/ckvsoft/cevian/commit/16a7b0cd76bd4300ee2ec62ac737ebda69022d33))
-* **gallery:** Implement media view counter and dynamic album tracking ([32b61ec](https://github.com/ckvsoft/cevian/commit/32b61ec6c03f92451848892771e4a201ecf63ca2))
-* **schema:** Finalize database schema with gallery and core updates ([37c4863](https://github.com/ckvsoft/cevian/commit/37c4863c8dbcdaf241967089b06cc6e215b50cdc))
 
 
 
