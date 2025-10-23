@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-23 14:09+0200\n"
+"POT-Creation-Date: 2025-10-23 18:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1014,6 +1014,94 @@ msgstr ""
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:146
 msgid "Changes not saved"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:13
+msgid "Processing..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:30
+msgid "Processing: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:31
+msgid "Complete: 100% ✅"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:42
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:134
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:297
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:300
+msgid "Complete"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:54
+msgid "Error!"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:97
+msgid "Unknown error"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:134
+msgid "Operation successful. Redirecting..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:227
+msgid "Previous"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:232
+msgid "Next"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:263
+msgid "Page"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:263
+msgid "of"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:284
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:308
+msgid "Saving..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:285
+msgid "Save Process"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:285
+msgid "Saving sequence initiated..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:291
+msgid "Step"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:292
+msgid "Data for"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:292
+msgid "saved successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:297
+msgid "All changes saved! Redirecting..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:300
+msgid "All changes saved!"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:305
+msgid "Save Failed!"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:305
+msgid "Process aborted:"
 msgstr ""
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:12
