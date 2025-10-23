@@ -4,7 +4,7 @@
         <?php
         // The user data being edited
         $user = $this->user[0];
-        // Flag passed from the controller about the CURRENTLY LOGGED IN user
+        // Flag passed from the controller about the CURRENTLY LOGGED IN user's privileges
         $is_admin = $this->isAdmin ?? false;
 
         // Set redirect based on who is editing: Admin goes to list, User goes to dashboard/profile
