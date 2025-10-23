@@ -1,7 +1,7 @@
 <?php
 
 use ckvsoft\ACL;
-use ckvsoft\CkvException; // Hinzugefügt für expliziten Exception-Import
+use ckvsoft\CkvException; // Added for explicit Exception import
 
 /**
  * Model responsible for Role-Based Access Control (RBAC) management
@@ -49,7 +49,10 @@ class Rbac_Model extends \ckvsoft\mvc\Model
      * Retrieves single role details by ID.
      *
      * NOTE: This implementation is inefficient (loads all roles, then filters).
-     * If roles table is large, ACL should provide a getRoleById() method.
+     * If the roles table is large, ACL should provide a getRoleById() method.
+     *
+     * @param int $id The role ID.
+     * @return array|null
      */
     public function roleSingle(int $id): ?array
     {
@@ -83,7 +86,8 @@ class Rbac_Model extends \ckvsoft\mvc\Model
 
             // 2. CREATE
             if ($this->acl->roleNameExists($roleName)) {
-                return "A role with this name already exists.";
+                // Use _() for the error message
+                return _("A role with this name already exists.");
             }
 
             // Delegate creation (Nested Set logic) to ACL
@@ -91,11 +95,14 @@ class Rbac_Model extends \ckvsoft\mvc\Model
         } catch (CkvException $e) {
             // Catch ACL/DB errors and return a user-friendly message
             if (str_contains($e->getMessage(), 'Parent role not found')) {
-                return "The selected parent role was not found.";
+                // Use _() for the error message
+                return _("The selected parent role was not found.");
             }
-            return "An unexpected error occurred during role save: " . $e->getMessage();
+            // Use _() for the error message
+            return _("An unexpected error occurred during role save: ") . $e->getMessage();
         } catch (\Exception $e) {
-            return "An unexpected system error occurred.";
+            // Use _() for the generic error message
+            return _("An unexpected system error occurred.");
         }
     }
 
@@ -125,13 +132,17 @@ class Rbac_Model extends \ckvsoft\mvc\Model
             }
             return null; // Success
         } catch (CkvException $e) {
+            // Check for specific error messages from ACL component
             if (str_contains($e->getMessage(), 'New parent not found')) {
-                return "The selected parent role was not found.";
+                // Use _() for the error message
+                return _("The selected parent role was not found.");
             }
             if (str_contains($e->getMessage(), 'Cannot move a node into its own subtree')) {
-                return "A role cannot be moved into its own subtree.";
+                // Use _() for the error message
+                return _("A role cannot be moved into its own subtree.");
             }
-            return "An unexpected error occurred while updating the role.";
+            // Use _() for the generic error message
+            return _("An unexpected error occurred while updating the role.");
         }
     }
 
@@ -141,9 +152,9 @@ class Rbac_Model extends \ckvsoft\mvc\Model
 
     /**
      * Delegates to ACL to retrieve all permission definitions (full data).
-     * This method fixes the original "getAllPermissions" error.
      *
      * @param string $format The format (e.g., 'full' for detailed array).
+     * @return array
      */
     public function getAllPermissions(string $format = 'ids'): array
     {
@@ -153,6 +164,7 @@ class Rbac_Model extends \ckvsoft\mvc\Model
     /**
      * Retrieves a list of all permission definitions (full data).
      * Alias for getAllPermissions.
+     * @return array
      */
     public function permList(): array
     {
@@ -163,6 +175,9 @@ class Rbac_Model extends \ckvsoft\mvc\Model
      * Retrieves a single permission definition by ID.
      *
      * NOTE: Inefficient implementation (loads all, then filters).
+     *
+     * @param int $id The permission ID.
+     * @return array|null
      */
     public function permSingle(int $id): ?array
     {
@@ -186,11 +201,13 @@ class Rbac_Model extends \ckvsoft\mvc\Model
         try {
             return $this->acl->createPermission($data);
         } catch (CkvException $e) {
-            // Check for duplicate key constraint violation
+            // Check for duplicate key constraint violation (SQLSTATE[23000])
             if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
-                return "A permission with this key already exists.";
+                // Use _() for the error message
+                return _("A permission with this key already exists.");
             }
-            return "Database error while creating permission.";
+            // Use _() for the generic error message
+            return _("Database error while creating permission.");
         }
     }
 
@@ -207,11 +224,13 @@ class Rbac_Model extends \ckvsoft\mvc\Model
             $this->acl->updatePermission($id, $data);
             return null; // Success
         } catch (CkvException $e) {
-            // Check for duplicate key constraint violation
+            // Check for duplicate key constraint violation (SQLSTATE[23000])
             if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
-                return "A permission with this key already exists.";
+                // Use _() for the error message
+                return _("A permission with this key already exists.");
             }
-            return "Database error while updating permission.";
+            // Use _() for the generic error message
+            return _("Database error while updating permission.");
         }
     }
 
@@ -228,12 +247,16 @@ class Rbac_Model extends \ckvsoft\mvc\Model
             return null; // Success
         } catch (CkvException $e) {
             // ACL handles cleanup, catch general DB errors here
-            return "Database error while deleting permission.";
+            // Use _() for the generic error message
+            return _("Database error while deleting permission.");
         }
     }
 
     /**
      * Checks if a permission key already exists. (DELEGATED TO ACL)
+     *
+     * @param string $key The permission key.
+     * @return bool
      */
     public function permExists(string $key): bool
     {
@@ -248,6 +271,7 @@ class Rbac_Model extends \ckvsoft\mvc\Model
      * Delegates to ACL to retrieve all roles (full data).
      *
      * @param string $format The format (e.g., 'full' for detailed array).
+     * @return array
      */
     public function getAllRoles(string $format = 'ids'): array
     {
@@ -257,6 +281,9 @@ class Rbac_Model extends \ckvsoft\mvc\Model
     /**
      * Retrieves the permission values directly assigned to a specific role.
      * Does not include inherited permissions.
+     *
+     * @param int $roleId The role ID.
+     * @return array An array mapping permID to its set value (0, 1, or 'X').
      */
     public function getRolePerms(int $roleId): array
     {
@@ -270,14 +297,20 @@ class Rbac_Model extends \ckvsoft\mvc\Model
 
     /**
      * Sets the direct permission values for a specific role.
-     * Deletes entries where $value === 'X'.
+     * Deletes entries where $value === 'X' (no explicit setting).
+     *
+     * @param int $roleId The role ID.
+     * @param array $perms An array mapping permID to its new value (0, 1, or 'X').
+     * @return void
      */
     public function setRolePerms(int $roleId, array $perms): void
     {
         foreach ($perms as $permId => $value) {
             if ($value === 'X') {
+                // Delete explicit setting if 'X' is passed
                 $this->db->delete($this->_table_role_perms, "roleID = :roleID AND permID = :permID", ['roleID' => $roleId, 'permID' => $permId]);
             } else {
+                // Insert or update the explicit setting (0 or 1)
                 $this->db->insertUpdate($this->_table_role_perms, [
                     'roleID' => $roleId,
                     'permID' => $permId,
