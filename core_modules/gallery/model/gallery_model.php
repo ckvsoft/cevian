@@ -1,6 +1,28 @@
 <?php
 
-// gallery/model/Gallery_Model.php
+/*
+ * The MIT License
+ *
+ * Copyright 2025 chris.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 use ckvsoft\mvc\Config;
 use ckvsoft\Image;
@@ -18,8 +40,8 @@ use ckvsoft\CkvException;
 class Gallery_Model extends ckvsoft\mvc\Model
 {
 
-    private string $basePath;
-    private string $albumsBaseUrl;
+    protected string $basePath;
+    protected string $albumsBaseUrl;
 
     // Supported file types
     public const SUPPORTED_IMAGE_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -32,8 +54,8 @@ class Gallery_Model extends ckvsoft\mvc\Model
         3 => 'Admin (Administrator)',
     ];
     // Default thumbnails
-    private const DEFAULT_VIDEO_THUMB_URL = BASE_URI . 'gallery/media/default/video_thumb.jpg';
-    private const DEFAULT_IMAGE_THUMB_URL = BASE_URI . 'gallery/media/default/image_thumb.jpg';
+    protected const DEFAULT_VIDEO_THUMB_URL = BASE_URI . 'gallery/media/default/video_thumb.jpg';
+    protected const DEFAULT_IMAGE_THUMB_URL = BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
     public function __construct()
     {
@@ -219,17 +241,69 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return $permittedSubAlbums;
     }
 
+    /**
+     * Retrieves all media items from a given album path.
+     *
+     * This version uses the 'file' field and the database's full path convention (e.g., "album1/album2")
+     * to correctly identify and check the source album's permission for recursive calls.
+     * * @param string $albumName The path of the album (relative to basePath).
+     * @param bool $recursive Whether to scan subdirectories recursively.
+     * @param bool $random Whether to randomize the order of the media items.
+     * @param bool $includeStats Whether to include view statistics for the media.
+     * @return array List of media items, or an empty array if access is denied or the album does not exist.
+     */
     public function getMediaByAlbum(string $albumName, bool $recursive = false, bool $random = false, bool $includeStats = false): array
     {
-        $albumDir = rtrim($this->basePath, '/') . '/' . trim($albumName, '/');
-        if (!is_dir($albumDir))
+        $normalizedPath = trim($albumName, '/');
+
+        // 1. TOP-LEVEL ACCESS CHECK (Original Logic Reinstated, using checkAlbumPermissions)
+        $albumData = $this->checkAlbumPermissions($normalizedPath);
+
+        $isRootAlbum = empty($normalizedPath);
+
+        // If access is denied for a non-root album, or if the root album is registered and denied, stop.
+        if (!$albumData && !$isRootAlbum) {
             return [];
+        }
 
-        $media = $recursive ? $this->_scanDirectoryRecursive($albumDir, $albumName) : $this->_scanDirectory($albumDir, $albumName);
+        // 2. PHYSICAL SCANNING
+        $albumDir = rtrim($this->basePath, '/') . '/' . $normalizedPath;
+        if (!is_dir($albumDir)) {
+            return [];
+        }
 
+        $media = $recursive ? $this->_scanDirectoryRecursive($albumDir, $normalizedPath) : $this->_scanDirectory($albumDir, $normalizedPath);
+
+        // 3. RECURSIVE PERMISSION FILTERING (Minimal Change for Security)
+        if ($recursive) {
+            $media = array_filter($media, function ($item) use ($normalizedPath) {
+
+                // SECURITY GATE: Only check items that have a 'file' path (which are the media items).
+                if (!isset($item['file']) || !is_string($item['file']) || empty($item['file'])) {
+                    // Keep entries without a 'file' (like potential folder-thumb sources) to maintain functionality.
+                    return true;
+                }
+
+                // Determine the subdirectory path (e.g., 'privat' from 'privat/bild.jpg').
+                $subPathToFile = dirname($item['file']);
+
+                // Determine the full DB album path for this media item: 'Denise/privat'
+                if ($subPathToFile === '.') {
+                    $itemSourceAlbumPath = $normalizedPath; // Directly in parent album
+                } else {
+                    $itemSourceAlbumPath = trim($normalizedPath . '/' . $subPathToFile, '/'); // In subfolder
+                }
+
+                // Check permission for the specific source sub-album against the DB.
+                // If denied, the media item is removed, fixing the "Deny Image" issue.
+                return (bool) $this->checkAlbumPermissions($itemSourceAlbumPath);
+            });
+        }
+
+        // 4. STATISTICS AND SORTING (Your original logic)
         if ($includeStats) {
             try {
-                $albumId = $this->getAlbumIdByPath($albumName);
+                $albumId = $albumData['album_id'] ?? $this->getAlbumIdByPath($normalizedPath);
                 $media = $this->_mergeViewsWithMedia($albumId, $media);
             } catch (CkvException $e) {
                 error_log("Cannot get album ID for stats: " . $e->getMessage());
@@ -244,11 +318,31 @@ class Gallery_Model extends ckvsoft\mvc\Model
         return $media;
     }
 
+    /**
+     * Retrieves a random thumbnail URL from media items within the specified album.
+     *
+     * It is secured because it relies on getMediaByAlbum() which performs an access check
+     * based on permissions_level or ownership. If access is denied, getMediaByAlbum()
+     * returns an empty array, and this method safely returns null.
+     *
+     * @param string $albumName The path of the album.
+     * @param bool $recursive Whether to include media from subdirectories.
+     * @return string|null The URL of a random thumbnail, or null if none is found or access is denied.
+     */
     public function getRandomThumbnailUrl(string $albumName, bool $recursive = false): ?string
     {
+        // 1. Fetch media items. This call is now secure because getMediaByAlbum()
+        // performs the required permissions check and returns [] if access is denied.
         $allMedia = $this->getMediaByAlbum($albumName, $recursive, false);
 
+        // If access was denied in getMediaByAlbum, $allMedia will be empty, and we return null.
+        if (empty($allMedia)) {
+            return null;
+        }
+
+        // 2. Filter for items that actually have a usable thumbnail URL.
         $itemsWithThumbs = array_filter($allMedia, fn($item) =>
+                // Check if the 'thumburl' key exists and is not one of the default placeholders
                 isset($item['thumburl']) &&
                 $item['thumburl'] !== self::DEFAULT_VIDEO_THUMB_URL &&
                 $item['thumburl'] !== self::DEFAULT_IMAGE_THUMB_URL
@@ -257,6 +351,7 @@ class Gallery_Model extends ckvsoft\mvc\Model
         if (empty($itemsWithThumbs))
             return null;
 
+        // 3. Select and return a random thumbnail URL.
         $randomIndex = array_rand($itemsWithThumbs);
         return $itemsWithThumbs[$randomIndex]['thumburl'];
     }
@@ -279,6 +374,14 @@ class Gallery_Model extends ckvsoft\mvc\Model
         $nameNoExt = pathinfo($file, PATHINFO_FILENAME);
         $filePath = $currentDirectory . '/' . $file;
 
+        $fileSize = null;
+        $fileMTime = null;
+
+        if (is_readable($filePath)) {
+            $fileSize = \ckvsoft\SizeConverter::bytesToHumanReadable(filesize($filePath) ?? 0);
+            $fileMTime = filemtime($filePath);
+        }
+
         if (str_ends_with($nameNoExt, '_thumb') || (!in_array($ext, self::SUPPORTED_IMAGE_EXT) && !in_array($ext, self::SUPPORTED_VIDEO_EXT))) {
             return null;
         }
@@ -290,6 +393,9 @@ class Gallery_Model extends ckvsoft\mvc\Model
             'file' => $file,
             'name' => $this->formatMediaName($file),
             'url' => BASE_URI . 'gallery/media/' . $encodedPath,
+            'size' => $fileSize,
+            'mtime' => $fileMTime,
+            'date_formatted' => $fileMTime ? date('Y-m-d H:i:s', $fileMTime) : null,
         ];
 
         if (in_array($ext, self::SUPPORTED_IMAGE_EXT)) {
@@ -359,6 +465,12 @@ class Gallery_Model extends ckvsoft\mvc\Model
             $relativePath = str_replace($this->basePath, '', $item->getPathname());
             $albumPath = pathinfo($relativePath, PATHINFO_DIRNAME);
             $cleanAlbumPath = ($albumPath === '.' || $albumPath === false) ? '' : $albumPath;
+
+            $itemSourceAlbumPath = trim($cleanAlbumPath, '/');
+
+            if ($this->checkAlbumPermissions($itemSourceAlbumPath) === false) {
+                continue;
+            }
 
             $mediaItem = $this->_createMediaItem($file, $currentDirectory, $cleanAlbumPath);
             if ($mediaItem !== null)
