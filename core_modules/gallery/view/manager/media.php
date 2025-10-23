@@ -71,20 +71,20 @@ $media = $this->media;
                     </p>
 
                     <p class="media-stats">
-                        Size: <?= $item['size'] ?><br />
-                        Views: <?= number_format($item['views'] ?? 0) ?><br>
-                        Last View: <?= htmlspecialchars($item['last_view'] ?? '-') ?><br />
-                        Date: <?= $item['date_formatted'] ?>
+                        <?= _('Size:') ?> <?= $item['size'] ?><br />
+                        <?= _('Views:') ?> <?= number_format($item['views'] ?? 0) ?><br>
+                        <?= _('Last View:') ?> <?= htmlspecialchars($item['last_view'] ?? '-') ?><br />
+                        <?= _('Date:') ?> <?= $item['date_formatted'] ?>
                     </p>
 
                     <div class="media-actions">
                         <a class="button small-action edit" href="<?= htmlspecialchars($editLink) ?>">
-                            Edit Details
+                            <?= _('Edit Details') ?>
                         </a>
                         <a class="button small-action delete"
                            href="<?= htmlspecialchars($deleteLink) ?>"
-                           onclick="return confirm('Delete <?= htmlspecialchars($item['file']) ?>?')">
-                            Delete
+                           onclick="return confirm('<?= _('Delete') ?> <?= htmlspecialchars($item['file']) ?>?')">
+                               <?= _('Delete') ?>
                         </a>
                     </div>
                 </div>
