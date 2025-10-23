@@ -91,7 +91,7 @@ $permissionMap = $this->permissionMap ?? [];
 <fieldset style="margin-top: 30px;">
     <legend><?= _('Albums') ?></legend>
 
-    <div class="paginated">
+    <div id="album-manager-list" class="paginated">
         <table>
             <thead>
                 <tr>
