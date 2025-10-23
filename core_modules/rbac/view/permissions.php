@@ -47,13 +47,16 @@
                     </thead>
                     <tbody>
                         <?php
+                        // Loop through all defined permissions
                         foreach ($this->allPerms as $perm):
                             $permId = $perm['id'];
+                            // Get the final inherited/effective access value
                             $effectiveValue = $this->effective[$permId] ?? false;
 
                             // Dynamic effective label translated
                             $effectiveLabel = $effectiveValue ? _('✅ Allowed') : _('❌ Denied');
 
+                            // Get the explicitly assigned value for this role ('0', '1', or 'X' for inherit/default)
                             $assignedValue = $this->assigned[$permId] ?? 'X';
 
                             // Source label translation logic
