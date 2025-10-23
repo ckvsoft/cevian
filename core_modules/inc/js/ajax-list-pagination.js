@@ -65,6 +65,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+// ----------------------------
+// Pagination State Storage (per container/album ID)
+// ----------------------------
+
+    /**
+     * Creates a unique key based on the container ID (which should represent the album ID).
+     * @param {string} containerId - The ID of the container (e.g., 'album-content-123').
+     * @returns {string} The unique localStorage key.
+     */
+    function getPaginationKey(containerId) {
+        // The key uses the container ID to ensure state is unique per album/list.
+        return 'pagination_page_' + containerId;
+    }
+
+    /**
+     * Stores the current page number in the browser's localStorage.
+     * This persists the state across sessions for the specific album/container.
+     * @param {string} containerId - The ID of the paginated container.
+     * @param {number} page - The page number to store.
+     */
+    function storePageInLocalStorage(containerId, page) {
+        try {
+            localStorage.setItem(getPaginationKey(containerId), page.toString());
+        } catch (e) {
+            console.warn('localStorage is unavailable or quota exceeded.', e);
+        }
+    }
+
+    /**
+     * Loads the saved page number from localStorage.
+     * @param {string} containerId - The ID of the paginated container.
+     * @returns {number} The stored page number, or 1 if none is found or if the value is invalid.
+     */
+    function loadPageFromLocalStorage(containerId) {
+        try {
+            const storedPage = localStorage.getItem(getPaginationKey(containerId));
+            const page = parseInt(storedPage, 10);
+            return (page > 0) ? page : 1;
+        } catch (e) {
+            return 1;
+        }
+    }
+
     // ----------------------------
     // AJAX form submission logic
     // ----------------------------
@@ -184,6 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container)
             return;
 
+        // Get the container's ID to use as a unique key for state storage (per album/list)
+        const containerId = container.id;
+
+        // Check if an ID is present. If not, the function defaults to no state persistence.
+        const hasPersistenceId = !!containerId;
+
         const table = container.querySelector('table');
 
         let paginatedContent, items = [], totalItems = 0;
@@ -210,8 +259,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
 
         const rowsPerPage = parseInt(container.dataset.perPage, 10) || 15;
-        let currentPage = 1;
+
+        let currentPage = 1; // Default starting page is always 1
+
+        // CHECK: If an ID is present, try to load the persistent state
+        if (hasPersistenceId) {
+            currentPage = loadPageFromLocalStorage(containerId);
+        }
+
         const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+        // Ensure the loaded page is within bounds
+        if (currentPage > totalPages) {
+            currentPage = 1;
+            // Only reset in localStorage if a key exists
+            if (hasPersistenceId) {
+                storePageInLocalStorage(containerId, currentPage);
+            }
+        }
+
 
         const oldPagination = container.querySelector('.pagination');
         if (oldPagination)
@@ -236,8 +302,17 @@ document.addEventListener('DOMContentLoaded', () => {
         pageStatus.style.marginLeft = '10px';
         pageStatus.style.fontWeight = 'bold';
 
-        prevButton.onclick = () => showPage(currentPage - 1);
-        nextButton.onclick = () => showPage(currentPage + 1);
+        // CHANGE: Use a local function to handle navigation and (optionally) storage
+        function navigateAndStore(pageChange) {
+            showPage(currentPage + pageChange);
+            // Only store the page if a valid ID is present
+            if (hasPersistenceId) {
+                storePageInLocalStorage(containerId, currentPage);
+            }
+        }
+
+        prevButton.onclick = () => navigateAndStore(-1);
+        nextButton.onclick = () => navigateAndStore(1);
 
         pagination.appendChild(prevButton);
         pagination.appendChild(nextButton);
@@ -266,7 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
             nextButton.disabled = currentPage === totalPages;
         }
 
-        showPage(1);
+        // Display the initial page (either 1 or the loaded state)
+        showPage(currentPage);
     }
 
     // ----------------------------
@@ -289,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const form = forms[i];
                 await submitFormLogic(form);
                 displayMessage('success', '<?= _("Step") ?> ' + (i + 1) + '/' + forms.length,
-                    '<?= _("Data for") ?> "' + form.id + '" <?= _("saved successfully.") ?>');
+                        '<?= _("Data for") ?> "' + form.id + '" <?= _("saved successfully.") ?>');
             }
 
             const redirectUrl = forms[0].dataset.redirect;
