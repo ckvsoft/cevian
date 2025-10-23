@@ -23,7 +23,9 @@
  * THE SOFTWARE.
  */
 
+// Determine if the form is in edit mode based on the existence of a permission ID
 $isEditMode = !empty($this->perm['id']);
+// Default redirection target after successful form submission
 $defaultRedirect = 'rbac/permissions';
 ?>
 <fieldset style="margin-top: 30px;">
@@ -69,7 +71,7 @@ $defaultRedirect = 'rbac/permissions';
      * @param {number} id - The ID of the permission to delete.
      */
     function deletePermission(id) {
-        // Confirmation dialog translated
+        // Confirmation dialog uses translated string
         if (!confirm("<?= _('Really delete this permission?') ?>"))
             return;
 
@@ -77,9 +79,10 @@ $defaultRedirect = 'rbac/permissions';
                 .then(r => r.json())
                 .then(d => {
                     if (d.success)
-                        // Redirect translated
+                        // Redirect on success
                         location.href = "<?= BASE_URI . $defaultRedirect ?>";
                     else
+                        // Display error message
                         alert(JSON.stringify(d.error || d));
                 }).catch(e => alert(e));
     }
