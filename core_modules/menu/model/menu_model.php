@@ -13,11 +13,21 @@ class Menu_Model extends Model
         parent::__construct();
     }
 
+    /**
+     * Retrieves a list of all menu entries.
+     * @return array
+     */
     public function menuList()
     {
-        return $this->db->select('SELECT id, label, link, parent, sort, role, is_public  FROM ' . $this->_table);
+        return $this->db->select('SELECT id, label, link, parent, sort, role, is_public FROM ' . $this->_table);
     }
 
+    /**
+     * Recursively generates a nested array structure for the menu.
+     *
+     * @param int $parentId The ID of the parent menu item.
+     * @return array
+     */
     public function generateMenuArray($parentId)
     {
         $result = $this->db->select("Select * from " . $this->_table . " where parent=:parent", ['parent' => intval($parentId)]);
@@ -28,7 +38,10 @@ class Menu_Model extends Model
 
         $menu = [];
         foreach ($result as $value) {
+            // Recursively fetch submenus
             $submenu = $this->generateMenuArray($value['id']);
+
+            // Structure the menu entry based on the existence of a submenu
             if (!empty($submenu)) {
                 $menu[] = [
                     'id' => $value['id'],
@@ -50,16 +63,22 @@ class Menu_Model extends Model
         return $menu;
     }
 
+    /**
+     * Retrieves a single menu entry by its ID.
+     *
+     * @param int $id The menu ID.
+     * @return array
+     */
     public function menuSingleList($id)
     {
         return $this->db->select('SELECT id, label, link, parent, sort, role, is_public FROM ' . $this->_table . ' WHERE id = :id', ['id' => $id]);
     }
 
     /**
-     * Creates a menuentry based on data
+     * Creates a menu entry based on provided data.
      *
-     * @param array $data
-     * @return integer The new id
+     * @param array $data The data to insert.
+     * @return integer|string The new ID on success, or an error message string on failure.
      */
     public function create($data)
     {
@@ -67,23 +86,24 @@ class Menu_Model extends Model
             $this->db->insert($this->_table, $data);
             return (int) $this->db->id();
         } catch (\ckvsoft\CkvException $e) {
-            // CATCH: Intercept the exception thrown by the Database class.
-            // CHECK: Look for known DB errors (e.g., Duplicate Entry, SQLSTATE '23000')
+            // Intercept the exception thrown by the Database class.
+            // Check for known DB errors (e.g., Duplicate Entry, SQLSTATE '23000')
             if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
-                // Return a specific, user-friendly message
-                return "The menu already exists.";
+                // Return a specific, user-friendly message for translation
+                return _("The menu already exists.");
             }
 
-            // FALLBACK: Return a generic database error message
-            return "Database error: User could not be created.";
+            // Fallback: Return a generic database error message for translation
+            return _("Database error: Menu entry could not be created.");
         }
     }
 
     /**
+     * Updates an existing menu entry.
      *
-     * @param integer $id
-     * @param array $data
-     * @return boolean
+     * @param int $id The ID of the menu entry to update.
+     * @param array $data The data to update.
+     * @return boolean True on successful update, false otherwise.
      */
     public function update($id, $data)
     {
@@ -91,25 +111,27 @@ class Menu_Model extends Model
     }
 
     /**
+     * Deletes a menu entry by ID.
      *
-     * @param integer $user_id
-     * @return boolean
+     * @param int $id The ID of the menu entry to delete.
+     * @return boolean True on successful delete, false otherwise.
      */
     public function delete($id)
     {
-        $entry = $this->_getMenuEntry($id);
+        // NOTE: The private method call _getMenuEntry($id) is currently unused but kept for context.
+        // $entry = $this->_getMenuEntry($id);
         return $this->db->delete($this->_table, "id = :id", ['id' => $id]);
     }
 
     /**
-     * Grabs information about a particular menuentry
+     * Grabs information about a particular menu entry.
      *
-     * @param integer $id
-     * @return boolean|array
+     * @param int $id The ID of the menu entry.
+     * @return boolean|array The menu entry data array, or false if not found.
      */
     private function _getMenuEntry($id)
     {
-        $result = $this->db->select("SELECT * FROM " . $this->_table . " WHERE   id = :id", ['id' => $id]);
+        $result = $this->db->select("SELECT * FROM " . $this->_table . " WHERE id = :id", ['id' => $id]);
 
         if (!empty($result)) {
             return $result[0];
