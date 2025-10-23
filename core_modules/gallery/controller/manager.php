@@ -1,6 +1,28 @@
 <?php
 
-// gallery/controller/Manager.php
+/*
+ * The MIT License
+ *
+ * Copyright 2025 chris.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 use ckvsoft\mvc\BaseController;
 use ckvsoft\Input;
@@ -63,7 +85,8 @@ class Manager extends BaseController
 
         // Render the full page with header, content view, and footer
         $this->renderPage([
-            ['view' => '/inc/header', 'data' => ['title' => $data['title'] ?? 'Gallery Manager']],
+            // Use _() for the default page title
+            ['view' => '/inc/header', 'data' => ['title' => $data['title'] ?? _('Gallery Manager')]],
             ['view' => $view, 'data' => $data],
             ['view' => '/inc/footer'],
                 ], $extraCss, $extraJs);
@@ -83,7 +106,8 @@ class Manager extends BaseController
         $managerModel = $this->getGalleryManagerModel();
         $albums = $managerModel->getAllAlbumsWithStats();
 
-        $message = "Album: size -> " . sizeof($albums);
+        // The message includes dynamic content, but the static parts can be translated
+        $message = _('Album: size -> ') . sizeof($albums);
         $rawPermissionMap = $managerModel::PERMISSION_LEVELS;
 
         // Translate permission level texts for display
@@ -95,7 +119,8 @@ class Manager extends BaseController
         // Render the album overview page
         $this->render('gallery/manager/index', [
             'albums' => $albums,
-            'title' => 'Album Management',
+            // Use _() for the section title
+            'title' => _('Album Management'),
             'permissionMap' => $permissionMap,
             'message' => $message
         ]);
@@ -154,14 +179,17 @@ class Manager extends BaseController
                 );
 
                 if ($success) {
-                    \ckvsoft\Output::success(['message' => 'Album permissions updated successfully.']);
+                    // Use _() for the success message
+                    \ckvsoft\Output::success(['message' => _('Album permissions updated successfully.')]);
                 } else {
-                    \ckvsoft\Output::error(['message' => 'No changes made or update failed.']);
+                    // Use _() for the error message
+                    \ckvsoft\Output::error(['message' => _('No changes made or update failed.')]);
                 }
                 return; // End execution for POST request
             }
         } catch (\ckvsoft\CkvException $e) {
             // Handle validation errors or other CkvExceptions
+            // The input errors are usually not translated here, but the surrounding message could be
             \ckvsoft\Output::error(['message' => implode('; ', $this->input->fetchErrors())]);
             return; // End execution on error
         }
@@ -170,7 +198,8 @@ class Manager extends BaseController
         $album = $managerModel->getAlbumById($albumId); // DELEGATION
 
         if (!$album) {
-            \ckvsoft\Output::error(['Album not found.']);
+            // Use _() for the error message
+            \ckvsoft\Output::error([_('Album not found.')]);
             $this->redirect(BASE_URI . 'gallery/manager/index');
             return;
         }
@@ -188,7 +217,8 @@ class Manager extends BaseController
         $this->render('gallery/manager/edit', [
             'album' => $album,
             'users' => $users,
-            'title' => 'Edit Album: ' . htmlspecialchars($album['album_path'] ?? ''),
+            // Use _() for the title prefix
+            'title' => _('Edit Album: ') . htmlspecialchars($album['album_path'] ?? ''),
             'permissionMap' => $permissionMap
         ]);
     }
@@ -204,7 +234,8 @@ class Manager extends BaseController
         $album = $managerModel->getAlbumById($albumId);
 
         if (!$album) {
-            \ckvsoft\Output::error(['Album not found.']);
+            // Use _() for the error message
+            \ckvsoft\Output::error([_('Album not found.')]);
             $this->redirect(BASE_URI . 'gallery/manager/index');
             return;
         }
@@ -218,7 +249,8 @@ class Manager extends BaseController
         $this->render('gallery/manager/media', [
             'album' => $album,
             'media' => $media,
-            'title' => 'Media Management for: ' . htmlspecialchars($album['album_path'])
+            // Use _() for the title prefix
+            'title' => _('Media Management for: ') . htmlspecialchars($album['album_path'])
         ]);
     }
 
@@ -235,17 +267,19 @@ class Manager extends BaseController
         $mediaItem = $managerModel->getMediaItemById($mediaId); // Assumption: Method exists in Model
 
         if (!$mediaItem) {
-            \ckvsoft\Output::error(['Media item not found.']);
+            // Use _() for the error message
+            \ckvsoft\Output::error([_('Media item not found.')]);
             // Redirect back to the album media overview if the item doesn't exist.
             $this->redirect(BASE_URI . 'gallery/manager/album_media/' . ($this->input->get('album_id') ?? ''));
             return;
         }
 
-        // HIER WÜRDE DIE FORMULAR-LOGIK UND DAS RENDERN DER EDITIER-ANSICHT FOLGEN.
+        // HERE THE FORM LOGIC AND RENDERING OF THE EDIT VIEW WOULD FOLLOW.
         // Render the media item edit view (placeholder array for now)
         $this->render('gallery/manager/edit_media', [
             'item' => $mediaItem,
-            'title' => 'Edit Media: ' . htmlspecialchars($mediaItem['name'] ?? '')
+            // Use _() for the title prefix
+            'title' => _('Edit Media: ') . htmlspecialchars($mediaItem['name'] ?? '')
         ]);
     }
 
@@ -260,9 +294,11 @@ class Manager extends BaseController
         $success = $managerModel->deleteMediaItem($mediaId); // Assumption: Method exists in Model
 
         if ($success) {
-            \ckvsoft\Output::success(['message' => "Media ID {$mediaId} and associated files deleted successfully."]);
+            // Use _() for the success message with placeholders
+            \ckvsoft\Output::success(['message' => sprintf(_('Media ID %d and associated files deleted successfully.'), $mediaId)]);
         } else {
-            \ckvsoft\Output::error(['message' => "Failed to delete media item ID {$mediaId}."]);
+            // Use _() for the error message with placeholders
+            \ckvsoft\Output::error(['message' => sprintf(_('Failed to delete media item ID %d.'), $mediaId)]);
         }
     }
 
@@ -281,9 +317,10 @@ class Manager extends BaseController
         // Rescan albums, tracking progress
         $results = $managerModel->rescanAlbums($currentUserId, $progressId);
 
-        $message = "Rescan complete: ";
-        $message .= "{$results['added_count']} new albums added. ";
-        $message .= "{$results['deleted_count']} obsolete albums deleted.";
+        // Construct the translatable message parts
+        $message = _('Rescan complete: ');
+        $message .= sprintf(_('%d new albums added. '), $results['added_count']);
+        $message .= sprintf(_('%d obsolete albums deleted.'), $results['deleted_count']);
 
         \ckvsoft\Output::success(['message' => $message]);
     }
@@ -298,11 +335,12 @@ class Manager extends BaseController
         // Rescan media, tracking progress and returning stats
         $results = $managerModel->rescanAlbumMedia($progressId);
 
-        $message = "Media Rescan complete: ";
-        $message .= "{$results['added_count']} new media files registered. ";
-        $message .= "{$results['skipped_count']} already present or unsupported. ";
-        $message .= "{$results['deleted_db_entries']} orphaned DB entries deleted. ";
-        $message .= "{$results['deleted_thumbnails']} orphaned thumbnails deleted.";
+        // Construct the translatable message parts
+        $message = _('Media Rescan complete: ');
+        $message .= sprintf(_('%d new media files registered. '), $results['added_count']);
+        $message .= sprintf(_('%d already present or unsupported. '), $results['skipped_count']);
+        $message .= sprintf(_('%d orphaned DB entries deleted. '), $results['deleted_db_entries']);
+        $message .= sprintf(_('%d orphaned thumbnails deleted.'), $results['deleted_thumbnails']);
 
         \ckvsoft\Output::success(['message' => $message]);
     }
@@ -319,9 +357,13 @@ class Manager extends BaseController
         $affectedRows = $managerModel->resetAlbumViewCounter($albumId); // DELEGATION
 
         if ($affectedRows >= 0) {
-            \ckvsoft\Output::success(['message' => "View counter for Album ID {$albumId} reset successfully. {$affectedRows} items affected."]);
+            // Use _() for the success message with placeholders
+            $message = sprintf(_('View counter for Album ID %d reset successfully. %d items affected.'), $albumId, $affectedRows);
+            \ckvsoft\Output::success(['message' => $message]);
         } else {
-            \ckvsoft\Output::error(['message' => "Failed to reset view counter for Album ID {$albumId}."]);
+            // Use _() for the error message with placeholders
+            $message = sprintf(_('Failed to reset view counter for Album ID %d.'), $albumId);
+            \ckvsoft\Output::error(['message' => $message]);
         }
     }
 
@@ -344,7 +386,6 @@ class Manager extends BaseController
         if (is_array($progress) && isset($progress['percent'])) {
             $modifiedTime = isset($progress['modified']) ? date('H:i:s', strtotime($progress['modified'])) : date('H:i:s');
 
-            // Output the progress data as a success response
             \ckvsoft\Output::success([
                 'percent' => $progress['percent'] ?? 0,
                 'modified' => $modifiedTime
@@ -352,8 +393,7 @@ class Manager extends BaseController
             exit;
         }
 
-        // Output an error if the job is not running or data is invalid
-        \ckvsoft\Output::error(['error' => 'Job not running or progress data invalid.']);
-        error_log('Job not running or progress data invalid.');
+        // Use _() for the error message
+        \ckvsoft\Output::error(['error' => _('Job not running or progress data invalid.')]);
     }
 }
