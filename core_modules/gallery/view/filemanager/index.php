@@ -783,9 +783,49 @@
         return path.split('/').reverse()[0];
     }
 
-    // NOTE: Assumed definition for displayMessage, as it is used throughout
-    // function displayMessage(type, title, message, details) { /* ... */ }
+    // ----------------------------
+    // File Manager Path Persistence
+    // ----------------------------
 
+    /**
+     * Creates a unique storage key based on the panel ID.
+     * @param {string} panelId - The ID of the panel (e.g., 'panel-left').
+     * @returns {string} The unique localStorage key.
+     */
+    function getPathKey(panelId) {
+        return 'filemanager_path_' + panelId;
+    }
+
+    /**
+     * Saves the current directory path for a specific panel in localStorage.
+     * @param {HTMLElement} panelElement - The panel DOM element.
+     * @param {string} path - The directory path to store.
+     */
+    function savePanelPath(panelElement, path) {
+        if (panelElement.id) {
+            try {
+                localStorage.setItem(getPathKey(panelElement.id), path);
+            } catch (e) {
+                console.warn('localStorage unavailable or quota exceeded.', e);
+            }
+        }
+    }
+
+    /**
+     * Loads the saved directory path for a specific panel from localStorage.
+     * @param {HTMLElement} panelElement - The panel DOM element.
+     * @returns {string|null} The saved path, or null if not found.
+     */
+    function loadPanelPath(panelElement) {
+        if (panelElement.id) {
+            try {
+                return localStorage.getItem(getPathKey(panelElement.id));
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    }
 
     // --- CORE FUNCTION: renderPanel ---
     /**
@@ -926,6 +966,8 @@
 
             fileList.appendChild(li);
         });
+
+        savePanelPath(panelElement, currentPath);
     }
 
     // --- CORE FUNCTIONS (browseDirectory) ---
@@ -1018,75 +1060,101 @@
 
     document.addEventListener('DOMContentLoaded', () => {
 
-        const leftPanel = document.getElementById('leftPanel');
-        const rightPanel = document.getElementById('rightPanel');
+                const leftPanel = document.getElementById('leftPanel');
+                const rightPanel = document.getElementById('rightPanel');
 
-        // Initialize Maps for selection state
-        selectedItems.set('leftPanel', []);
-        selectedItems.set('rightPanel', []);
-        lastClickedItem.set('leftPanel', null);
-        lastClickedItem.set('rightPanel', null);
+                // Initialize Maps for selection state
+                selectedItems.set('leftPanel', []);
+                selectedItems.set('rightPanel', []);
+                lastClickedItem.set('leftPanel', null);
+                lastClickedItem.set('rightPanel', null);
 
-        // Set the left panel as active initially and add panel click handlers
-        setActivePanel(leftPanel);
-        leftPanel.addEventListener('click', () => setActivePanel(leftPanel));
-        rightPanel.addEventListener('click', () => setActivePanel(rightPanel));
+                // Set the left panel as active initially and add panel click handlers
+                setActivePanel(leftPanel);
+                leftPanel.addEventListener('click', () => setActivePanel(leftPanel));
+                rightPanel.addEventListener('click', () => setActivePanel(rightPanel));
 
 
-        // --- MKDIR HANDLER ---
-        document.getElementById('createDirBtn').addEventListener('click', () => {
-            const newDirName = prompt('<?= _("Enter new directory name:") ?>');
-            if (!newDirName)
-                return;
+                // --- MKDIR HANDLER ---
+                document.getElementById('createDirBtn').addEventListener('click', () => {
+                        const newDirName = prompt('<?= _("Enter new directory name:") ?>');
+                        if (!newDirName)
+                                return;
 
-            const targetPanel = document.getElementById(activePanelId); // Uses the active panel ID
-            const targetPath = targetPanel.dataset.currentPath;
+                        const targetPanel = document.getElementById(activePanelId); // Uses the active panel ID
+                        const targetPath = targetPanel.dataset.currentPath;
 
-            const formData = new FormData();
-            formData.append('newDirName', newDirName);
-            formData.append('targetPath', targetPath);
+                        const formData = new FormData();
+                        formData.append('newDirName', newDirName);
+                        formData.append('targetPath', targetPath);
 
-            fetch(LOCAL_BASE_URI + 'gallery/filemanager/mkdir', {
-                method: 'POST',
-                body: formData
-            })
-                    .then(response => response.json())
-                    .then(data => {
-                        const message = data.data && data.data.message ? data.data.message : (data.errorMessage || '<?= _("Error creating directory.") ?>');
+                        fetch(LOCAL_BASE_URI + 'gallery/filemanager/mkdir', {
+                                method: 'POST',
+                                body: formData
+                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                                const message = data.data && data.data.message ? data.data.message : (data.errorMessage || '<?= _("Error creating directory.") ?>');
 
-                        if (data.success === 1) {
-                            displayMessage('success', '<?= _("Directory Created") ?>', message);
-                            // Reload only the active panel
-                            browseDirectory(targetPanel, targetPath);
-                        } else {
-                            displayMessage('error', '<?= _("Creation Failed") ?>', message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('MKDIR failed:', error);
-                        displayMessage('error', '<?= _("Creation Failed") ?>', '<?= _("A network error occurred while creating the directory.") ?>');
-                    });
-        });
+                                                if (data.success === 1) {
+                                                        displayMessage('success', '<?= _("Directory Created") ?>', message);
+                                                        // Reload only the active panel
+                                                        browseDirectory(targetPanel, targetPath);
+                                                } else {
+                                                        displayMessage('error', '<?= _("Creation Failed") ?>', message);
+                                                }
+                                        })
+                                        .catch(error => {
+                                                console.error('MKDIR failed:', error);
+                                                displayMessage('error', '<?= _("Creation Failed") ?>', '<?= _("A network error occurred while creating the directory.") ?>');
+                                        });
+                });
 
-        // --- DELETE HANDLER ---
-        document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedItems);
+                // --- DELETE HANDLER ---
+                document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedItems);
 
-        // --- INITIAL RENDER ---
+                // --- INITIAL RENDER ---
 
-        const initialLeftData = <?php echo json_encode($this->manager['leftPanel']); ?>;
-        const initialRightData = <?php echo json_encode($this->manager['rightPanel']); ?>;
-        const initialPath = '<?php echo $this->manager['currentPath']; ?>';
+                // PHP-generated initial content (used only if no path is saved in localStorage)
+                const initialLeftData = <?php echo json_encode($this->manager['leftPanel']); ?>;
+                const initialRightData = <?php echo json_encode($this->manager['rightPanel']); ?>;
 
-        renderPanel(leftPanel, initialLeftData, initialPath);
-        renderPanel(rightPanel, initialRightData, initialPath);
+        // This is the default path provided by the server (e.g., '/')
+                const controllerPath = '<?php echo $this->manager['currentPath']; ?>';
 
-        // --- Attach DragOver/Drop Listeners to the panels ---
-        [leftPanel, rightPanel].forEach(panel => {
-            panel.addEventListener('dragover', handleDragOver);
-            // This listener is for drops onto the panel background.
-            panel.addEventListener('drop', handleDrop);
-            panel.addEventListener('dragenter', handleDragEnter);
-            panel.addEventListener('dragleave', handleDragLeave);
-        });
-    });
+
+        // 1. LEFT Panel: Check for saved path and load content
+        const savedPathLeft = loadPanelPath(leftPanel);
+        const finalPathLeft = savedPathLeft || controllerPath; // Use saved path or controller default
+
+        if (savedPathLeft) {
+            // Path found in storage, fetch its current contents dynamically
+            // browseDirectory handles fetching data and calling renderPanel internally.
+            browseDirectory(leftPanel, finalPathLeft);
+        } else {
+            // No path saved, use the initial content baked into the PHP page
+            renderPanel(leftPanel, initialLeftData, finalPathLeft);
+        }
+
+        // 2. RIGHT Panel: Check for saved path and load content
+        const savedPathRight = loadPanelPath(rightPanel);
+        const finalPathRight = savedPathRight || controllerPath; // Use saved path or controller default
+
+        if (savedPathRight) {
+            // Path found in storage, fetch its current contents dynamically
+            browseDirectory(rightPanel, finalPathRight);
+        } else {
+            // No path saved, use the initial content baked into the PHP page
+            renderPanel(rightPanel, initialRightData, finalPathRight);
+        }
+
+                // --- Attach DragOver/Drop Listeners to the panels ---
+                [leftPanel, rightPanel].forEach(panel => {
+                        panel.addEventListener('dragover', handleDragOver);
+                        // This listener is for drops onto the panel background.
+                        panel.addEventListener('drop', handleDrop);
+                        panel.addEventListener('dragenter', handleDragEnter);
+                        panel.addEventListener('dragleave', handleDragLeave);
+                });
+        });
 </script>
