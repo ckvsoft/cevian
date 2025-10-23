@@ -36,8 +36,6 @@ require_once __DIR__ . '/gallery_model.php';
 class GalleryManager_Model extends Gallery_Model
 {
 
-    private string $basePath;
-
     // Constant specific to this model's batch processing
     const UPDATE_FREQUENCY = 10;
 
@@ -49,9 +47,6 @@ class GalleryManager_Model extends Gallery_Model
     public function __construct()
     {
         parent::__construct();
-
-        $relativePath = trim(Config::get('paths.albums_relative_path') ?? 'public/albums/', '/');
-        $this->basePath = __DIR__ . '/../../../' . $relativePath . '/';
     }
 
     // ------------------------------------------------------------------
@@ -112,7 +107,6 @@ class GalleryManager_Model extends Gallery_Model
             }
         }
 
-        error_log("totalcount: " . $totalCount);
         return $totalCount;
     }
 
@@ -208,7 +202,6 @@ class GalleryManager_Model extends Gallery_Model
 
         // 3. Clean up orphaned DB entries and thumbnails
         $dbMediaEntries = $this->db->select("SELECT id, album_id, file_name FROM gallery_media_stats");
-        error_log("progress current: " . $progress->getCurrent());
 
         foreach ($dbMediaEntries as $entry) {
             $albumId = $entry['album_id'];
@@ -255,6 +248,55 @@ class GalleryManager_Model extends Gallery_Model
             'deleted_db_entries' => $deletedDbEntries,
             'deleted_thumbnails' => $deletedThumbs
         ];
+    }
+
+    /**
+     * Updates the album_id for a single media item after it has been moved
+     * to a new folder on the file system.
+     *
+     * @param string $fileName The file name (e.g., 'image.jpg').
+     * @param string $oldAlbumPath The previous relative album path.
+     * @param string $newAlbumPath The new relative album path.
+     * @return bool True on successful DB update, false otherwise.
+     */
+    public function updateMediaAlbumId(string $fileName, string $oldAlbumPath, string $newAlbumPath): bool
+    {
+        // 1. Get the new Album ID
+        $newAlbum = $this->db->selectOne(
+                "SELECT album_id FROM gallery_albums WHERE album_path = :newPath",
+                ['newPath' => trim($newAlbumPath, '/')]
+        );
+
+        if (!$newAlbum) {
+            error_log("updateMediaAlbumId failed: New album not found for path '{$newAlbumPath}'.");
+            return false;
+        }
+
+        $newAlbumId = $newAlbum['album_id'];
+
+        // 2. Find the media item by its old path/name combination.
+        // We assume media is identified by a unique combination of its album_id and file name.
+        $oldAlbum = $this->db->selectOne(
+                "SELECT album_id FROM gallery_albums WHERE album_path = :oldPath",
+                ['oldPath' => trim($oldAlbumPath, '/')]
+        );
+
+        if (!$oldAlbum) {
+            error_log("updateMediaAlbumId failed: Old album not found for path '{$oldAlbumPath}'.");
+            return false;
+        }
+
+        $oldAlbumId = $oldAlbum['album_id'];
+
+        // 3. Update the media item's album_id to the new one
+        // We also update the file name to be safe, although it usually doesn't change here.
+        $updatedRows = $this->db->update('gallery_media_stats',
+                ['album_id' => $newAlbumId],
+                'album_id = :oldId AND file_name = :file_name',
+                ['oldId' => $oldAlbumId, 'file_name' => $fileName]
+        );
+
+        return $updatedRows > 0;
     }
 
     // ------------------------------------------------------------------
@@ -347,13 +389,12 @@ class GalleryManager_Model extends Gallery_Model
                 $ownerId = $currentUserId ?? 1;
                 $trimmedPath = trim($path, '/');
 
-                // 💡 NEUE LOGIK: Titel generieren
                 $folderName = basename($trimmedPath);
                 $generatedTitle = $this->formatMediaName($folderName);
 
                 $data = [
                     'album_path' => $trimmedPath,
-                    'title' => $generatedTitle, // NEU: Den generierten Titel setzen
+                    'title' => $generatedTitle,
                     'permissions_level' => 2,
                     'owner_user_id' => $ownerId
                 ];
@@ -426,6 +467,89 @@ class GalleryManager_Model extends Gallery_Model
     }
 
     /**
+     * @param string $oldPath The original relative path of the album (e.g., 'old_folder/sub').
+     * @param string $newPath The new relative path of the album (e.g., 'new_folder/sub').
+     * @return bool True on successful DB update, false otherwise.
+     */
+    public function updateAlbumPath(string $oldPath, string $newPath): bool
+    {
+        // Trim paths to ensure consistency (e.g., remove leading/trailing slashes)
+        $trimmedOldPath = trim($oldPath, '/');
+        $trimmedNewPath = trim($newPath, '/');
+
+        // Special case: The root album cannot be moved.
+        if ($trimmedOldPath === '' || $trimmedNewPath === '') {
+            return false;
+        }
+
+        $this->db->beginTransaction();
+
+        try {
+            // 1. Get the album ID of the album being moved
+            $album = $this->db->selectOne(
+                    "SELECT album_id FROM gallery_albums WHERE album_path = :oldPath",
+                    ['oldPath' => $trimmedOldPath]
+            );
+
+            if (!$album) {
+                $this->db->rollBack();
+                error_log("UpdateAlbumPath failed: Album not found for path '{$trimmedOldPath}'.");
+                return false;
+            }
+
+            $albumId = $album['album_id'];
+
+            // 2. Update the path of the moved album itself in gallery_albums
+            $success = $this->db->update('gallery_albums',
+                    ['album_path' => $trimmedNewPath],
+                    'album_id = :id',
+                    ['id' => $albumId]
+            );
+
+            if (!$success) {
+                $this->db->rollBack();
+                error_log("UpdateAlbumPath failed to update the main album ID {$albumId}.");
+                return false;
+            }
+
+            // 3. Find all sub-albums recursively
+            $oldPrefix = $trimmedOldPath . '/';
+            $dbSubAlbums = $this->db->select(
+                    // Use LIKE to find all paths starting with the old path followed by a slash
+                    "SELECT album_id, album_path FROM gallery_albums WHERE album_path LIKE :prefixWildcard",
+                    ['prefixWildcard' => $oldPrefix . '%']
+            );
+
+            $updatedCount = 0;
+
+            // 4. Update paths of all sub-albums by looping through the results
+            foreach ($dbSubAlbums as $subAlbum) {
+                // Replace the old prefix with the new prefix to get the corrected path
+                $newSubPath = str_replace($oldPrefix, $trimmedNewPath . '/', $subAlbum['album_path']);
+
+                $success = $this->db->update('gallery_albums',
+                        ['album_path' => $newSubPath],
+                        'album_id = :id',
+                        ['id' => $subAlbum['album_id']]
+                );
+
+                if ($success) {
+                    $updatedCount++;
+                } else {
+                    error_log("UpdateAlbumPath Warning: Failed to update sub-album {$subAlbum['album_id']}.");
+                }
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            error_log("UpdateAlbumPath DB transaction FAILED: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Ensures the primary album root directory (gallery base path) is registered as an album
      * in the gallery_albums table, if it's not already present.
      *
@@ -452,7 +576,6 @@ class GalleryManager_Model extends Gallery_Model
                     'permissions_level' => 2,
                     'owner_user_id' => $userId,
                 ]);
-                error_log("INFO: Root Album ('{$rootAlbumPath}') entry created in gallery_albums.");
             }
 
             $this->db->commit();
@@ -683,5 +806,18 @@ class GalleryManager_Model extends Gallery_Model
     {
         $sql = "SELECT user_id, username FROM `user` ORDER BY username ASC";
         return $this->db->select($sql);
+    }
+
+    /**
+     * Retrieves all albums owned by the given user.
+     * * @param int $userId The ID of the current user.
+     * @return array List of album data arrays.
+     */
+    protected function getOwnedAlbums(int $userId): array
+    {
+        return $this->db->select(
+                        "SELECT `album_path`, `title` FROM `gallery_albums` WHERE `owner_user_id` = :user_id",
+                        ['user_id' => $userId]
+                );
     }
 }
