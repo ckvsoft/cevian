@@ -1,3 +1,6 @@
+<?php
+$defaultRedirect = 'rbac';
+?>
 <h1><?= $this->title ?></h1>
 
 <fieldset>
@@ -38,15 +41,16 @@
      * @param {number} id - The ID of the role to delete.
      */
     function deleteRole(id) {
-        // Confirmation dialog translated
+        // Confirmation dialog uses translated string
         if (!confirm("<?= _('Really delete this role?') ?>"))
             return;
 
+        // AJAX call to delete the role
         fetch("<?= BASE_URI ?>rbac/deleteRole/" + id)
                 .then(r => r.json())
                 .then(d => {
                     if (d.success)
-                        // Redirect on success
+                        // Redirect on success (assuming successful deletion requires page refresh/redirect)
                         location.href = "<?= BASE_URI ?>rbac";
                     else
                         // Display error translated
