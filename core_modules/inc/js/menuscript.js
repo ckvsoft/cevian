@@ -19,18 +19,4 @@ document.addEventListener("DOMContentLoaded", function () {
             menuItems[i].classList.add("has-child");
         }
     }
-
-    /*
-     
-     var headerHeight = document.querySelector('.fixed-header').offsetHeight;
-     document.querySelector('#flex-container').style.marginTop = headerHeight + "px";
-     
-     
-     var statusMessage = document.querySelector('#statusmessage');
-     statusMessage.textContent = '#status page loaded..';
-     statusMessage.style.marginBottom = 0;
-     setTimeout( function(){
-     statusMessage.style.marginBottom = "-50px";
-     }, 5000);
-     */
 });
