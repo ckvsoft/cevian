@@ -1,0 +1,1152 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-23 14:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:90
+msgid "A role with this name already exists."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:99
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:138
+msgid "The selected parent role was not found."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:102
+msgid "An unexpected error occurred during role save: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:105
+msgid "An unexpected system error occurred."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:142
+msgid "A role cannot be moved into its own subtree."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:145
+msgid "An unexpected error occurred while updating the role."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:207
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:230
+msgid "A permission with this key already exists."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:210
+msgid "Database error while creating permission."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:233
+msgid "Database error while updating permission."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:251
+msgid "Database error while deleting permission."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:7
+msgid "Create New Role"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:11
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:11
+msgid "Role Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:15
+msgid "Parent Role (optional)"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:17
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:17
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:21
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:24
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:33
+msgid "None"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:26
+msgid "Create Role"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:27
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:60
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:35
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:23
+msgid "Clear"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:34
+msgid "Existing Roles"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:45
+msgid "Really delete this role?"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:36
+msgid "Add New Permission"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:48
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:41
+msgid "Permission Key"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:49
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:52
+msgid "e.g."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:49
+msgid "user_create"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:51
+msgid "Display Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:52
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:22
+msgid "Create User"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:54
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:44
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:61
+msgid "Description"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:59
+msgid "Add Permission"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:66
+msgid "Existing Permissions"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:70
+msgid "Loading..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:32
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:239
+msgid "Edit Permission"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:38
+msgid "Permission Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:49
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:36
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:40
+msgid "Save"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:54
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:57
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:81
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:51
+msgid "Delete"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:61
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:33
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:37
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:44
+msgid "Cancel"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:75
+msgid "Really delete this permission?"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:34
+msgid "Permissions for"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:43
+msgid "Permission Key / Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:44
+msgid "Current Effective Access"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:45
+msgid "Direct Assignment (Override: 0/1/X)"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:57
+msgid "✅ Allowed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:57
+msgid "❌ Denied"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:63
+msgid "Default"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:65
+msgid "Inherited"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:65
+msgid "Explicit"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
+msgid "X - Inherit"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
+msgid "Effective"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
+msgid "Allowed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
+msgid "Denied"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:84
+msgid "1 - Explicitly Allow"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:84
+msgid "Allow"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:87
+msgid "0 - Explicitly Deny"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:87
+msgid "Deny"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:99
+msgid "Save permissions"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:33
+msgid "No permissions defined yet."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:53
+msgid "Key"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:57
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:38
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:5
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:18
+msgid "Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:67
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:53
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:142
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:37
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:2
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:78
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:46
+msgid "Edit"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:5
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:148
+msgid "Edit Role"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:15
+msgid "Parent Role"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:29
+msgid "Save Role & Permissions"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:46
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:101
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:127
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:19
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:22
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:14
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:31
+msgid "Role"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:63
+msgid "No roles found."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:57
+msgid "Role Management"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:92
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:184
+msgid "Role name cannot be empty."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:239
+msgid "New Permission"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:251
+msgid "Permissions Definition"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:297
+msgid "Permission name and key are required."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:370
+msgid "Invalid role id"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:5
+msgid "Email:"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:9
+msgid "Password:"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:14
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:74
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:90
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:98
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/controller/login.php:19
+msgid "Login"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:74
+msgid "Login successful"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:98
+msgid "Server error! Status: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/controller/login.php:60
+msgid "No user found"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:129
+msgid "Permission Denied: You must be logged in to access the file manager."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:271
+msgid "Permission Denied: You do not own this folder."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:309
+msgid "Directory already exists"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:314
+msgid "Failed to create directory"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:314
+msgid "Check file permissions."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/partials/video-item.php:30
+msgid "Your browser does not support the video tag."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/partials/album-item.php:28
+msgid "Album"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/partials/image-item.php:28
+msgid "Image"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:215
+msgid "Create New Directory"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:216
+msgid "Delete Selected Items"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:554
+msgid "Move Canceled"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:554
+#, php-format
+msgid "Item %s is already in this folder."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:559
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:615
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:994
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1012
+msgid "Move Failed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:559
+msgid "Cannot move an item into its own subfolder."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:610
+msgid "Move Complete with Errors"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:610
+#, php-format
+msgid "Failed to move %s of %s item(s)."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:615
+msgid "An unexpected error occurred during move processing."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:664
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:671
+#, php-format
+msgid "Upload Failed: %s"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:671
+msgid "Network or unexpected error occurred."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:681
+msgid "Upload Complete"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:681
+#, php-format
+msgid "%s file(s) uploaded successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:688
+msgid "Upload Failed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:688
+msgid "All uploads failed. Check individual error messages."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:706
+msgid "No Selection"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:706
+msgid "Please select at least one item to delete."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:711
+#, php-format
+msgid "Are you sure you want to delete the following %s item(s) from \"%s\"?%s"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:733
+msgid "Delete Failed (Invalid Server Response)"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:733
+#, php-format
+msgid "Server sent non-JSON data. First characters: \"%s\""
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:738
+msgid "Deletion failed due to server error."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:743
+msgid "Deletion Complete."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:751
+msgid "Unknown error object received."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:760
+msgid "Deletion Complete"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:762
+msgid "Deletion Failed or Completed with Errors"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:772
+msgid "Delete Failed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:772
+msgid "A network error occurred."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:816
+msgid "Access Denied"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:945
+msgid "Network Error"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:945
+#, php-format
+msgid "HTTP error! status: %s when browsing %s"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:956
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:958
+msgid "Browsing Error"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:961
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:966
+msgid "Browsing Failed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:961
+msgid "Unexpected server response format."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:966
+msgid "A network error occurred while loading the directory."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:994
+msgid "Server sent invalid response format. Check the browser console."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1000
+msgid "Move failed due to server error."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1004
+#, php-format
+msgid "Move Failed: %s"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1012
+msgid "A network error occurred while moving an item."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1039
+msgid "Enter new directory name:"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1056
+msgid "Error creating directory."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1059
+msgid "Directory Created"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1063
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1068
+msgid "Creation Failed"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1068
+msgid "A network error occurred while creating the directory."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:46
+msgid "Rescan Operations"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:58
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:63
+msgid "[Album Folder Rescan]"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:60
+msgid "Are you sure? This will synchronize the Albums DB with the filesystem."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:78
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:83
+msgid "[All Media Rescan]"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:80
+msgid ""
+"Are you sure? This will register ALL media files found in the filesystem "
+"into the media table. It might take a while!"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:92
+msgid "Albums"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:98
+msgid "Album Path Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:99
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:119
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:51
+msgid "Title"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:100
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:123
+msgid "User Name"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:102
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:132
+msgid "Views"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:103
+msgid "Actions"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:109
+msgid "No albums found. Run Album Folder Rescan."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:115
+msgid "Album Path"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:124
+msgid "System/N/A"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:139
+msgid "Media"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:153
+#, php-format
+msgid "Are you sure you want to reset the View Counter for Album ID %s to 0?"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:154
+msgid "Reset Views"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:42
+msgid "Edit Album"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:61
+msgid "Album Owner"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:63
+msgid "-- Please select --"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:76
+msgid "Apply Owner to all subfolders"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:81
+msgid "Permission Level"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:98
+msgid "Apply Permissions to all subfolders"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:103
+msgid "Save Changes"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:104
+msgid "Back to Overview"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:63
+msgid "File Manager"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:103
+msgid "Missing source or target path."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:113
+msgid "Item moved successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:116
+msgid "Move failed due to a database error."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:146
+msgid "Missing directory name or target path."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:156
+msgid "Directory created successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:158
+msgid "Failed to create directory due to a database error."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:175
+msgid "Missing or invalid path list for deletion."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:191
+msgid "Failed to delete item from database:"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:200
+msgid "Selected items deleted successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:206
+msgid "Deletion completed with errors."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:229
+msgid "File uploaded successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:231
+msgid "File upload failed for unknown reason or file not registered in DB."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:234
+msgid "Upload Error: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/gallery.php:46
+msgid "Gallery"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/gallery.php:91
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/gallery.php:102
+msgid "All Albums"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:89
+msgid "Gallery Manager"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:110
+msgid "Album: size -> "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:123
+msgid "Album Management"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:183
+msgid "Album permissions updated successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:186
+msgid "No changes made or update failed."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:202
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:238
+msgid "Album not found."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:221
+msgid "Edit Album: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:253
+msgid "Media Management for: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:271
+msgid "Media item not found."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:282
+msgid "Edit Media: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:298
+#, php-format
+msgid "Media ID %d and associated files deleted successfully."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:301
+#, php-format
+msgid "Failed to delete media item ID %d."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:321
+msgid "Rescan complete: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:322
+#, php-format
+msgid "%d new albums added. "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:323
+#, php-format
+msgid "%d obsolete albums deleted."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:339
+msgid "Media Rescan complete: "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:340
+#, php-format
+msgid "%d new media files registered. "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:341
+#, php-format
+msgid "%d already present or unsupported. "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:342
+#, php-format
+msgid "%d orphaned DB entries deleted. "
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:343
+#, php-format
+msgid "%d orphaned thumbnails deleted."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:361
+#, php-format
+msgid "View counter for Album ID %d reset successfully. %d items affected."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:365
+#, php-format
+msgid "Failed to reset view counter for Album ID %d."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:397
+msgid "Job not running or progress data invalid."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:9
+msgid "Installation Successful! ✅"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:10
+msgid ""
+"The installation was successful. A crucial point to remember is the "
+"generated HASH_KEY found in the config/app.json file. You must save this key "
+"in a secure location. If the key is lost, you will no longer be able to log "
+"in to the system."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:11
+msgid ""
+"To customize this page, you can copy the core_modules/home directory to /"
+"modules, but do not delete the original core_modules/home directory. You can "
+"then make your modifications. You can delete parts of the copied directory, "
+"such as Controller, Model, View, etc., where you are not making any changes. "
+"This same logic applies to other resources like JavaScript (JS) and "
+"Cascading Style Sheets (CSS) files. The /modules folder is the place for "
+"your own modules or for customized versions of core modules."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:12
+msgid "Modular Customization"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:13
+msgid ""
+"Only the files you want to modify should be saved within the /modules "
+"directory, and they must be in the exact same path as they are in the "
+"core_modules directory. This \"mirroring\" path ensures your customized "
+"files seamlessly override the originals."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:14
+msgid "For example:"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:16
+msgid ""
+"If you only want to change the header and footer in /modules/inc, you just "
+"need to copy those files from core_modules/inc and modify them. There's no "
+"need to copy the entire main module."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:17
+msgid ""
+"If you are changing a View component, it's enough to copy and modify only "
+"the View of the desired module. The same applies to Model and all other "
+"parts."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:18
+msgid ""
+"Should the inc/header be changed only for this copied module, create a "
+"header file in view/inc and also copy the corresponding controller. In the "
+"controller, you must adjust the header's path, for example, from /inc/header "
+"to inc/header (note the leading slash /). The header will then be loaded "
+"from <module>/view/inc/header."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:19
+msgid ""
+"If you want to use a header from another module, you must specify the module "
+"name, for example: dashboard/inc/header."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:21
+msgid "Using a Logo"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:22
+msgid ""
+"If a file named logo.png exists in the public/images directory, it will "
+"automatically be used as the logo without any further configuration."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/model/menu_model.php:93
+msgid "The menu already exists."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/model/menu_model.php:97
+msgid "Database error: Menu entry could not be created."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:2
+msgid "Menuentry: Add"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:6
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:9
+msgid "Label"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:9
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:12
+msgid "Link"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:12
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:15
+msgid "Parent"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:15
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:18
+msgid "Sort"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:22
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:25
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:17
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:34
+msgid "Admin"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:23
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:26
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:16
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:35
+msgid "Owner"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:27
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:30
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:69
+msgid "Public"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:33
+msgid "Create Menuentry"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:40
+msgid "Existing Menuentries"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:2
+msgid "Menuentry"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:20
+msgid "Menu"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:53
+msgid "Yes"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:53
+msgid "No"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:65
+msgid "Entry"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:123
+msgid "Edit Menuentry"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:146
+msgid "Changes not saved"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:12
+msgid "Current/Last Backup"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:14
+msgid "Database"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:15
+msgid "Images"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:23
+msgid "Start Database Backup"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:29
+msgid "Database Backup Progress"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:39
+msgid "Image Directory"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:41
+msgid "Loading directories..."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:49
+msgid "Start Images Backup"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:55
+msgid "Images Backup Progress"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:77
+msgid "The email address already exists."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:81
+msgid "Database error: User could not be created."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:102
+msgid "The email address you tried to set already exists."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:106
+msgid "Database error: Changes could not be saved."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:129
+msgid ""
+"Cannot delete user. They have active data (e.g., orders, posts) in the "
+"system."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:133
+msgid "Database error: User could not be deleted."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:39
+msgid "eMail"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:63
+msgid "No users found."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:2
+msgid "User: Add"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:8
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:21
+msgid "Email"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:11
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:24
+msgid "Password"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:29
+msgid "Existing Users"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:2
+msgid "User: Edit"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:25
+msgid "Leave empty to keep current password"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:27
+msgid "Confirm Password"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:28
+msgid "Repeat password if changing"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:31
+msgid "User"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:77
+msgid "User not found."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:83
+msgid "Edit Profile"
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:104
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:154
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:249
+msgid "Authorization denied."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:225
+msgid "Changes were not saved (no rows affected)."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:233
+msgid ""
+"Email changed successfully. Please log in again with your new email address."
+msgstr ""
+
+#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:260
+msgid "User was not found or could not be deleted."
+msgstr ""
