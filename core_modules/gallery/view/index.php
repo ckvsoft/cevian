@@ -65,11 +65,21 @@ $basePath = BASE_URI . 'gallery/index';
     <p class="back-link">
         <a href="<?= htmlspecialchars($backUrl) ?>">&larr; Back</a>
     </p>
-<?php endif; ?>
+<?php
+endif;
 
-<div id="gallery-list-container" class="paginated" data-per-page="9">
+$containerIdBase = 'gallery-list-';
+if ($isRootView) {
+    $containerId = $containerIdBase . 'root';
+} else {
+    // Sanitize path for use in HTML ID (replace slashes with hyphens)
+    $sanitizedPath = str_replace('/', '-', trim($this->currentAlbum, '/'));
+    $containerId = $containerIdBase . $sanitizedPath;
+}
+?>
+<div id="<?= htmlspecialchars($containerId) ?>" class="paginated" data-per-page="9">
     <div class="image-grid">
-        <?= $this->galleryHtml ?>
+<?= $this->galleryHtml ?>
     </div>
 </div>
 
