@@ -3,7 +3,8 @@
         "debug": false,
         "css_js_debug": false,
         "hash_key": null,
-        "controller_default": "home"
+        "controller_default": "home",
+        "locale": "de_DE"
     },
     "paths": {
         "base_uri": "/",
