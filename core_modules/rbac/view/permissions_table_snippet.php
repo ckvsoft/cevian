@@ -27,6 +27,7 @@
  * View Snippet: rbac/permission_table_snippet.php
  * Renders the Permission List using a responsive DIV card structure for mobile devices.
  */
+// Check if the permissions array is empty
 if (empty($this->permissions)) :
     ?>
     <div class="info-message"><?= _('No permissions defined yet.') ?></div>
@@ -39,7 +40,10 @@ $baseUri = BASE_URI;
 ?>
 
 <div class="list-cards">
-    <?php foreach ($this->permissions as $perm) : ?>
+    <?php
+    // Loop through each permission to create a card
+    foreach ($this->permissions as $perm) :
+        ?>
 
         <div class="card" data-perm-id="<?= htmlspecialchars($perm['id']) ?>">
 
