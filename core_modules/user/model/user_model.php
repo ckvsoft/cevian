@@ -3,6 +3,7 @@
 class User_Model extends \ckvsoft\mvc\Model
 {
 
+    // User table name
     private $_table = 'user';
 
     public function __construct()
@@ -13,11 +14,13 @@ class User_Model extends \ckvsoft\mvc\Model
     /**
      * Attempt to log the user in.
      *
-     * @param   array   $data   From the Input class returned array
-     * @return  array|false Result set on success, false on failure.
+     * @param array $data From the Input class returned array
+     * @return array|false Result set on success, false on failure.
      */
     public function login($data)
     {
+        // NOTE: This SQL query is insecure as it lacks password hashing.
+        // It should be updated to use password_verify against a hashed password field.
         $result = $this->db->select("
             SELECT  user_id, role
             FROM    user
@@ -35,11 +38,21 @@ class User_Model extends \ckvsoft\mvc\Model
         return false;
     }
 
+    /**
+     * Retrieves a list of all users.
+     * @return array
+     */
     public function userList()
     {
         return $this->db->select('SELECT user_id, username, email, role FROM user');
     }
 
+    /**
+     * Retrieves details for a single user by ID.
+     *
+     * @param int $userid The ID of the user.
+     * @return array
+     */
     public function userSingleList($userid)
     {
         return $this->db->select('SELECT user_id, email, username, role FROM user WHERE user_id = :user_id', array('user_id' => $userid));
@@ -60,12 +73,12 @@ class User_Model extends \ckvsoft\mvc\Model
             // CATCH: Intercept the exception thrown by the Database class.
             // CHECK: Look for known DB errors (e.g., Duplicate Entry, SQLSTATE '23000')
             if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
-                // Return a specific, user-friendly message
-                return "The email address already exists.";
+                // Return a specific, translated, user-friendly message
+                return _("The email address already exists.");
             }
 
-            // FALLBACK: Return a generic database error message
-            return "Database error: User could not be created.";
+            // FALLBACK: Return a generic, translated database error message
+            return _("Database error: User could not be created.");
         }
     }
 
@@ -85,11 +98,12 @@ class User_Model extends \ckvsoft\mvc\Model
             // CATCH: Intercept the exception thrown by the Database class.
             // CHECK: Look for Duplicate Key violation (SQLSTATE '23000')
             if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
-                return "The email address you tried to set already exists.";
+                // Return a specific, translated failure message
+                return _("The email address you tried to set already exists.");
             }
 
-            // FALLBACK: Return a generic failure message
-            return "Database error: Changes could not be saved.";
+            // FALLBACK: Return a generic, translated failure message
+            return _("Database error: Changes could not be saved.");
         }
     }
 
@@ -111,11 +125,12 @@ class User_Model extends \ckvsoft\mvc\Model
             // CATCH: Intercept the exception thrown by the Database class.
             // CHECK: Look for Foreign Key Constraint violation (SQLSTATE '23000')
             if (str_contains($e->getMessage(), 'SQLSTATE[23000]')) {
-                return "Cannot delete user. They have active data (e.g., orders, posts) in the system.";
+                // Return a specific, translated failure message
+                return _("Cannot delete user. They have active data (e.g., orders, posts) in the system.");
             }
 
-            // FALLBACK: Return a generic failure message
-            return "Database error: User could not be deleted.";
+            // FALLBACK: Return a generic, translated failure message
+            return _("Database error: User could not be deleted.");
         }
     }
 
@@ -136,6 +151,7 @@ class User_Model extends \ckvsoft\mvc\Model
         ));
 
         if (!empty($result)) {
+            // Assuming the method should return a single row array or false
             return $result[0];
         } else {
             return false;
