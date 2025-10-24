@@ -53,6 +53,20 @@ body {
     width: 99%;
 }
 
+.fixed-header.shrink {
+    padding: 5px 0; /* Kleinere Polsterung, Header schrumpft */
+}
+
+.fixed-header .logo {
+    max-height: 80px; 
+    width: auto;
+    transition: max-height 0.3s ease-in-out; /* NEU: Animation für das Logo */
+}
+
+.fixed-header.shrink .logo {
+    max-height: 40px; 
+}
+
 /* Fixed Header and Footer */
 .fixed-header, .fixed-footer{
     z-index: 5;
