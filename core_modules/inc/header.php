@@ -28,11 +28,11 @@
                 <nav id="primary_nav_wrap" role="navigation">
 
                     <?php if ($this->mobile): ?>
-                        <button class="hamburger-menu" aria-label="Navigation öffnen">
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                        </button>
+                        <div class="hamburger-menu">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
                     <?php endif; ?>
 
                     <?= $this->menuitems ?? '' ?>
