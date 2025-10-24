@@ -48,7 +48,7 @@ body {
     font-size: 16px;
     line-height: 1.5;
     text-align: left;
-    padding-top: 60px; /* Space for fixed header */
+    padding-top: 120px; /* Space for fixed header */
     padding-bottom: 120px; /* Space for fixed footer */
     margin: 0;
     width: 100%;
@@ -110,6 +110,20 @@ header {
     padding: 0;
 }
 
+.fixed-header.shrink {
+    padding: 5px 0; /* Kleinere Polsterung, Header schrumpft */
+}
+
+.fixed-header .logo {
+    max-height: 80px; 
+    width: auto;
+    transition: max-height 0.3s ease-in-out; /* NEU: Animation für das Logo */
+}
+
+.fixed-header.shrink .logo {
+    max-height: 40px; 
+}
+
 /* Fixed Header and Footer */
 .fixed-header, .fixed-footer{
     z-index: 50;
@@ -122,6 +136,7 @@ header {
     padding: 10px;
     border-bottom: 5px solid #e84c11;
     text-align: left;
+    transition: all 0.3s ease-in-out;    
     overflow-x: hidden;
 }
 .fixed-footer{
