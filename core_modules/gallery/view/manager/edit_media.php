@@ -25,33 +25,35 @@
 
 /*
  * View for editing individual media item details.
- * Nutzt das Framework-Grid-Layout (.form-group) für die Formularfelder.
- * @var array $item Contains: 'id', 'album_id', 'name', 'description', 'file',
+ * Uses the framework grid layout (.form-group) for the form fields.
+ * @var array $item Contains: 'id', 'album_id', 'title', 'description', 'file',
  * 'thumburl', 'album_path', etc.
  */
 $baseUri = BASE_URI;
 $item = $this->item;
+
+$displayTitle = $item['title'] ?? $item['file'] ?? _('No Title Available');
 ?>
 
 <fieldset style="margin-top: 30px;">
-    <legend>Media Edit</legend>
+    <legend><?= _('Media Edit') ?></legend>
 
     <div data-form="mediaEditForm" id="mediaEditContainer" data-json="1">
 
         <div class="page-header">
-            <h1>Medium bearbeiten: <?= htmlspecialchars($item['name'] ?? 'none'); ?></h1>
+            <h1><?= _('Edit Media Item:') ?> <?= htmlspecialchars($displayTitle); ?></h1>
         </div>
 
         <p class="back-link">
-            <a href="<?= htmlspecialchars($baseUri . 'gallery/manager/album_media/' . $item['album_id']) ?>">← Zurück zur Medien-Übersicht</a>
+            <a href="<?= htmlspecialchars($baseUri . 'gallery/manager/album_media/' . $item['album_id']) ?>">← <?= _('Back to Media Overview') ?></a>
         </p>
 
         <div class="media-details-block">
             <img src="<?= htmlspecialchars($item['thumburl']) ?>"
-                 alt="Thumbnail for <?= htmlspecialchars($item['file']) ?>"
+                 alt="<?= _('Thumbnail for') ?> <?= htmlspecialchars($item['file']) ?>"
                  class="media-preview-thumb-minimal">
-            <p>Datei: <strong><?= htmlspecialchars($item['file']) ?></strong> (ID: <?= $item['id'] ?>)</p>
-            <p>Album-Pfad: <?= htmlspecialchars($item['album_path']) ?></p>
+            <p><?= _('File:') ?> <strong><?= htmlspecialchars($item['file']) ?></strong> (ID: <?= $item['id'] ?>)</p>
+            <p><?= _('Album Path:') ?> <?= htmlspecialchars($item['album_path']) ?></p>
         </div>
 
         <div class="clear-both"></div>
@@ -59,31 +61,29 @@ $item = $this->item;
 
         <form id="mediaEditForm" action="<?= htmlspecialchars($baseUri . 'gallery/manager/edit_media/' . $item['id']) ?>"
               method="POST" class="form-horizontal"
-              data-redirect="<?= htmlspecialchars($baseUri . 'gallery/manager/album_media/' . $item['album_id']) ?>">
+              data-redirect="<?= htmlspecialchars('gallery/manager/album_media/' . $item['album_id']) ?>"
+              data-message="<?= _('Details for media "%s" updated successfully.') . ' ' . htmlspecialchars($item['file']) ?>">
 
             <input type="hidden" name="media_id" value="<?= $item['id'] ?>">
 
             <div class="form-group">
-                <label for="media_name">Anzeigename / Titel:</label>
-                <input type="text" id="media_name" name="name"
-                       value="<?= htmlspecialchars($item['name'] ?? '') ?>"
-                       maxlength="255">
+                <label for="media_name"><?= _('Display Name:') ?></label>
+                <input type="text" id="media_name" name="title"
+                       value="<?= htmlspecialchars($item['title'] ?? '') ?>"
+                       maxlength="255" style="width: 100%; box-sizing: border-box;">
+                <p class="form-hint-simple"><?= _('Displayed below the image (optional).') ?></p>
             </div>
-            <p class="form-hint-simple">Wird unter dem Bild angezeigt (optional).</p>
-
             <div class="form-group">
-                <label for="media_description">Beschreibung / Caption:</label>
-                <textarea id="media_description" name="description" rows="5"><?= htmlspecialchars($item['description'] ?? '') ?></textarea>
+                <label for="media_description"><?= _('Description:') ?></label>
+                <textarea id="media_description" name="description" rows="6" maxlength="1024" style="width: 100%; box-sizing: border-box;"><?= htmlspecialchars($item['description'] ?? '') ?></textarea>
+                <p class="form-hint-simple"><?= _('Additional image description. Max 1024 characters.') ?></p>
             </div>
-            <p class="form-hint-simple">Zusätzliche Bildbeschreibung. Max 1024 Zeichen.</p>
-
-
             <div class="form-actions-simple">
                 <button type="submit" class="button small-action save">
-                    Save
+                    <?= _('Save') ?>
                 </button>
                 <a class="button small-action cancel" href="<?= htmlspecialchars($baseUri . 'gallery/manager/album_media/' . $item['album_id']) ?>">
-                    Cancel
+                    <?= _('Cancel') ?>
                 </a>
             </div>
         </form>
