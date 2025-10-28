@@ -19,13 +19,13 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OR TORT OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-use ckvsoft\mvc\Config;
 use ckvsoft\Progress;
+use ckvsoft\Image;
 
 require_once __DIR__ . '/gallery_model.php';
 
@@ -36,13 +36,11 @@ require_once __DIR__ . '/gallery_model.php';
 class GalleryManager_Model extends Gallery_Model
 {
 
-    // Constant specific to this model's batch processing
     const UPDATE_FREQUENCY = 10;
 
     /**
      * Constructor receives Gallery_Model (Dependency Injection) to eliminate
      * internal duplication of constants and helper methods.
-     * @param Gallery_Model $galleryModel The main gallery model dependency.
      */
     public function __construct()
     {
@@ -79,7 +77,6 @@ class GalleryManager_Model extends Gallery_Model
             $fullPath = $this->basePath . $album['album_path'];
 
             try {
-                // Scan top level directory only, not recursive
                 $dirIterator = new \DirectoryIterator($fullPath);
 
                 foreach ($dirIterator as $item) {
@@ -91,18 +88,15 @@ class GalleryManager_Model extends Gallery_Model
                     $ext = strtolower($origExt);
                     $nameNoExt = $item->getBasename('.' . $origExt);
 
-                    // Skip thumbnails
                     if (str_ends_with($nameNoExt, '_thumb')) {
                         continue;
                     }
 
-                    // Count only supported image/video extensions
                     if (in_array($ext, $imageExt) || in_array($ext, $videoExt)) {
                         $totalCount++;
                     }
                 }
             } catch (\Exception $e) {
-                // Directory not readable, ignore
                 error_log("Cannot read directory {$fullPath}: " . $e->getMessage());
             }
         }
@@ -115,7 +109,9 @@ class GalleryManager_Model extends Gallery_Model
     // ------------------------------------------------------------------
 
     /**
-     * Scans the filesystem, synchronizes gallery_media_stats table, and removes orphaned media/thumbnails.
+     * Scans the filesystem, synchronizes gallery_media_stats table (metadata and stats),
+     * and removes orphaned media files and thumbnails.
+     * This method is the SOLE source of truth for media metadata synchronization.
      * Includes Progress Tracking.
      * @param int $progressId The ID for progress tracking.
      * @return array Summary of the rescan results.
@@ -123,6 +119,7 @@ class GalleryManager_Model extends Gallery_Model
     public function rescanAlbumMedia(int $progressId): array
     {
         $addedCount = 0;
+        $updatedCount = 0;
         $skippedCount = 0;
         $deletedDbEntries = 0;
         $deletedThumbs = 0;
@@ -134,14 +131,20 @@ class GalleryManager_Model extends Gallery_Model
 
         $imageExt = Gallery_Model::SUPPORTED_IMAGE_EXT;
         $videoExt = Gallery_Model::SUPPORTED_VIDEO_EXT;
-
         $updateCounter = 0;
 
         foreach ($dbAlbums as $album) {
+            $existingMedia = $this->db->select(
+                    "SELECT id, file_name, file_mtime FROM gallery_media_stats WHERE album_id = :aid",
+                    ['aid' => $album['album_id']]
+            );
+            $existingMediaMap = array_column($existingMedia, 'file_mtime', 'file_name');
+
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_write_close();
             }
             usleep(100);
+
             $albumId = $album['album_id'];
             $albumPath = $album['album_path'];
             $fullPath = $this->basePath . $albumPath;
@@ -162,29 +165,64 @@ class GalleryManager_Model extends Gallery_Model
                 $origExt = $item->getExtension();
                 $ext = strtolower($origExt);
                 $nameNoExt = $item->getBasename('.' . $origExt);
+                $filePath = $item->getPathname();
 
-                // Skip thumbnails and unsupported file types
-                if (str_ends_with($nameNoExt, '_thumb')) {
-                    continue;
-                }
-                if (!in_array($ext, $imageExt) && !in_array($ext, $videoExt)) {
+                if (str_ends_with($nameNoExt, '_thumb') ||
+                        (!in_array($ext, $imageExt) && !in_array($ext, $videoExt))) {
                     continue;
                 }
 
                 $fileName = $file;
+                $fileMTime = $item->getMTime();
+                $fileSize = $item->getSize();
+                $mediaType = in_array($ext, $imageExt) ? 'image' : 'video';
 
-                // Check if file already exists in DB
-                $existing = $this->db->selectOne(
-                        "SELECT id FROM gallery_media_stats WHERE album_id = :aid AND file_name = :file",
-                        ['aid' => $albumId, 'file' => $fileName]
-                );
+                $isNew = !isset($existingMediaMap[$fileName]);
+                $isModified = !$isNew && ((string) $existingMediaMap[$fileName] !== (string) $fileMTime);
 
-                if (!$existing) {
-                    $this->db->insertUpdate('gallery_media_stats', [
+                $thumbExt = ($mediaType === 'video') ? 'jpg' : $origExt;
+                $thumbFileName = $nameNoExt . '_thumb.' . $thumbExt;
+                $thumbFile = $fullPath . '/' . $thumbFileName;
+
+                $shouldRegenerateThumb = $isModified || !file_exists($thumbFile);
+
+                if ($shouldRegenerateThumb && $mediaType === 'image') {
+                    try {
+                        if ($isModified && file_exists($thumbFile)) {
+                            unlink($thumbFile);
+                            $deletedThumbs++;
+                        }
+
+                        if (!file_exists($thumbFile)) {
+                            $image = new Image($filePath, $thumbFileName, $fullPath . '/');
+                            $image->resize();
+                        }
+                    } catch (\Exception $e) {
+                        error_log("Failed to create/check thumbnail for {$filePath}: " . $e->getMessage());
+                    }
+                }
+                if ($isNew || $isModified) {
+                    $dataToSave = [
                         'album_id' => $albumId,
-                        'file_name' => $fileName
-                    ]);
-                    $addedCount++;
+                        'file_name' => $fileName,
+                        'file_mtime' => $fileMTime,
+                        'file_size' => $fileSize,
+                        'media_type' => $mediaType,
+                    ];
+
+                    if ($isNew) {
+                        $this->db->insert('gallery_media_stats', $dataToSave);
+                        $addedCount++;
+                    } else {
+                        $updateData = $dataToSave;
+                        unset($updateData['album_id'], $updateData['file_name']);
+
+                        $this->db->update('gallery_media_stats', $updateData, 'album_id = :aid AND file_name = :file', [
+                            'aid' => $albumId,
+                            'file' => $fileName
+                        ]);
+                        $updatedCount++;
+                    }
                 } else {
                     $skippedCount++;
                 }
@@ -200,13 +238,11 @@ class GalleryManager_Model extends Gallery_Model
 
         $progress->updateProgress();
 
-        // 3. Clean up orphaned DB entries and thumbnails
         $dbMediaEntries = $this->db->select("SELECT id, album_id, file_name FROM gallery_media_stats");
 
         foreach ($dbMediaEntries as $entry) {
             $albumId = $entry['album_id'];
             $fileName = $entry['file_name'];
-
             $albumPath = $this->getAlbumPathById($albumId);
 
             if ($albumPath === null) {
@@ -227,9 +263,9 @@ class GalleryManager_Model extends Gallery_Model
                 $ext = strtolower($origExt);
 
                 $thumbFile = null;
-                if (in_array($ext, $imageExt)) {
+                if (in_array($ext, Gallery_Model::SUPPORTED_IMAGE_EXT)) {
                     $thumbFile = $fullAlbumPath . '/' . $nameNoExt . '_thumb.' . $origExt;
-                } elseif (in_array($ext, $videoExt)) {
+                } elseif (in_array($ext, Gallery_Model::SUPPORTED_VIDEO_EXT)) {
                     $thumbFile = $fullAlbumPath . '/' . $nameNoExt . '_thumb.jpg';
                 }
 
@@ -244,6 +280,7 @@ class GalleryManager_Model extends Gallery_Model
 
         return [
             'added_count' => $addedCount,
+            'updated_count' => $updatedCount,
             'skipped_count' => $skippedCount,
             'deleted_db_entries' => $deletedDbEntries,
             'deleted_thumbnails' => $deletedThumbs
@@ -261,7 +298,6 @@ class GalleryManager_Model extends Gallery_Model
      */
     public function updateMediaAlbumId(string $fileName, string $oldAlbumPath, string $newAlbumPath): bool
     {
-        // 1. Get the new Album ID
         $newAlbum = $this->db->selectOne(
                 "SELECT album_id FROM gallery_albums WHERE album_path = :newPath",
                 ['newPath' => trim($newAlbumPath, '/')]
@@ -274,8 +310,6 @@ class GalleryManager_Model extends Gallery_Model
 
         $newAlbumId = $newAlbum['album_id'];
 
-        // 2. Find the media item by its old path/name combination.
-        // We assume media is identified by a unique combination of its album_id and file name.
         $oldAlbum = $this->db->selectOne(
                 "SELECT album_id FROM gallery_albums WHERE album_path = :oldPath",
                 ['oldPath' => trim($oldAlbumPath, '/')]
@@ -288,8 +322,6 @@ class GalleryManager_Model extends Gallery_Model
 
         $oldAlbumId = $oldAlbum['album_id'];
 
-        // 3. Update the media item's album_id to the new one
-        // We also update the file name to be safe, although it usually doesn't change here.
         $updatedRows = $this->db->update('gallery_media_stats',
                 ['album_id' => $newAlbumId],
                 'album_id = :oldId AND file_name = :file_name',
@@ -317,7 +349,6 @@ class GalleryManager_Model extends Gallery_Model
             if (!is_dir($this->basePath)) {
                 return [];
             }
-            // Use iterator to scan all subdirectories
             $rii = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($this->basePath, \RecursiveDirectoryIterator::SKIP_DOTS),
                     \RecursiveIteratorIterator::SELF_FIRST
@@ -339,6 +370,8 @@ class GalleryManager_Model extends Gallery_Model
     }
 
     /**
+     * Rescans all albums and synchronizes the gallery_albums table with the filesystem.
+     * Handles adding new folders and deleting database entries for missing folders.
      * @param int|null $currentUserId Optional user ID to be assigned as owner for new albums.
      * @param int|null $progressId The ID for the progress bar (e.g., 3).
      * @return array An array containing the results of the operation.
@@ -357,14 +390,13 @@ class GalleryManager_Model extends Gallery_Model
             'deleted_albums' => [],
         ];
 
-        // 1. Progress Initialization (If ID is present)
         if ($progressId !== null) {
             $progress = new \ckvsoft\Progress(0, $progressId, $this->db);
             $progress->updateProgress(0);
         }
 
         $rootPathInDb = '';
-        $this->ensureRootAlbumExists($rootPathInDb, $currentUserId);
+        $this->ensureRootAlbumExists($rootPathInDb, $currentUserId ?? 1); // Pass a default user ID
 
         $fsPaths = $this->getAvailableAlbumPaths();
 
@@ -372,7 +404,6 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(30);
         }
 
-        // --- Phase 2: Fetch and compare DB data (approx. 40%) ---
         $dbAlbums = $this->db->select("SELECT album_id, album_path FROM `gallery_albums`");
         $dbPaths = array_column($dbAlbums, 'album_path');
         $dbPathToId = array_column($dbAlbums, 'album_id', 'album_path');
@@ -381,7 +412,6 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(40);
         }
 
-        // --- Phase 3: Add new albums (approx. 60%) ---
         $pathsToAdd = array_diff($fsPaths, $dbPaths);
 
         foreach ($pathsToAdd as $path) {
@@ -412,9 +442,6 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(60);
         }
 
-        // --- Phase 4: Delete obsolete albums (approx. 90%) ---
-        // ... (Der Rest der Methode bleibt unverändert) ...
-
         $pathsToDelete = array_diff($dbPaths, $fsPaths);
 
         if (!empty($pathsToDelete)) {
@@ -443,7 +470,6 @@ class GalleryManager_Model extends Gallery_Model
                 try {
                     $deleteCount = $this->db->delete('gallery_albums', $whereCondition, $boundParams);
 
-                    // IMPORTANT: Also delete all associated media statistics!
                     $this->db->delete('gallery_media_stats', $whereCondition, $boundParams);
 
                     $results['deleted_count'] = $deleteCount;
@@ -458,7 +484,6 @@ class GalleryManager_Model extends Gallery_Model
             $progress->updateProgress(90);
         }
 
-        // 2. Progress Finalization (100%)
         if ($progressId !== null) {
             $progress->updateProgress(100);
         }
@@ -467,17 +492,16 @@ class GalleryManager_Model extends Gallery_Model
     }
 
     /**
+     * Updates the path of an album and recursively updates the paths of all its sub-albums.
      * @param string $oldPath The original relative path of the album (e.g., 'old_folder/sub').
      * @param string $newPath The new relative path of the album (e.g., 'new_folder/sub').
      * @return bool True on successful DB update, false otherwise.
      */
     public function updateAlbumPath(string $oldPath, string $newPath): bool
     {
-        // Trim paths to ensure consistency (e.g., remove leading/trailing slashes)
         $trimmedOldPath = trim($oldPath, '/');
         $trimmedNewPath = trim($newPath, '/');
 
-        // Special case: The root album cannot be moved.
         if ($trimmedOldPath === '' || $trimmedNewPath === '') {
             return false;
         }
@@ -485,7 +509,6 @@ class GalleryManager_Model extends Gallery_Model
         $this->db->beginTransaction();
 
         try {
-            // 1. Get the album ID of the album being moved
             $album = $this->db->selectOne(
                     "SELECT album_id FROM gallery_albums WHERE album_path = :oldPath",
                     ['oldPath' => $trimmedOldPath]
@@ -499,7 +522,6 @@ class GalleryManager_Model extends Gallery_Model
 
             $albumId = $album['album_id'];
 
-            // 2. Update the path of the moved album itself in gallery_albums
             $success = $this->db->update('gallery_albums',
                     ['album_path' => $trimmedNewPath],
                     'album_id = :id',
@@ -512,7 +534,6 @@ class GalleryManager_Model extends Gallery_Model
                 return false;
             }
 
-            // 3. Find all sub-albums recursively
             $oldPrefix = $trimmedOldPath . '/';
             $dbSubAlbums = $this->db->select(
                     // Use LIKE to find all paths starting with the old path followed by a slash
@@ -522,9 +543,7 @@ class GalleryManager_Model extends Gallery_Model
 
             $updatedCount = 0;
 
-            // 4. Update paths of all sub-albums by looping through the results
             foreach ($dbSubAlbums as $subAlbum) {
-                // Replace the old prefix with the new prefix to get the corrected path
                 $newSubPath = str_replace($oldPrefix, $trimmedNewPath . '/', $subAlbum['album_path']);
 
                 $success = $this->db->update('gallery_albums',
@@ -553,7 +572,7 @@ class GalleryManager_Model extends Gallery_Model
      * Ensures the primary album root directory (gallery base path) is registered as an album
      * in the gallery_albums table, if it's not already present.
      *
-     * @param string $rootAlbumPath The path representation for the root album (e.g., '/').
+     * @param string $rootAlbumPath The path representation for the root album (e.g., '').
      * @param int $userId The user ID to assign as the creator/owner.
      * @return void
      */
@@ -562,7 +581,6 @@ class GalleryManager_Model extends Gallery_Model
         $this->db->beginTransaction();
 
         try {
-            // 1. Check if the root entry exists
             $rootAlbumExists = $this->db->selectOne(
                     "SELECT album_id FROM gallery_albums WHERE album_path = :path",
                     ['path' => $rootAlbumPath]
@@ -673,7 +691,6 @@ class GalleryManager_Model extends Gallery_Model
 
         if ($applyOwner || $applyPermissions) {
 
-            // Prepare recursive data (Owner and/or Permissions, but NO title)
             $updateDataForRecursive = $filteredData;
             unset($updateDataForRecursive['title']);
 
@@ -695,19 +712,12 @@ class GalleryManager_Model extends Gallery_Model
 
             $basePath = trim($album['album_path'], '/');
 
-            // 💡 NEUE LOGIK: WHERE-Klausel für rekursive Updates anpassen
             if ($basePath === '') {
-                // Wenn es das Root-Album ist, aktualisiere ALLE Alben außer dem Root-Album selbst.
-                // Wir nehmen an, dass das Root-Album (album_path = '') immer die ID ungleich $albumId hat,
-                // aber um sicherzugehen, schließen wir es über den Pfad aus.
                 $whereCondition = 'album_path != :rootPath';
                 $bindings = [
                     'rootPath' => ''
                 ];
             } else {
-                // Wenn es ein Unterordner ist, aktualisiere alle Unterordner, die mit diesem Pfad beginnen.
-                // Beachten Sie, dass die ursprüngliche Logik "{$basePath}/%" nur ECHTE Unterordner erfasst,
-                // was hier auch weiterhin richtig ist.
                 $whereCondition = 'album_path LIKE :pathPrefix';
                 $bindings = [
                     'pathPrefix' => "{$basePath}/%"
@@ -715,7 +725,6 @@ class GalleryManager_Model extends Gallery_Model
             }
 
             try {
-                // Update only the descendants with the recursive values (Owner/Permissions).
                 $success = $this->db->update('gallery_albums', $updateDataForRecursive, $whereCondition, $bindings);
             } catch (\Exception $e) {
                 error_log("Recursive album update failed: " . $e->getMessage());
@@ -726,28 +735,34 @@ class GalleryManager_Model extends Gallery_Model
         return (bool) $success;
     }
 
-// ------------------------------------------------------------------
-// MEDIA ITEM ACTIONS
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    // MEDIA ITEM ACTIONS
+    // ------------------------------------------------------------------
 
     /**
-     * Retrieves a single media item entry by its ID, including album path for context.
-     * @param int $mediaId The ID of the media item.
+     * Retrieves a single media item entry by its ID, including album path and new metadata for context.
+     * * NOTE: The query now includes a LEFT JOIN to gallery_media_details to fetch title and description.
+     * * @param int $mediaId The ID of the media item.
      * @return array|null Media item data or null if not found.
      */
     public function getMediaItemById(int $mediaId): ?array
     {
         $sql = "
-        SELECT
-            gms.id, gms.album_id, gms.file_name AS file, gms.views, gms.last_view,
-            ga.album_path
-        FROM
-            gallery_media_stats gms
-        JOIN
-            gallery_albums ga ON gms.album_id = ga.album_id
-        WHERE
-            gms.id = :id
-    ";
+            SELECT
+                gms.id, gms.album_id, gms.file_name AS file, gms.views, gms.last_view,
+                gms.file_size, gms.file_mtime, gms.media_type,
+                ga.album_path,
+                gmd.title,
+                gmd.description
+            FROM
+                gallery_media_stats gms
+            JOIN
+                gallery_albums ga ON gms.album_id = ga.album_id
+            LEFT JOIN
+                gallery_media_details gmd ON gms.id = gmd.media_id -- LEFT JOIN is crucial here
+            WHERE
+                gms.id = :id
+            ";
 
         $item = $this->db->selectOne($sql, ['id' => $mediaId]);
 
@@ -755,47 +770,104 @@ class GalleryManager_Model extends Gallery_Model
             return null;
         }
 
-        // Add URL and thumbnail links (using logic from Gallery_Model/Manager)
         $item['url'] = BASE_URI . 'gallery/media/' . $item['album_path'] . '/' . urlencode($item['file']);
 
-        // Determine the thumbnail file name
         $pathInfo = pathinfo($item['file']);
         $nameNoExt = $pathInfo['filename'];
         $ext = strtolower($pathInfo['extension']);
 
         $thumbFile = null;
-        if (in_array($ext, self::SUPPORTED_IMAGE_EXT)) {
-            // Images use the same extension for the thumbnail
+        if ($item['media_type'] === 'image') {
             $thumbFile = $nameNoExt . '_thumb.' . $ext;
-        } elseif (in_array($ext, self::SUPPORTED_VIDEO_EXT)) {
-            // Videos use the predefined thumbnail (e.g., .jpg)
+        } elseif ($item['media_type'] === 'video') {
             $thumbFile = $nameNoExt . '_thumb.jpg';
         }
 
         if ($thumbFile) {
             $item['thumburl'] = BASE_URI . 'gallery/media/' . $item['album_path'] . '/' . urlencode($thumbFile);
         } else {
-            // Fallback logic if no thumb link can be determined
             $item['thumburl'] = $item['url'];
         }
-
 
         return $item;
     }
 
     /**
-     * Placeholder for deleting a media item (File, Thumbnail, and DB entry).
-     * Needs implementation!
+     * Updates or inserts the title and description details for a media item
+     * based on an associative array of data.
+     *
+     * It utilizes the Database class's replace() method for UPSERT functionality.
+     * * @param int $mediaId The ID of the media item from gallery_media_stats.
+     * @param array $updateData Associative array containing 'title' and 'description'.
+     * @return bool True on successful DB operation, false otherwise.
+     */
+    public function updateMediaDetails(int $mediaId, array $updateData): bool
+    {
+        $title = $updateData['title'] ?? null;
+        $description = $updateData['description'] ?? null;
+
+        $data = [
+            'media_id' => $mediaId,
+            'title' => !empty($title) ? trim($title) : null,
+            'description' => !empty($description) ? trim($description) : null,
+        ];
+
+        try {
+            $result = $this->db->replace('gallery_media_details', $data);
+
+            return (bool) $result;
+        } catch (\ckvsoft\CkvException $e) {
+            error_log("updateMediaDetails failed for ID {$mediaId}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Deletes a media item: its main file, its thumbnail, and its DB entry.
      * @param int $mediaId The ID of the media item to delete.
      * @return bool True on success, false otherwise.
      */
     public function deleteMediaItem(int $mediaId): bool
     {
-        // TODO: 1. Fetch DB entry (to determine file paths)
-        // TODO: 2. Delete main file and thumbnail (unlink)
-        // TODO: 3. Delete DB entry from gallery_media_stats
-        // For now: Dummy return until logic is implemented
-        return true;
+        $mediaItem = $this->getMediaItemById($mediaId);
+
+        if (!$mediaItem) {
+            error_log("deleteMediaItem failed: Media ID {$mediaId} not found in DB.");
+            return false;
+        }
+
+        $albumPath = $mediaItem['album_path'];
+        $fileName = $mediaItem['file'];
+        $mediaType = $mediaItem['media_type'];
+
+        $fullAlbumPath = $this->basePath . $albumPath;
+        $filePath = $fullAlbumPath . '/' . $fileName;
+
+        $pathInfo = pathinfo($fileName);
+        $nameNoExt = $pathInfo['filename'];
+        $origExt = $pathInfo['extension'];
+
+        $thumbFile = null;
+        if ($mediaType === 'image') {
+            $thumbFile = $fullAlbumPath . '/' . $nameNoExt . '_thumb.' . $origExt;
+        } elseif ($mediaType === 'video') {
+            $thumbFile = $fullAlbumPath . '/' . $nameNoExt . '_thumb.jpg';
+        }
+
+        try {
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            if ($thumbFile && file_exists($thumbFile)) {
+                unlink($thumbFile);
+            }
+        } catch (\Exception $e) {
+            error_log("File deletion FAILED for {$filePath}: " . $e->getMessage());
+        }
+
+        $dbDeleted = $this->db->delete('gallery_media_stats', 'id = :id', ['id' => $mediaId]);
+
+        return (bool) $dbDeleted;
     }
 
     /**
@@ -810,7 +882,7 @@ class GalleryManager_Model extends Gallery_Model
 
     /**
      * Retrieves all albums owned by the given user.
-     * * @param int $userId The ID of the current user.
+     * @param int $userId The ID of the current user.
      * @return array List of album data arrays.
      */
     protected function getOwnedAlbums(int $userId): array
@@ -819,5 +891,19 @@ class GalleryManager_Model extends Gallery_Model
                         "SELECT `album_path`, `title` FROM `gallery_albums` WHERE `owner_user_id` = :user_id",
                         ['user_id' => $userId]
                 );
+    }
+
+    /**
+     * Formats a filename into a human-readable name (e.g., 'my_photo.jpg' -> 'My Photo').
+     * NOTE: This is a utility function used by file scanning methods, but not DB-based methods.
+     * @param string $fileName The media file name.
+     * @return string The formatted name.
+     *
+     */
+    public function formatMediaName(string $fileName): string
+    {
+        $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+        $nameCleaned = str_replace('_', ' ', $nameWithoutExt);
+        return ucwords(strtolower($nameCleaned));
     }
 }
