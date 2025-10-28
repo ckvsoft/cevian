@@ -32,9 +32,7 @@ class Filemanager extends ckvsoft\mvc\BaseController
     public function __construct()
     {
         parent::__construct();
-        // Ensure only logged-in users with permissions can access this tool
         Auth::isNotLogged();
-        ;
     }
 
     /**
@@ -43,22 +41,18 @@ class Filemanager extends ckvsoft\mvc\BaseController
      */
     public function index(string ...$pathParts)
     {
-        // Load the new Filemanager model
         $fileManagerModel = $this->loadModel('filemanager', 'gallery');
 
-        // Concatenate path segments from the URL (e.g., 'performance/team')
         $currentPath = trim(implode('/', $pathParts), '/');
 
-        // Load initial content for the panels
         $leftPanelData = $fileManagerModel->listDirectoryContents($currentPath);
 
         $data = [
             'leftPanel' => $leftPanelData,
-            'rightPanel' => $leftPanelData, // Both panels start at the same location
+            'rightPanel' => $leftPanelData,
             'currentPath' => $currentPath,
         ];
 
-        // Render the main page
         $this->renderPage([
             ['view' => '/inc/header', 'data' => ['title' => _('File Manager')]],
             ['view' => 'gallery/filemanager/index', 'data' => ['manager' => $data]],
@@ -93,7 +87,7 @@ class Filemanager extends ckvsoft\mvc\BaseController
         $data = $input->fetch();
         if ($data === false) {
             \ckvsoft\Output::error(['message' => $input->fetchErrors()]);
-            return; // Output::error usually exits, but safe to return/exit here
+            return;
         }
 
         $sourcePath = $data['sourcePath'] ?? null;
@@ -112,11 +106,9 @@ class Filemanager extends ckvsoft\mvc\BaseController
             if ($success) {
                 \ckvsoft\Output::success(['message' => _('Item moved successfully.')]);
             } else {
-                // This path handles DB-related failures where the Model returned false.
                 \ckvsoft\Output::error(['message' => _('Move failed due to a database error.')]);
             }
         } catch (\ckvsoft\CkvException $e) {
-            // Catches expected conflicts: "Source does not exist", "Destination already exists", "Rename failed".
             \ckvsoft\Output::error(['message' => $e->getMessage()]);
         }
     }
@@ -126,7 +118,6 @@ class Filemanager extends ckvsoft\mvc\BaseController
      */
     public function mkdir()
     {
-        // 1. Use ckvsoft\Input for validation and fetching data
         $input = new \ckvsoft\Input();
         $input->post('newDirName', true)
                 ->post('targetPath', true)
@@ -169,29 +160,24 @@ class Filemanager extends ckvsoft\mvc\BaseController
     public function delete()
     {
         $json_data = file_get_contents('php://input');
-        $data = json_decode($json_data, true); // Daten als assoziatives Array
-        // Wir suchen direkt nach 'paths' im dekodierten JSON-Array
+        $data = json_decode($json_data, true);
         if (empty($data) || empty($data['paths']) || !is_array($data['paths'])) {
             \ckvsoft\Output::error(['message' => _('Missing or invalid path list for deletion.')]);
             return;
         }
 
-        $pathsToDelete = $data['paths']; // Jetzt ist $pathsToDelete das Array
+        $pathsToDelete = $data['paths'];
         $fileManagerModel = $this->loadModel('filemanager', 'gallery');
         $errors = [];
 
-        // Process each path individually
         foreach ($pathsToDelete as $path) {
             try {
-                // The Model handles the logic: permission check, file system, and DB update.
                 $success = $fileManagerModel->deleteItem($path);
 
                 if (!$success) {
-                    // Collect specific DB errors if the Model returned false
                     $errors[] = _("Failed to delete item from database:") . " {$path}";
                 }
             } catch (\ckvsoft\CkvException $e) {
-                // Collect file system or permission errors
                 $errors[] = $e->getMessage();
             }
         }
@@ -201,7 +187,7 @@ class Filemanager extends ckvsoft\mvc\BaseController
         } else {
             $responseData = [
                 'success' => 0,
-                'errorMessage' => null, // Optional
+                'errorMessage' => null,
                 'data' => [
                     'message' => _('Deletion completed with errors.'),
                     'details' => $errors
@@ -215,8 +201,8 @@ class Filemanager extends ckvsoft\mvc\BaseController
     public function upload()
     {
         $input = new \ckvsoft\Input();
-        $input->post('targetPath', true) // The target folder for the upload
-                ->post('file_name', true) // The name of the file field in the JS FormData object
+        $input->post('targetPath', true)
+                ->post('file_name', true)
                 ->submit();
 
         $data = $input->fetch();
