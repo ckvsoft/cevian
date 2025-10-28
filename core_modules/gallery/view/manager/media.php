@@ -67,7 +67,7 @@ $media = $this->media;
 
                 <div class="media-item-content">
                     <p class="media-filename">
-                        <strong><?= htmlspecialchars($item['name']) ?></strong>
+                        <strong><?= htmlspecialchars($item['title'] ?? $item['file_name'] ?? _('N/A')) ?></strong>
                     </p>
 
                     <p class="media-stats">
