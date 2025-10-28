@@ -1,7 +1,8 @@
 <?php
 
-class Logout extends \ckvsoft\mvc\Controller
+class Logout extends \ckvsoft\mvc\BaseController
 {
+
     public function __construct()
     {
         parent::__construct();
@@ -9,17 +10,17 @@ class Logout extends \ckvsoft\mvc\Controller
 
     public function index()
     {
-        // 1. MultiLoginManager Logout
         \ckvsoft\MultiLoginManager::logout('ckvsoft');
 
-        // 2. PHP-Session zurücksetzen
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_unset();
             session_destroy();
         }
 
-        // 3. Zurück zur Startseite
-        header('Location: ' . BASE_URI);
-        exit;
+        $this->renderPage([
+            ['view' => '/inc/header'],
+            ['view' => 'logout/index'],
+            ['view' => '/inc/footer'],
+        ]);
     }
 }
