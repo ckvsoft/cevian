@@ -93,7 +93,8 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
         foreach ($mediaItems as $item) {
             $contentList[] = [
                 'type' => $item['type'] ?? 'media',
-                'name' => $item['name'] ?? basename($item['url']),
+                'name' => $item['title'] ?? basename($item['url']),
+                'description' => $item['description'] ?? '',
                 'url' => $item['url'],
                 'thumburl' => $item['thumburl'] ?? $item['url'],
             ];
@@ -127,20 +128,16 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             if (empty($segment))
                 continue;
 
-            // Accumulate the full path for lookup
             $pathAccumulator = trim($pathAccumulator . '/' . $segment, '/');
 
-            // Check permissions/fetch data (this includes the title)
-            // Note: This requires a DB call per segment, but correctly fetches the title.
             $albumData = $model->checkAlbumPermissions($pathAccumulator);
 
-            // Get the title from DB or fall back to the segment name
             $title = $albumData['title'] ?? $segment;
 
             $pathMap[] = [
-                'name' => $segment, // The original folder name
-                'title' => $title, // The title from the DB
-                'path' => $pathAccumulator // The full path (e.g., 'events/hochzeit')
+                'name' => $segment,
+                'title' => $title,
+                'path' => $pathAccumulator
             ];
         }
         return $pathMap;
