@@ -22,14 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+// Video Item Snippet
+$titleText = $this->item['title'] ?? $this->item['name'];
+$descriptionText = $this->item['description'] ?? '';
+
+$captionContent = $titleText;
+if (!empty($descriptionText)) {
+    $captionContent .= '<br>' . $descriptionText;
+}
 ?>
 
-<div class="media-item video-item" title="<?= htmlspecialchars($this->item['name']) ?>">
+<div class="media-item video-item" title="<?= htmlspecialchars($titleText) ?>">
     <video controls preload="none" poster="<?= htmlspecialchars($this->item['thumburl']) ?>" width="100%" height="auto">
         <source src="<?= htmlspecialchars($this->item['url']) ?>" type="video/mp4">
         <?= _('Your browser does not support the video tag.') ?>
     </video>
     <p class="video-caption" style="margin-top: 0;">
-        <?= htmlspecialchars($this->item['name']) ?>
+        <?= $captionContent ?>
     </p>
 </div>
