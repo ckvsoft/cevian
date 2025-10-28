@@ -14,8 +14,8 @@
     },
     "php_settings": {
         "error_reporting": "E_ALL",
-        "display_errors": 1,
-        "display_startup_errors": 1,
+        "display_errors": 0,
+        "display_startup_errors": 0,
         "log_errors": 1,
         "error_log_path": "/var/log/error.log"
     },
@@ -29,7 +29,7 @@
         },
         "js": [
             "/inc/js/ajax-list-pagination.js",
-            "/inc/js/menuscript.js",
+            "/inc/js/cevian.js",
             "/inc/js/x-notify.js",
             "/inc/js/theme-js-vanilla.js"
         ]
