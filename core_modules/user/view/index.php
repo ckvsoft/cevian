@@ -1,6 +1,6 @@
 <fieldset>
     <legend><?= _('User: Add') ?></legend>
-    <div id="addUser" class="ajax-form-container" data-form="userForm" data-url="user/userList">
+    <div id="addUser" class="ajax-form-container" data-form="userForm" data-url="user/userList" data-message="<?= _('User created successfully!') ?>">
         <form action="user/create" method="post" id="userForm" autocomplete="off">
             <label for="username"><?= _('Name') ?>:</label>
             <input type="text" id="username" name="username" required autocomplete="off"><br />
