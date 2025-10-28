@@ -53,17 +53,15 @@ class Filemanager_Model extends GalleryManager_Model
                 return '';
             }
 
-            // Check if this parent path is owned
             $parentAlbumData = $this->checkAlbumPermissions($parentPath);
             if ($parentAlbumData && (string) $parentAlbumData['owner_user_id'] === (string) $currentUserId) {
                 return $parentPath;
             }
 
-            // Move up one level
             $currentPath = $parentPath;
         }
 
-        return ''; // Should only be reached if $path was already empty
+        return '';
     }
 
     /**
@@ -77,11 +75,7 @@ class Filemanager_Model extends GalleryManager_Model
         $currentUserId = \ckvsoft\Auth::getUserId();
         $normalizedPath = trim($relativePath, '/');
 
-        // ----------------------------------------------------------------------
-        // ADMIN LOGIC (Pass-Through)
-        // ----------------------------------------------------------------------
         if ($isAdmin) {
-            // Check if the path exists in the database for non-root paths.
             if (!empty($normalizedPath) && !$this->db->selectOne("SELECT 1 FROM `gallery_albums` WHERE `album_path` = :path", ['path' => $normalizedPath])) {
 
             }
@@ -90,7 +84,6 @@ class Filemanager_Model extends GalleryManager_Model
             $mediaItems = $this->getMediaByAlbum($normalizedPath);
             $items = [];
 
-            // Add 'Go Back' for Admin view
             if (!empty($normalizedPath)) {
                 $parentPath = dirname($normalizedPath);
                 $parentPath = ($parentPath === '.') ? '' : $parentPath;
@@ -102,7 +95,6 @@ class Filemanager_Model extends GalleryManager_Model
                 ];
             }
 
-            // List sub-albums
             foreach ($subAlbums as $album) {
                 $items[] = [
                     'name' => $album['title'] ?? basename($album['path']),
@@ -129,16 +121,11 @@ class Filemanager_Model extends GalleryManager_Model
             return ['error' => _('Permission Denied: You must be logged in to access the file manager.')];
         }
 
-        // ----------------------------------------------------------------------
-        // Case 1: User is in the VIRTUAL ROOT ('') - Only show top-level owned folders.
-        // ----------------------------------------------------------------------
         if (empty($normalizedPath)) {
             $items = [];
-            // Assuming getOwnedAlbums returns all albums owned by the user, regardless of depth.
             $ownedAlbums = $this->getOwnedAlbums($currentUserId);
             $topLevelPaths = [];
 
-            // Filter for unique, top-level paths only (e.g., 'Auspuff' from 'Auspuff/BOS/Bandit').
             foreach ($ownedAlbums as $album) {
                 $pathSegments = explode('/', $album['album_path']);
                 $topPath = $pathSegments[0];
@@ -148,11 +135,8 @@ class Filemanager_Model extends GalleryManager_Model
                 }
             }
 
-            // Get the album data for the actual top-level paths and list them.
             foreach ($topLevelPaths as $topPath) {
-                // We use checkAlbumPermissions to ensure we have the title/data for the top folder.
                 $albumData = $this->checkAlbumPermissions($topPath);
-                // Only list the folder if it is owned by the current user.
                 if ($albumData && (string) $albumData['owner_user_id'] === (string) $currentUserId) {
                     $items[] = [
                         'name' => $albumData['title'] ?? basename($topPath),
@@ -164,9 +148,6 @@ class Filemanager_Model extends GalleryManager_Model
             return $items;
         }
 
-        // ----------------------------------------------------------------------
-        // Case 2: User is inside an OWNED album (e.g., in 'Auspuff')
-        // ----------------------------------------------------------------------
         $albumData = $this->checkAlbumPermissions($normalizedPath);
 
         if ($albumData && (string) $albumData['owner_user_id'] === (string) $currentUserId) {
@@ -176,24 +157,19 @@ class Filemanager_Model extends GalleryManager_Model
             $items = [];
             $alreadyListedPaths = [];
 
-            // Add 'Go Back' logic (FIX 1: Use recursive helper to find nearest owned ancestor)
             if (!empty($normalizedPath)) {
 
-                // Determine the correct path for '..': either the immediate owned parent or VROOT.
                 $backPath = $this->getNearestOwnedAncestor($normalizedPath, $currentUserId);
 
                 $items[] = [
                     'name' => '..',
                     'type' => 'album',
-                    // This will be '' for VROOT or the actual ancestor path (e.g., 'Auspuff').
                     'path' => $backPath,
                     'isParent' => true
                 ];
             }
 
 
-            // Database query to find all owned albums *under* the current path.
-            // Using $this->db->select for multiple rows.
             $allOwnedUnderPath = $this->db->select("
                 SELECT album_path, title FROM gallery_albums
                 WHERE owner_user_id = :userId AND album_path LIKE :pathPrefix
@@ -205,7 +181,6 @@ class Filemanager_Model extends GalleryManager_Model
                 'currentPath' => $normalizedPath
             ]);
 
-            // 1. List all DIRECT children that are owned (e.g., Yoshimura).
             foreach ($subAlbums as $album) {
                 $path = $album['path'];
                 $subAlbumData = $this->checkAlbumPermissions($path);
@@ -220,36 +195,27 @@ class Filemanager_Model extends GalleryManager_Model
                 }
             }
 
-            // 2. List deep, "orphaned" children (e.g., BOS -> Bandit/Hornet)
-            // that were NOT direct children AND whose immediate parent is NOT owned.
             if (is_array($allOwnedUnderPath)) {
                 foreach ($allOwnedUnderPath as $album) {
                     $fullPath = $album['album_path'];
 
-                    // Skip if already listed as a direct child (by full path).
                     if (isset($alreadyListedPaths[$fullPath]))
                         continue;
 
-                    // Calculate path segments relative to the current folder (e.g., 'BOS/Bandit')
                     $pathRelativeToCurrent = substr($fullPath, strlen($normalizedPath) + 1);
                     $pathSegments = explode('/', $pathRelativeToCurrent);
 
-                    // The path of the immediate child folder (e.g., 'Auspuff/BOS')
                     $immediateChildPath = $normalizedPath . '/' . $pathSegments[0];
 
-                    // Check ownership of the immediate child folder (e.g., 'BOS').
                     $immediateChildData = $this->checkAlbumPermissions($immediateChildPath);
                     $isImmediateChildOwned = ($immediateChildData && (string) $immediateChildData['owner_user_id'] === (string) $currentUserId);
 
-                    // If the immediate child is NOT owned, we list the deep, orphaned path.
                     if (!$isImmediateChildOwned) {
 
-                        // FIX 2: Ensure the derived path is ALWAYS used for the display name
-                        // for orphaned paths to avoid 'Bandit' instead of 'BOS -> Bandit'.
                         $displayName = str_replace('/', ' -> ', $pathRelativeToCurrent);
 
                         $items[] = [
-                            'name' => $displayName, // Always use the full derived name for consistency
+                            'name' => $displayName,
                             'type' => 'album',
                             'path' => $fullPath,
                         ];
@@ -281,7 +247,6 @@ class Filemanager_Model extends GalleryManager_Model
      */
     public function createDirectory(string $targetPath, string $newDirName): bool
     {
-        // Delegate the physical creation to the inherited method
         return $this->createPhysicalDirectory($targetPath, $newDirName);
     }
 
@@ -302,7 +267,6 @@ class Filemanager_Model extends GalleryManager_Model
         $newDirName = trim($newDirName, '/');
         $fullRelativePath = trim($targetPath . '/' . $newDirName, '/');
 
-        // Construct the full absolute path using the base path
         $absolutePath = $this->basePath . $fullRelativePath;
 
         if (is_dir($absolutePath)) {
@@ -337,6 +301,7 @@ class Filemanager_Model extends GalleryManager_Model
                     rmdir($absolutePath);
                 }
                 $errorMessage = _("Failed to insert new album into DB for path: {$fullRelativePath}. Directory cleaned up.");
+                error_log($errorMessage);
                 return false;
             }
 
@@ -367,11 +332,10 @@ class Filemanager_Model extends GalleryManager_Model
         $absoluteSourcePath = $this->basePath . $sourcePath;
 
         $absoluteTargetPath = $this->basePath . $targetPath;
-        // The movePhysicalItem method already throws CkvException on 'Source does not exist' or 'Destination already exists'.
         $physicalMoveSuccess = $this->movePhysicalItem($absoluteSourcePath, $absoluteTargetPath);
 
         if (!$physicalMoveSuccess) {
-            return false; // Physical move failed, do not update DB. (This path should rarely be hit if movePhysicalItem throws on failure)
+            return false;
         }
 
         $oldAlbumPath = dirname($sourcePath);
@@ -383,7 +347,6 @@ class Filemanager_Model extends GalleryManager_Model
             $oldFullPath = $sourcePath;
             $newFullPath = trim($newAlbumPath . '/' . $itemName, '/');
 
-            // Update the album path and all nested media/sub-albums
             $dbSuccess = $this->updateAlbumPath($oldFullPath, $newFullPath);
 
             if (!$dbSuccess) {
@@ -391,7 +354,6 @@ class Filemanager_Model extends GalleryManager_Model
             }
             return $dbSuccess;
         } else {
-            // Update the media record with the new album ID
             $dbSuccess = $this->updateMediaAlbumId($itemName, $oldAlbumPath, $newAlbumPath);
 
             if (!$dbSuccess) {
@@ -414,25 +376,19 @@ class Filemanager_Model extends GalleryManager_Model
         $itemName = basename($sourcePath);
         $finalDestination = rtrim($targetPath, '/') . '/' . $itemName;
 
-        // --- 1. FIND ASSOCIATED THUMBNAIL (IF ANY) ---
         $filenameWithoutExt = pathinfo($itemName, PATHINFO_FILENAME);
-        // Search for thumb files associated with the source item
         $oldThumbPattern = dirname($sourcePath) . '/' . $filenameWithoutExt . '_thumb.*';
         $thumbsToMove = glob($oldThumbPattern);
         $thumbToMove = $thumbsToMove[0] ?? null;
 
-        // --- 2. MOVE MAIN FILE/FOLDER (Primary Action) ---
         if (!file_exists($sourcePath)) {
-            // This already throws an exception on an expected failure.
             throw new \ckvsoft\CkvException("Source does not exist: {$sourcePath}");
         }
 
         if (file_exists($finalDestination)) {
-            // This already throws an exception on an expected conflict.
             throw new \ckvsoft\CkvException("Destination already exists: {$finalDestination}");
         }
 
-        // Handle move: Convert rename() warnings into controllable exceptions
         set_error_handler(function ($errno, $errstr) use ($sourcePath, $finalDestination) {
             if ($errno === E_WARNING) {
                 throw new \ckvsoft\CkvException("Rename failed: {$errstr} ({$sourcePath} → {$finalDestination})");
@@ -440,19 +396,15 @@ class Filemanager_Model extends GalleryManager_Model
             return false;
         });
 
-        // The rename function handles both file and folder moves
         rename($sourcePath, $finalDestination);
 
         restore_error_handler();
 
-        // --- 3. MOVE THUMBNAIL (Secondary Action) ---
         if ($thumbToMove) {
             $thumbItemName = basename($thumbToMove);
             $thumbDestination = rtrim($targetPath, '/') . '/' . $thumbItemName;
 
-            // Temporarily suppress errors for thumbnail move, as it's secondary
             set_error_handler(function () {
-                // Swallow the error silently for the thumbnail only
                 return true;
             });
 
@@ -464,32 +416,41 @@ class Filemanager_Model extends GalleryManager_Model
         return true;
     }
 
+    protected function getMediaType(string $extension): string
+    {
+        if (in_array($extension, self::SUPPORTED_VIDEO_EXT)) {
+            return 'video';
+        }
+        if (in_array($extension, self::SUPPORTED_IMAGE_EXT)) {
+            return 'image';
+        }
+        return 'file'; // Default fallback
+    }
+
     /**
-     * Uploads an image file and registers it in the database for visibility.
+     * Uploads a file and registers it in the database for visibility.
+     * This method ensures the file's metadata (type, size, mtime) is correctly
+     * persisted to the gallery_media_stats table, but skips database registration
+     * for thumbnail files (those ending in '_thumb').
+     *
      * @param string $targetpath The relative path of the album (e.g., 'photos/summer').
      * @param string $filename The name of the file field in $_FILES or the target file name.
      * @param bool $overwrite Whether to overwrite an existing file.
-     * @return bool True on successful upload AND successful database registration, false otherwise.
+     * @return bool True on successful upload (and successful DB registration for non-thumbs), false otherwise.
      */
     public function uploadImage($targetpath, $filename, $overwrite = true)
     {
         $targetpath = trim($targetpath, '/');
         $directory = $this->basePath . $targetpath;
 
-        // ---------------------------------------------------------------------
-        // FILE EXTENSION VALIDATION
-        // ---------------------------------------------------------------------
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        // Check against the supported extensions (inherited from Parent Model).
         $allowedExtensions = array_merge(self::SUPPORTED_IMAGE_EXT, self::SUPPORTED_VIDEO_EXT);
 
         if (!in_array($extension, $allowedExtensions)) {
             error_log("Upload failed: File extension '{$extension}' is not permitted.");
-            // You might output a specific error message here using an output system.
             return false;
         }
-        // ---------------------------------------------------------------------
 
         $album = $this->db->selectOne(
                 "SELECT album_id FROM gallery_albums WHERE album_path = :path",
@@ -498,37 +459,50 @@ class Filemanager_Model extends GalleryManager_Model
 
         if (!$album) {
             error_log("Upload failed: Target album '{$targetpath}' not found in DB.");
-            return false; // Cannot proceed without a valid album ID
+            return false;
         }
         $albumId = $album['album_id'];
 
-        // Note: The $filename here typically refers to the key in $_FILES, not the final file name.
-        // It's assumed that ckvsoft\Upload handles reading from $_FILES and saving the file correctly.
         $upload = new \ckvsoft\Upload($filename, $directory, $filename, $overwrite);
         $success = $upload->submit();
 
         if ($success) {
-            // Database registration
-            $existing = $this->db->selectOne(
-                    "SELECT id FROM gallery_media_stats WHERE album_id = :aid AND file_name = :file",
-                    ['aid' => $albumId, 'file' => $filename]
-            );
+            $fullPath = $directory . '/' . $filename;
 
-            if (!$existing) {
-                $result = $this->db->insertUpdate('gallery_media_stats', [
-                    'album_id' => $albumId,
-                    'file_name' => $filename
-                ]);
-
-                if ($result === false) {
-                    error_log("DB registration failed for file '{$filename}' in album ID '{$albumId}'.");
-                    return false;
-                }
+            if (!file_exists($fullPath)) {
+                error_log("CRITICAL: Upload successful, but file not found at: {$fullPath}");
+                return false;
             }
-            return true; // Upload and DB registration successful
+
+            $nameNoExt = pathinfo($filename, PATHINFO_FILENAME);
+            $isThumbnail = str_ends_with(strtolower($nameNoExt), '_thumb');
+
+            if ($isThumbnail) {
+                return true;
+            }
+
+            $mediaType = $this->getMediaType($extension);
+            $fileSize = filesize($fullPath);
+            $fileMtime = filemtime($fullPath);
+
+            $mediaData = [
+                'album_id' => $albumId,
+                'file_name' => $filename,
+                'media_type' => $mediaType,
+                'file_size' => $fileSize,
+                'file_mtime' => $fileMtime
+            ];
+
+            $result = $this->db->insertUpdate('gallery_media_stats', $mediaData, ['album_id', 'file_name']);
+
+            if ($result === false) {
+                error_log("DB registration/update failed for file '{$filename}' in album ID '{$albumId}'.");
+                return false;
+            }
+
+            return true;
         }
 
-        // Upload failed
         return false;
     }
 
@@ -550,23 +524,16 @@ class Filemanager_Model extends GalleryManager_Model
 
         $currentUserId = \ckvsoft\Auth::getUserId();
 
-        // 1. Check for basic existence (or whether it's a ghost entry)
         if (!file_exists($absolutePath)) {
 
-            // Check if a ghost ALBUM entry exists in the DB
             $albumExistsInDb = $this->db->selectOne("SELECT 1 FROM gallery_albums WHERE album_path = :path", ['path' => $relativePath]);
 
             if (!empty($albumExistsInDb)) {
-                // GHOST ALBUM CLEANUP: Item is physically missing but present in the DB.
                 error_log("DB CLEANUP: Album '{$relativePath}' is physically missing. Deleting DB entry only.");
 
-                // Since the file system part is already done (it's missing),
-                // we skip straight to DB cleanup.
                 return $this->deleteAlbumAndContents($relativePath);
             }
 
-            // OPTIONAL: Check for ghost MEDIA (file) entry
-            // This is more complex as it requires checking the parent album ID.
             $album = $this->db->selectOne("SELECT album_id FROM gallery_albums WHERE album_path = :path", ['path' => $parentPath]);
             if ($album) {
                 $mediaExistsInDb = $this->db->selectOne(
@@ -580,16 +547,11 @@ class Filemanager_Model extends GalleryManager_Model
                 }
             }
 
-            // If it doesn't exist physically AND is not found in the DB, throw the original exception.
             throw new \ckvsoft\CkvException("Item not found: {$relativePath}");
         }
 
-        // --- If the item exists physically, proceed with the standard deletion process ---
-
         $isFolder = is_dir($absolutePath);
 
-        // 2. Perform FULL OWNERSHIP CHECK (Security Critical)
-        // Permissions are checked against the item itself (if folder) or its parent (if file).
         $albumPathToCheck = $isFolder ? $relativePath : $parentPath;
 
         $albumData = $this->checkAlbumPermissions($albumPathToCheck);
@@ -598,17 +560,12 @@ class Filemanager_Model extends GalleryManager_Model
             throw new \ckvsoft\CkvException("The associated album/folder could not be found for permission check: {$albumPathToCheck}");
         }
 
-        // Crucial security check: Is the current user the owner?
         if ((string) $albumData['owner_user_id'] !== (string) $currentUserId) {
             throw new \ckvsoft\CkvException("Permission Denied: You do not have ownership rights to delete this item. ({$relativePath})");
         }
 
-        // --- Proceed only if security and existence checks passed ---
-        // 3. Perform physical deletion (File System)
-        // If this fails, an exception is thrown and DB deletion is skipped.
         $this->deletePhysicalItem($absolutePath);
 
-        // 4. Perform database deletion
         if ($isFolder) {
             $dbSuccess = $this->deleteAlbumAndContents($relativePath);
         } else {
@@ -616,7 +573,6 @@ class Filemanager_Model extends GalleryManager_Model
         }
 
         if (!$dbSuccess) {
-            // Log a critical error if the file is gone but DB cleanup failed
             error_log("CRITICAL: DB deletion failed for '{$relativePath}'. File system item is gone.");
         }
 
@@ -633,60 +589,41 @@ class Filemanager_Model extends GalleryManager_Model
      */
     protected function deletePhysicalItem(string $absolutePath): bool
     {
-        // FIX: If the item to delete appears to be a thumbnail and it doesn't exist,
-        // we return TRUE immediately and silently to avoid throwing an exception.
-        // This allows the deletion process (especially recursive folder deletion) to continue
-        // even if optional thumbnails are already missing.
         if (!file_exists($absolutePath) && strpos($absolutePath, '_thumb.') !== false) {
             return true;
         }
 
         if (!file_exists($absolutePath)) {
-            // This exception is correctly thrown for the main item if it doesn't exist,
-            // unless it's a ghost entry handled by deleteItem() previously.
             throw new \ckvsoft\CkvException("Cannot delete: Item not found at path: {$absolutePath}");
         }
 
         if (is_dir($absolutePath)) {
-            // --- FOLDER DELETION ---
             $files = array_diff(scandir($absolutePath) ?: [], ['.', '..']);
 
-            // Recursively delete contents
             foreach ($files as $file) {
-                // Call self recursively to handle sub-folders and files
                 $this->deletePhysicalItem(rtrim($absolutePath, '/') . '/' . $file);
             }
 
-            // After all contents are deleted, remove the directory itself
             if (!rmdir($absolutePath)) {
-                // This means the directory was not empty, which indicates an error in the recursion
                 throw new \ckvsoft\CkvException("Failed to remove directory: {$absolutePath}. Directory might not be empty.");
             }
 
             return true;
         } else {
-            // --- FILE DELETION ---
-            // 1. Delete the main file
             if (!unlink($absolutePath)) {
                 throw new \ckvsoft\CkvException("Failed to delete file: {$absolutePath}. Check file permissions.");
             }
 
-            // 2. Delete any associated thumbnail
             $itemName = basename($absolutePath);
             $filenameWithoutExt = pathinfo($itemName, PATHINFO_FILENAME);
             $parentDir = dirname($absolutePath);
 
-            // Search for thumb files associated with the item (e.g., file_thumb.jpg, file_thumb.png)
             $thumbPattern = $parentDir . '/' . $filenameWithoutExt . '_thumb.*';
             $thumbsToDelete = glob($thumbPattern);
 
             foreach ($thumbsToDelete as $thumbPath) {
-                // FIX: Explicitly check if the file exists before attempting deletion.
-                // This prevents an error if the thumbnail was somehow deleted between the glob() call
-                // and the unlink() attempt, or if it was never created.
                 if (file_exists($thumbPath)) {
                     if (!unlink($thumbPath)) {
-                        // Log a warning if deletion fails, but do not interrupt the main process.
                         error_log("Warning: Could not delete thumbnail: " . $thumbPath);
                     }
                 }
@@ -704,15 +641,12 @@ class Filemanager_Model extends GalleryManager_Model
      */
     protected function deleteMediaRecord(string $fileName, string $albumPath): bool
     {
-        // 1. Find the album_id for the given path
         $album = $this->db->selectOne("SELECT album_id FROM gallery_albums WHERE album_path = :path", ['path' => $albumPath]);
 
         if (!$album) {
-            // If the parent album doesn't exist, the media record is likely orphaned or already deleted.
             return true;
         }
 
-        // 2. Delete the specific media stats record
         $rowsAffected = $this->db->delete(
                 'gallery_media_stats',
                 'album_id = :aid AND file_name = :file',
@@ -722,7 +656,6 @@ class Filemanager_Model extends GalleryManager_Model
                 ]
         );
 
-        // If 0 rows are affected, it might mean it was already deleted, which is okay.
         return $rowsAffected !== false;
     }
 
@@ -734,11 +667,9 @@ class Filemanager_Model extends GalleryManager_Model
      */
     protected function deleteAlbumAndContents(string $albumPath): bool
     {
-        // Start a transaction for data integrity (all or nothing)
         $this->db->beginTransaction();
 
         try {
-            // Find all album_ids affected (the album itself and all sub-albums)
             $albumRecords = $this->db->select("
                 SELECT album_id FROM gallery_albums
                 WHERE album_path = :path OR album_path LIKE :pathPrefix
@@ -754,23 +685,15 @@ class Filemanager_Model extends GalleryManager_Model
             $ids = array_column($albumRecords, 'album_id');
 
             if (empty($ids)) {
-                // Nothing to delete, commit the empty transaction
                 $this->db->commit();
                 return true;
             }
 
-            // CONVERT IDS TO A RAW, COMMA-SEPARATED STRING FOR THE IN CLAUSE.
-            // This avoids the PDO TypeError by calling $this->db->query() with only one argument.
-            // We use intval to ensure safety, even though array_map already produces strings.
             $idList = implode(',', array_map('intval', $ids));
 
-            // 1. Delete all media stats for the affected albums
-            // Using a raw query. We expect $this->db->query() to behave like PDO::query().
             $sqlDeleteMedia = "DELETE FROM gallery_media_stats WHERE album_id IN ({$idList})";
             $mediaDeleted = $this->db->query($sqlDeleteMedia);
 
-            // 2. Delete all album records themselves
-            // Use the native $this->db->delete() method for safety and compatibility.
             $sqlCondition = "album_path = :path OR album_path LIKE :pathPrefix";
             $params = [
                 'path' => $albumPath,
@@ -779,14 +702,12 @@ class Filemanager_Model extends GalleryManager_Model
 
             $albumsDeleted = $this->db->delete('gallery_albums', $sqlCondition, $params);
 
-            // Check if both deletes were successful (assuming $this->db->query/delete returns false on failure)
             if ($mediaDeleted === false || $albumsDeleted === false) {
                 $this->db->rollBack();
                 error_log("DB transaction failed during deletion of album content or album record.");
                 return false;
             }
 
-            // Commit the transaction
             $this->db->commit();
             return true;
         } catch (\Exception $e) {
