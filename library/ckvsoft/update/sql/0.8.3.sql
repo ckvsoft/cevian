@@ -27,3 +27,4 @@ CREATE TABLE `gallery_media_stats` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;
+SET foreign_key_checks = 1;
