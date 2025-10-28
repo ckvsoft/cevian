@@ -34,7 +34,7 @@ $basePath = BASE_URI . 'gallery/index';
         <nav class="breadcrumb" aria-label="breadcrumb">
             <a href="<?= htmlspecialchars($basePath) ?>">Home</a>
 
-            <?php foreach ($this->breadcrumbData as $index => $item): // Iteration über die vorgefertigten Titel-Daten  ?>
+            <?php foreach ($this->breadcrumbData as $index => $item): ?>
                 <span class="separator">/</span>
                 <?php
                 $segmentTitle = $item['title'];
@@ -65,26 +65,112 @@ $basePath = BASE_URI . 'gallery/index';
     <p class="back-link">
         <a href="<?= htmlspecialchars($backUrl) ?>">&larr; Back</a>
     </p>
-<?php
+    <?php
 endif;
 
 $containerIdBase = 'gallery-list-';
 if ($isRootView) {
     $containerId = $containerIdBase . 'root';
 } else {
-    // Sanitize path for use in HTML ID (replace slashes with hyphens)
     $sanitizedPath = str_replace('/', '-', trim($this->currentAlbum, '/'));
     $containerId = $containerIdBase . $sanitizedPath;
 }
 ?>
 <div id="<?= htmlspecialchars($containerId) ?>" class="paginated" data-per-page="9">
+
+    <?php if (!$isRootView): ?>
+        <div class="slideshow-controls" style="margin-bottom: 15px; display: flex; align-items: center;">
+            <input type="checkbox" id="autoSlideshowToggle" name="auto_slideshow" style="margin-right: 8px;">
+            <label for="autoSlideshowToggle" style="font-weight: normal; margin: 0; padding: 0;">
+                <?= _('Automatische Diashow (5 Sek.)') ?>
+            </label>
+        </div>
+    <?php endif; ?>
+
     <div class="image-grid">
-<?= $this->galleryHtml ?>
+        <?= $this->galleryHtml ?>
     </div>
 </div>
 
 <script>
     (function () {
-        var $gallery = new SimpleLightbox('.paginated a:not(.album-item)', {overlayOpacity: 0.7});
+        const STORAGE_KEY = 'slideshow_auto_start';
+        const SLIDESHOW_DELAY = 5000; // 5 seconds per image
+
+        let slideshowTimer;
+        const $toggleCheckbox = document.getElementById('autoSlideshowToggle');
+
+        var $gallery = new SimpleLightbox('.paginated a:not(.album-item)', {
+            overlayOpacity: 0.7,
+            captionDelay: 0,
+            captionHTML: true
+        });
+
+        // ----------------------------------------------------
+        // 1. LOAD AND RESTORE STATE
+        // ----------------------------------------------------
+        if ($toggleCheckbox) {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState === 'true') {
+                $toggleCheckbox.checked = true;
+            }
+        }
+
+        if (!$toggleCheckbox)
+            return;
+
+        // ----------------------------------------------------
+        // SLIDESHOW CONTROL FUNCTIONS
+        // ----------------------------------------------------
+
+        function startSlideshow() {
+            clearTimeout(slideshowTimer);
+            slideshowTimer = setTimeout(function () {
+                $gallery.next();
+            }, SLIDESHOW_DELAY);
+        }
+
+        function stopSlideshow() {
+            clearTimeout(slideshowTimer);
+        }
+
+        // ----------------------------------------------------
+        // 2. EVENT LISTENERS & PERSISTENCE
+        // ----------------------------------------------------
+
+        // Saves the state and controls the slideshow (if open)
+        $toggleCheckbox.addEventListener('change', function () {
+            localStorage.setItem(STORAGE_KEY, this.checked ? 'true' : 'false');
+
+            // Control
+            if ($gallery.isOpened()) {
+                if (this.checked) {
+                    startSlideshow();
+                } else {
+                    stopSlideshow();
+                }
+            }
+        });
+
+        // On opening the Lightbox
+        $gallery.on('shown.simplelightbox', function () {
+            if ($toggleCheckbox.checked) {
+                startSlideshow();
+            }
+        });
+
+        // Timer restart after each image change
+        $gallery.on('changed.simplelightbox', function () {
+            if ($toggleCheckbox.checked) {
+                startSlideshow();
+            } else {
+                stopSlideshow();
+            }
+        });
+
+        // Stop slideshow before closing
+        $gallery.on('close.simplelightbox', function () {
+            stopSlideshow();
+        });
     })();
 </script>
