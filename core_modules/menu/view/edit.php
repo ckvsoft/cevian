@@ -1,7 +1,7 @@
 <fieldset>
     <legend><?php echo _('Menuentry') . ': ' . _('Edit'); ?></legend>
     <div data-form="editForm">
-        <form action="<?php echo BASE_URI; ?>menu/editSave/<?php echo $this->menuList[0]['id']; ?>" method="post" id="editForm" data-redirect="menu">
+        <form action="<?php echo BASE_URI; ?>menu/editSave/<?php echo $this->menuList[0]['id']; ?>" method="post" id="editForm" data-message="<?= _('Menuentry changes have been saved successfully.') ?>" data-redirect="menu">
 
             <label for="id">ID:</label>
             <input type="text" id="id" value="<?php echo $this->menuList[0]['id']; ?>" readonly><br />
