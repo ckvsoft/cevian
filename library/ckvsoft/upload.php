@@ -53,31 +53,17 @@ class Upload
      */
     public function __construct($name, $directory, $saveAs = "", $overwrite = true)
     {
-        /**
-         * Set the class-wide properties
-         */
         $this->_name = $name;
-        // Ensure the directory path ends with a separator
         $this->_directory = rtrim($directory, '/') . '/';
-        // Use the form name/placeholder if no custom save name is provided
         $this->_saveAs = (empty($saveAs)) ? $name : $saveAs;
         $this->_overwrite = $overwrite;
 
-        /**
-         * Make sure the save path is a directory
-         */
         if (!is_dir($this->_directory))
             throw new \ckvsoft\CkvException("Target must be a directory: {$this->_directory}");
 
-        /**
-         * Check the directory permissions (assuming 0755 is the requirement)
-         */
-        $writable = substr(sprintf('%o', fileperms($this->_directory)), -4);
-
-        if ($writable != "0755")
+        if (!is_writable($this->_directory)) {
             throw new \ckvsoft\CkvException("Directory is not writable: {$this->_directory}");
-
-        // Check for existing file if overwrite is forbidden (checks the base name before renaming)
+        }
         if ($overwrite == false && file_exists($this->_directory . $this->_saveAs))
             throw new \ckvsoft\CkvException("File already exists and cannot be overwritten: {$this->_directory}{$this->_saveAs}");
     }
@@ -95,44 +81,33 @@ class Upload
         $uploadFieldName = 'image';
 
         try {
-            // Check if the file was uploaded successfully under the expected name ('image')
             if (isset($_FILES[$uploadFieldName]) && $_FILES[$uploadFieldName]['error'] === UPLOAD_ERR_OK) {
 
                 $uploadedFile = $_FILES[$uploadFieldName];
                 $originalFilename = $uploadedFile['name'];
                 $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
 
-                // Use the desired save-as name set in the constructor
                 $targetBaseName = $this->_saveAs;
                 $target_file = $this->_directory . $targetBaseName;
 
-                // --- FIX: Logic to prevent double extension (e.g., 'file.jpg.jpg') ---
                 if (strtolower(pathinfo($targetBaseName, PATHINFO_EXTENSION)) !== strtolower($extension)) {
                     $target_file .= "." . $extension;
                 }
 
-                // Get the final unique file name (e.g., '1a.jpg')
                 $target_file = $this->getFilename($target_file);
 
                 if (move_uploaded_file($uploadedFile["tmp_name"], $target_file)) {
-                    // echo "The image file was successfully uploaded."; // Original comment replaced
                     return true;
                 } else {
-                    // Handle move failure
                     throw new CkvException("Failed to move the uploaded file. PHP Error Code: " . $uploadedFile["error"]);
                 }
             } else {
-                // If the file is not found or an upload error occurred (e.g., UPLOAD_ERR_NO_FILE = 4)
                 $errorCode = $_FILES[$uploadFieldName]['error'] ?? UPLOAD_ERR_NO_FILE;
                 throw new \ckvsoft\CkvException("No file uploaded or upload error occurred. Error code: " . $errorCode);
             }
         } catch (\ckvsoft\CkvException $e) {
-            // Echo the German error message from the original code (if present) for compatibility
-            // echo "Error: " . $e->getMessage();
             throw $e;
         } catch (\Exception $e) {
-            // Catch general PHP exceptions
-            // echo "Error: " . $e->getMessage();
             throw new \ckvsoft\CkvException("An unexpected error occurred during file submission.");
         }
         return false;
@@ -162,7 +137,7 @@ class Upload
             while (file_exists($filename)) {
 
                 $suffix = '';
-                $num = $i + 1; // Start with 1, 2, 3...
+                $num = $i + 1;
                 // Convert number to base-26 letter sequence (1=a, 26=z, 27=aa, 28=ab...)
                 while ($num > 0) {
                     $remainder = ($num - 1) % 26;
@@ -171,15 +146,13 @@ class Upload
                 }
 
                 $newBasename = $basename . $suffix;
-                // Construct the new filename with directory, new basename, and extension
                 $filename = $dirPath . DIRECTORY_SEPARATOR . $newBasename . '.' . $extension;
-                $i++; // Increment the counter
+                $i++;
             }
         } catch (\ckvsoft\CkvException $e) {
-            error_log("Rename process failed: " . $e->getMessage());
             throw new \ckvsoft\CkvException("Rename process failed: " . $e->getMessage());
         }
 
-        return $filename; // Return the new unique filename
+        return $filename;
     }
 }
