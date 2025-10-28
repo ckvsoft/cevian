@@ -6,7 +6,7 @@ $defaultRedirect = 'rbac';
 <fieldset>
     <legend><?= _('Create New Role') ?></legend>
 
-    <div data-form="roleForm" class="ajax-form-container" data-url="rbac/roleList" data-json="1">
+    <div data-form="roleForm" class="ajax-form-container" data-url="rbac/roleList" data-json="1" data-message="<?= _('Role created successfully!') ?>">
         <form id="roleForm" action="<?= BASE_URI ?>rbac/saveRole" method="post" autocomplete="off">
             <label for="roleName"><?= _('Role Name') ?>:</label>
             <input type="text" id="roleName" name="roleName" required><br />
@@ -42,19 +42,23 @@ $defaultRedirect = 'rbac';
      */
     function deleteRole(id) {
         // Confirmation dialog uses translated string
-        if (!confirm("<?= _('Really delete this role?') ?>"))
+        if (!confirm("<?= _('Really delete this role?') ?>")) {
             return;
+        }
 
-        // AJAX call to delete the role
-        fetch("<?= BASE_URI ?>rbac/deleteRole/" + id)
-                .then(r => r.json())
+        fetchAndLog("<?= BASE_URI ?>rbac/deleteRole/" + id)
                 .then(d => {
-                    if (d.success)
+                    if (d && d.success) {
                         // Redirect on success (assuming successful deletion requires page refresh/redirect)
-                        location.href = "<?= BASE_URI ?>rbac";
-                    else
+                        sendMessageAndRedirect('success', '<?= _("Delete") ?>', '<?= _("Role successfully deleted") ?>', [], "<?= BASE_URI ?>rbac");
+                    } else {
                         // Display error translated
-                        alert(JSON.stringify(d.error || d));
-                }).catch(e => alert(e));
+                        const msg = d?.error ?? d ?? "<?= _('Unknown Error') ?>";
+                        alert(typeof msg === "string" ? msg : JSON.stringify(msg));
+                    }
+                })
+                .catch(e => {
+                    alert("<?= _('Error') ?>: " + (e && e.message ? e.message : e));
+                });
     }
 </script>
