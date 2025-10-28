@@ -115,7 +115,7 @@ class Media extends ckvsoft\mvc\BaseController
 
         header("Content-Type: $mimeType");
         header("Content-Length: " . filesize($filePath));
-        header('Cache-Control: public, max-age=3600');
+        header('Cache-Control: private, max-age=0, must-revalidate');
 
         readfile($filePath);
         exit;
