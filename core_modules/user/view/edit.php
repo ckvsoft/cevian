@@ -10,7 +10,7 @@
         // Set redirect based on who is editing: Admin goes to list, User goes to dashboard/profile
         $redirect_url = $is_admin ? 'user' : 'dashboard';
         ?>
-        <form action="<?php echo BASE_URI; ?>user/editSave/<?php echo htmlspecialchars($user['user_id']); ?>" method="post" id="editForm" data-redirect="<?php echo $redirect_url; ?>">
+        <form action="<?php echo BASE_URI; ?>user/editSave/<?php echo htmlspecialchars($user['user_id']); ?>" method="post" id="editForm" data-message="<?= _('User changes have been saved successfully.') ?>" data-redirect="<?php echo $redirect_url; ?>">
 
             <label for="user_id">ID:</label>
             <input type="text" id="user_id" value="<?php echo htmlspecialchars($user['user_id']); ?>" readonly><br />
