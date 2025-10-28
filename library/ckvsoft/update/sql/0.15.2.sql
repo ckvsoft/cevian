@@ -1,0 +1,58 @@
+/* 
+ * The MIT License
+ *
+ * Copyright 2025 chris.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+/**
+ * Author:  chris
+ * Created: 26.10.2025
+ */
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET foreign_key_checks = 0;
+START TRANSACTION;
+
+ALTER TABLE `gallery_media_stats` 
+    ADD COLUMN `file_mtime` INT(11) UNSIGNED NOT NULL DEFAULT 0 
+        COMMENT 'Last modification time (UNIX timestamp) for cache check',
+    ADD COLUMN `file_size` INT(11) UNSIGNED NOT NULL DEFAULT 0 
+        COMMENT 'File size in bytes',
+    ADD COLUMN `media_type` ENUM('image', 'video') NOT NULL DEFAULT 'image' 
+        COMMENT 'Type of media: image or video',
+    ADD UNIQUE KEY `idx_album_file_unique` (`album_id`, `file_name`);
+
+
+CREATE TABLE `gallery_media_details` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key for this details entry',
+  `media_id` int(11) UNSIGNED NOT NULL COMMENT 'Foreign key to the gallery_media_stats table (id)',
+  `title` varchar(255) DEFAULT NULL COMMENT 'The title of the media item',
+  `description` text DEFAULT NULL COMMENT 'A longer description or caption for the media item',
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_media_id` (`media_id`),
+  CONSTRAINT `fk_media_details_stats` 
+    FOREIGN KEY (`media_id`) 
+    REFERENCES `gallery_media_stats` (`id`) 
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+COMMIT;
+SET foreign_key_checks = 1;
