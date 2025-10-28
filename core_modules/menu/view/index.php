@@ -1,6 +1,6 @@
 <fieldset>
     <legend><?= _('Menuentry: Add') ?></legend>
-    <div id="addMenu" class="ajax-form-container" data-form="menuForm" data-url="menu/menuList">
+    <div id="addMenu" class="ajax-form-container" data-form="menuForm" data-url="menu/menuList" dataset.message="<?= _('Menuentry created successfully!') ?>">
         <form action="menu/create" method="post" id="menuForm">
 
             <label for="label"><?= _('Label') ?>:</label>
