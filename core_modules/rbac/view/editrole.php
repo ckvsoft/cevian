@@ -5,7 +5,7 @@ $defaultRedirect = 'rbac';
     <legend><?= _('Edit Role') ?>: <?= htmlspecialchars($this->role['roleName']); ?></legend>
     <div data-form="editRoleForm" data-json="1">
 
-        <form action="<?= BASE_URI ?>rbac/editRoleSave" method="post" id="editRoleForm" data-redirect="<?= $defaultRedirect ?>">
+        <form action="<?= BASE_URI ?>rbac/editRoleSave" method="post" id="editRoleForm" data-message="<?= _('Role updated successfully!') ?>" data-redirect="<?= $defaultRedirect ?>">
             <input type="hidden" name="role_id" value="<?= $this->role['id'] ?>">
 
             <label for="roleName"><?= _('Role Name') ?>:</label>
@@ -16,7 +16,7 @@ $defaultRedirect = 'rbac';
             <select name="parentId" id="parentId">
                 <option value="">-- <?= _('None') ?> --</option>
                 <?php foreach ($this->roles as $r): ?>
-                    <?php if ($r['id'] == $this->role['id']) continue; // cannot be parent to itself ?>
+                    <?php if ($r['id'] == $this->role['id']) continue; ?>
                     <option value="<?= $r['id'] ?>" <?= ((isset($this->role['parentId']) && $r['id'] == $this->role['parentId']) ? 'selected' : '') ?>>
                         <?= str_repeat('&nbsp;&nbsp;', $r['depth']) . htmlspecialchars($r['roleName']) ?>
                     </option>
