@@ -225,34 +225,4 @@ $baseUri = BASE_URI;
         }, 1000);
     }
 
-    /**
-     * Fetches data from a URL and logs the response.
-     * @param {string} url The URL to fetch.
-     * @param {object} options Fetch options.
-     * @returns {Promise<any>}
-     */
-    function fetchAndLog(url, options = {}) {
-        return fetch(url, options)
-                .then(async resp => {
-                    const text = await resp.text();
-                    console.log(_("Response from"), url, ":", text || _("<empty>"));
-
-                    if (!text) {
-                        // Empty response – just return null
-                        console.warn(_("Response is empty."));
-                        return null;
-                    }
-
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        console.warn(_("Not a valid JSON response:"), e.message);
-                        return text;
-                    }
-                })
-                .catch(err => {
-                    console.error(_("Fetch error at"), url, ":", err);
-                    throw err;
-                });
-    }
 </script>
