@@ -1,3 +1,35 @@
+# [0.16.0](https://github.com/ckvsoft/cevian/compare/v0.15.0...v0.16.0) (2025-10-28)
+
+
+### Bug Fixes
+
+* Add custom success message for inline permission creation ([d354518](https://github.com/ckvsoft/cevian/commit/d354518c2b7f975abc7aa79eaa86c6055e255c5b))
+* Add custom success message for menu entry creation form ([a072459](https://github.com/ckvsoft/cevian/commit/a07245913d818e0987afa72f43e7f5a7f818dcfc))
+* Add custom success message for menu entry editing ([b837001](https://github.com/ckvsoft/cevian/commit/b837001b1110357d1bd4afb75d213e1b91cb84e6))
+* Add custom success message for role editing and minor cleanup ([1b8d1ea](https://github.com/ckvsoft/cevian/commit/1b8d1ea0ec99a6b021978d6880de052f2c4460b2))
+* Add custom success message for user creation form ([0693bd0](https://github.com/ckvsoft/cevian/commit/0693bd086634edd07024c5cee93c32e7a90a049b))
+* Add custom success message for user editing form ([09319d6](https://github.com/ckvsoft/cevian/commit/09319d648206ec13c75b72bc4800f62117a98049))
+* Implement client-side logic for multi-tab logout broadcast ([3ab1c06](https://github.com/ckvsoft/cevian/commit/3ab1c06bfe10772acc17334523e1b70dabed2607))
+* **media/controller:** Update caching headers to prevent browser caching of private content ([3a56684](https://github.com/ckvsoft/cevian/commit/3a56684d081ae03352e516f64890a01c19ed1ea5))
+
+
+### Features
+
+* Add persistent 'OK' button support to XNotify notifications ([63164eb](https://github.com/ckvsoft/cevian/commit/63164eb083f8505e5ef201dc7e273d8dc33ce52d))
+* Add persistent automatic slideshow control to gallery view ([a8737ec](https://github.com/ckvsoft/cevian/commit/a8737ec7db83bde93d6d1da1d902ab034b50428d))
+* Create core JS utilities file and implement authentication/message features ([cd907cc](https://github.com/ckvsoft/cevian/commit/cd907cc51d93f73fa5e124084eda7de75c01f04e))
+* **db:** Normalize gallery media metadata into new table ([97d35b1](https://github.com/ckvsoft/cevian/commit/97d35b1e012f02d3e898c0e1e7c1bd5f27d729f4))
+* Enhance media rescan with modification checks and thumbnail regeneration ([d70960b](https://github.com/ckvsoft/cevian/commit/d70960bb9b1e648e0d639b98e88fc32cabf860c3))
+* Enhance permission CRUD with custom messaging and utility integration ([3e3332e](https://github.com/ckvsoft/cevian/commit/3e3332e0c143ff3e915785e10f741d2322018999))
+* Enhance role CRUD with custom messaging and utility integration ([8d33e57](https://github.com/ckvsoft/cevian/commit/8d33e572cddf7d256695b8d38fb79497f1b12bf1))
+* **gallery/controller:** Implement edit_media POST logic and cleanup internal comments ([619a406](https://github.com/ckvsoft/cevian/commit/619a4060e39009dc50a4ed683c607059691dcbd2))
+* Internationalize media editing view and rename 'name' to 'title' ([4cba9b3](https://github.com/ckvsoft/cevian/commit/4cba9b30559826c8e8e407f941906b8e557195c1))
+* Introduce dedicated FlashMessage class for server-side messaging ([bfedcd2](https://github.com/ckvsoft/cevian/commit/bfedcd222b8ed2422f20bd234124b598320ec3ac))
+* Introduce Request class for robust and safe request data access ([72b3b8a](https://github.com/ckvsoft/cevian/commit/72b3b8a8c05c4f3066a4ef491b9d7487ae0fd82d))
+* **js:** Overhaul menuscript.js into core UI utility, add shrinking header, notifications, and change detection ([122de6e](https://github.com/ckvsoft/cevian/commit/122de6ebf43f42ddc86d32ba02b1cc9782ca4b79)), closes [#menu_11](https://github.com/ckvsoft/cevian/issues/menu_11)
+
+
+
 # [0.15.0](https://github.com/ckvsoft/cevian/compare/v0.14.0...v0.15.0) (2025-10-23)
 
 
@@ -65,21 +97,6 @@
 * **i18n:** Introduce gettext fallback functions for internationalization ([69c9ba2](https://github.com/ckvsoft/cevian/commit/69c9ba22f757166a7fb1872d43a0f4ba63fb05c6))
 * **user/view:** Add 'Clear' button to user creation form ([a2603bb](https://github.com/ckvsoft/cevian/commit/a2603bb4019b525c7d1628efa8f53bfc18ce7c70))
 * **validation:** Implement 'matches' rule for cross-field comparison ([5420897](https://github.com/ckvsoft/cevian/commit/5420897365e43430bf5d414ed4d85c423dee8b8e))
-
-
-
-# [0.11.0](https://github.com/ckvsoft/cevian/compare/v0.10.0...v0.11.0) (2025-10-15)
-
-
-### Bug Fixes
-
-* **gallery/view/inc:** Add missing opening PHP tag to menu snippet ([752fbcc](https://github.com/ckvsoft/cevian/commit/752fbcc6c337ef1ba1f62c66172bc06ba6240827))
-
-
-### Features
-
-* **gallery/ui:** Display album title in manager overview table ([34983f0](https://github.com/ckvsoft/cevian/commit/34983f09f76030c4a89002670ae3a079d75000b0))
-* **gallery:** Ensure root album tracking and include it in path list ([4ed2dbe](https://github.com/ckvsoft/cevian/commit/4ed2dbe7102a8086d6572df129a9b717cf312866))
 
 
 
