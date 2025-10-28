@@ -1,14 +1,22 @@
 // IMPORTANT: This file MUST be processed by the PHP interpreter BEFORE it is served to the browser.
+// It contains PHP constants (BASE_URI) and localization calls (_("...")) that must be processed server-side.
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // ----------------------------
     // Progress Polling
     // ----------------------------
+    /**
+     * Starts polling a progress URL to check the status of a long-running job.
+     * @param {string} progressId - The unique ID of the job's progress status.
+     * @param {string} progressUrl - The URL path to fetch the progress data (e.g., 'jobs/progress/').
+     * @param {HTMLElement} submitButton - The button element to disable/enable.
+     * @param {string} originalText - The original text content of the button.
+     * @returns {number} The interval ID for clearing later.
+     */
     function startProgressPolling(progressId, progressUrl, submitButton, originalText) {
         const container = submitButton; // The button element itself
         const text = document.getElementById('progress-text-' + progressId);
-
         if (text) {
             text.textContent = '<?= _("Processing...") ?>';
         }
@@ -19,12 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const interval = setInterval(async () => {
             try {
-                const resp = await fetch(BASE_URI + progressUrl + progressId);
-                const data = await resp.json();
-
-                if (data && data.data.percent !== undefined) {
+                const data = await fetchAndLog('<?= BASE_URI ?>' + progressUrl + progressId);
+                if (data && typeof data === 'object' && data.data && data.data.percent !== undefined) {
                     const percentage = parseInt(data.data.percent, 10);
-
                     if (text) {
                         const statusText = (percentage < 100)
                                 ? '<?= _("Processing: ") ?>' + percentage + '%'
@@ -33,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     if (percentage >= 100) {
                         clearInterval(interval);
-
                         if (container) {
                             container.disabled = false;
                         }
@@ -46,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Polling error:', error);
                 clearInterval(interval);
-
                 if (container) {
                     container.disabled = false;
                 }
@@ -55,10 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }, 200);
-
         return interval;
     }
 
+    /**
+     * Clears the progress polling interval.
+     * @param {number} pollingInterval - The interval ID.
+     */
     function stopProgressPolling(pollingInterval) {
         if (pollingInterval) {
             clearInterval(pollingInterval);
@@ -111,17 +117,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // AJAX form submission logic
     // ----------------------------
+    /**
+     * Submits a form using AJAX and returns the parsed JSON response data.
+     * @param {HTMLFormElement} form - The form element.
+     * @returns {Promise<object>} The parsed JSON data from the successful response.
+     * @throws {Error} Throws an error if the submission fails (data.success !== 1).
+     */
     async function submitFormLogic(form) {
         const url = form.getAttribute('action');
         const container = document.querySelector('[data-form="' + form.id + '"]');
         let sendAsJson = false;
-
         if (container) {
             sendAsJson = container.dataset.json === '1';
         }
 
         let options = {method: 'POST'};
-
         if (sendAsJson) {
             const formData = Object.fromEntries(new FormData(form).entries());
             options.body = JSON.stringify(formData);
@@ -130,10 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
             options.body = new FormData(form);
         }
 
-        const resp = await fetch(url, options);
-        const data = await resp.json();
-
+        // fetchAndLog returns the parsed JSON data directly on success
+        const data = await fetchAndLog(url, options);
         if (data.success !== 1) {
+            // Error handling for business logic failure (e.g., validation errors)
             const errorMsg = Object.entries(data.errorMessage || {})
                     .map(([k, v]) => k + ' ' + v)
                     .join('<br />');
@@ -145,22 +155,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // Setup AJAX form (single submit with progress)
     // ----------------------------
+    /**
+     * Attaches event listeners to a form to handle AJAX submission, progress polling, and post-submission actions.
+     * @param {string} formId - The ID of the form element.
+     * @param {string} listUrl - URL to reload the list after submission.
+     * @param {string} listContainerId - The ID of the container element for the reloaded list.
+     */
     function setupAjaxForm(formId, listUrl, listContainerId) {
         const form = document.getElementById(formId);
         if (!form)
             return;
-
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const progressId = form.dataset.progressId;
             const progressUrl = form.dataset.progressUrl;
             const isLongRunningJob = !!progressId && !!progressUrl;
-
             const submitButton = form.querySelector('button[type="submit"]');
             let pollingInterval = null;
             let originalText = submitButton ? submitButton.textContent : null;
-
             try {
                 // Start polling for long-running job
                 if (isLongRunningJob) {
@@ -168,19 +180,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 await submitFormLogic(form);
-
                 // Stop polling
                 stopProgressPolling(pollingInterval);
-
                 const redirectUrl = form.dataset.redirect;
+                const successMessage = form.dataset.message || '<?= _("Operation successful.") ?>';
                 if (redirectUrl) {
-                    displayMessage('success', '<?= _("Complete") ?>', '<?= _("Operation successful. Redirecting...") ?>', true);
-                    setTimeout(() => window.location.href = BASE_URI + redirectUrl, 1500);
+                    sendMessageAndRedirect('success', '<?= _("Complete") ?>', successMessage, [], '<?= BASE_URI ?>' + redirectUrl)
                 } else {
                     form.reset();
                     if (listUrl && listContainerId) {
                         await loadList(listUrl, listContainerId);
                     }
+                    displayMessage('success', '<?= _("Complete") ?>', successMessage);
                 }
             } catch (error) {
                 stopProgressPolling(pollingInterval);
@@ -195,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusEl.style.display = 'block';
                 }
                 console.error('Error submitting the form:', error);
+                displayMessage('error', '<?= _("Error") ?>', error.message || '<?= _("Unknown error occurred.") ?>', true);
             }
         });
     }
@@ -202,18 +214,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // Load list via AJAX
     // ----------------------------
+    /**
+     * Loads HTML content from a URL via AJAX and injects it into a container.
+     * @param {string} url - The URL to fetch the list content from.
+     * @param {string} containerId - The ID of the container to update.
+     */
     async function loadList(url, containerId) {
         if (!url || !containerId)
             return;
-
         try {
-            const resp = await fetch(url);
-            const html = await resp.text();
+            const html = await fetchAndLog(url);
+            if (typeof html !== 'string') {
+                console.error('List URL did not return expected HTML fragment.', html);
+                return;
+            }
+
             const container = document.getElementById(containerId);
             if (!container)
                 return;
-
             container.innerHTML = html;
+            // Re-setup pagination for the newly loaded content
             setupPagination(container);
         } catch (err) {
             console.error('Error loading the list:', err);
@@ -223,20 +243,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // Setup pagination for table or generic list
     // ----------------------------
+    /**
+     * Applies client-side pagination to a content container based on its data-per-page attribute.
+     * Handles state persistence using localStorage if the container has an ID.
+     * @param {HTMLElement} container - The container element (e.g., a div wrapper for a table or grid).
+     */
     function setupPagination(container) {
         if (!container)
             return;
-
-        // Get the container's ID to use as a unique key for state storage (per album/list)
         const containerId = container.id;
-
-        // Check if an ID is present. If not, the function defaults to no state persistence.
         const hasPersistenceId = !!containerId;
-
         const table = container.querySelector('table');
-
         let paginatedContent, items = [], totalItems = 0;
-
         if (table) {
             paginatedContent = table;
             items = Array.from(table.rows).slice(1);
@@ -245,67 +263,52 @@ document.addEventListener('DOMContentLoaded', () => {
             paginatedContent = container.querySelector('.list-cards') ||
                     container.querySelector('.image-grid') ||
                     container;
-
             items = Array.from(paginatedContent.children).filter(el =>
                 el.nodeType === 1 &&
                         el.tagName !== 'SCRIPT' &&
                         !el.classList.contains('pagination')
             );
-
             totalItems = items.length;
         }
 
         if (totalItems <= 0)
             return;
-
         const rowsPerPage = parseInt(container.dataset.perPage, 10) || 15;
-
         let currentPage = 1; // Default starting page is always 1
 
-        // CHECK: If an ID is present, try to load the persistent state
         if (hasPersistenceId) {
             currentPage = loadPageFromLocalStorage(containerId);
         }
 
         const totalPages = Math.ceil(totalItems / rowsPerPage);
-
-        // Ensure the loaded page is within bounds
         if (currentPage > totalPages) {
             currentPage = 1;
-            // Only reset in localStorage if a key exists
             if (hasPersistenceId) {
                 storePageInLocalStorage(containerId, currentPage);
             }
         }
 
-
         const oldPagination = container.querySelector('.pagination');
         if (oldPagination)
             oldPagination.remove();
-
         const pagination = document.createElement('div');
         pagination.className = 'pagination';
         pagination.style.marginTop = '10px';
         pagination.style.marginBottom = '20px';
         pagination.style.textAlign = 'left';
-
         const prevButton = document.createElement('button');
         prevButton.textContent = '<?= _("Previous") ?>';
         prevButton.className = 'button small-action pagination-nav';
         prevButton.style.marginRight = '8px';
-
         const nextButton = document.createElement('button');
         nextButton.textContent = '<?= _("Next") ?>';
         nextButton.className = 'button small-action pagination-nav';
-
         const pageStatus = document.createElement('span');
         pageStatus.style.marginLeft = '10px';
         pageStatus.style.fontWeight = 'bold';
-
-        // CHANGE: Use a local function to handle navigation and (optionally) storage
+        // Use a local function to handle navigation and (optionally) storage
         function navigateAndStore(pageChange) {
             showPage(currentPage + pageChange);
-            // Only store the page if a valid ID is present
             if (hasPersistenceId) {
                 storePageInLocalStorage(containerId, currentPage);
             }
@@ -313,41 +316,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         prevButton.onclick = () => navigateAndStore(-1);
         nextButton.onclick = () => navigateAndStore(1);
-
         pagination.appendChild(prevButton);
         pagination.appendChild(nextButton);
         pagination.appendChild(pageStatus);
         paginatedContent.insertAdjacentElement('afterend', pagination);
-
         function showPage(page) {
             if (page < 1)
                 page = 1;
             if (page > totalPages)
                 page = totalPages;
             currentPage = page;
-
             const start = (page - 1) * rowsPerPage;
             const end = start + rowsPerPage;
-
             const displayValue = table ? 'table-row' : '';
-
             items.forEach((item, index) => {
                 item.style.display = (index >= start && index < end) ? displayValue : 'none';
             });
-
             pageStatus.textContent = '<?= _("Page") ?> ' + currentPage + ' <?= _("of") ?> ' + totalPages;
-
             prevButton.disabled = currentPage === 1;
             nextButton.disabled = currentPage === totalPages;
         }
 
-        // Display the initial page (either 1 or the loaded state)
         showPage(currentPage);
     }
 
     // ----------------------------
     // Sequential save for multiple forms
     // ----------------------------
+    /**
+     * Submits multiple forms sequentially using AJAX.
+     * @param {string[]} formIds - An array of form IDs to submit in order.
+     * @param {HTMLElement} triggerButton - The button that initiated the save.
+     */
     async function saveSequentially(formIds, triggerButton) {
         const forms = formIds.map(id => document.getElementById(id)).filter(f => f);
         if (forms.length !== formIds.length) {
@@ -359,21 +359,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalText = triggerButton.textContent;
         triggerButton.textContent = '<?= _("Saving...") ?>';
         displayMessage('info', '<?= _("Save Process") ?>', '<?= _("Saving sequence initiated...") ?>');
-
         try {
             for (let i = 0; i < forms.length; i++) {
                 const form = forms[i];
+                // Submit the form using the core logic
                 await submitFormLogic(form);
                 displayMessage('success', '<?= _("Step") ?> ' + (i + 1) + '/' + forms.length,
                         '<?= _("Data for") ?> "' + form.id + '" <?= _("saved successfully.") ?>');
             }
 
             const redirectUrl = forms[0].dataset.redirect;
+            const successMessage = forms[0].dataset.message || '<?= _("All changes saved!") ?>';
             if (redirectUrl) {
-                displayMessage('success', '<?= _("Complete") ?>', '<?= _("All changes saved! Redirecting...") ?>');
-                setTimeout(() => window.location.href = BASE_URI + redirectUrl, 1500);
+                sendMessageAndRedirect('success', '<?= _("Complete") ?>', successMessage, [], '<?= BASE_URI ?>' + redirectUrl);
             } else {
-                displayMessage('success', '<?= _("Complete") ?>', '<?= _("All changes saved!") ?>');
+                displayMessage('success', '<?= _("Complete") ?>', successMessage);
                 document.querySelectorAll('.paginated').forEach(c => setupPagination(c));
             }
         } catch (error) {
@@ -389,6 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // Initialize sequential save buttons
     // ----------------------------
+    /**
+     * Finds all buttons marked for sequential saving and attaches the click handler.
+     */
     function initSequentialSave() {
         document.querySelectorAll('[data-forms-to-save]').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -402,28 +405,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // Global initialization
     // ----------------------------
+
+    // Setup AJAX forms based on data-form attribute
     document.querySelectorAll('[data-form]').forEach(container => {
         const formId = container.dataset.form;
         const listUrl = container.dataset.url;
-        const containerId = container.id;
         const listContainer = listUrl ? document.querySelector('[data-list="' + listUrl + '"]') : null;
         const listContainerId = listContainer ? listContainer.id : null;
-
         if (document.getElementById(formId)) {
             setupAjaxForm(formId, listUrl, listContainerId);
         }
     });
-
     document.querySelectorAll('[data-list]').forEach(container => {
         const listUrl = container.dataset.list;
         const containerId = container.id;
         loadList(listUrl, containerId);
     });
-
     initSequentialSave();
-
     document.querySelectorAll('.paginated').forEach(container => {
         setupPagination(container);
     });
-
 });
+
