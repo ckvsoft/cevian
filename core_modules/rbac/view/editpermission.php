@@ -32,7 +32,7 @@ $defaultRedirect = 'rbac/permissions';
     <legend><?= _($isEditMode ? 'Edit Permission' : 'Create Permission') ?>: <?= htmlspecialchars($this->perm['permName'] ?? '') ?></legend>
     <div data-form="permissionForm" data-json="1">
 
-        <form action="<?= BASE_URI ?>rbac/editPermissionSave" method="post" id="permissionForm" data-redirect="<?= $defaultRedirect ?>">
+        <form action="<?= BASE_URI ?>rbac/editPermissionSave" method="post" id="permissionForm" data-message="<?= _($isEditMode ? 'Permission updated successfully!' : 'Permission created successfully!') ?>" data-redirect="<?= $defaultRedirect ?>">
             <input type="hidden" name="perm_id" value="<?= $this->perm['id'] ?? '' ?>">
 
             <label for="permName"><?= _('Permission Name') ?>:</label>
@@ -72,18 +72,23 @@ $defaultRedirect = 'rbac/permissions';
      */
     function deletePermission(id) {
         // Confirmation dialog uses translated string
-        if (!confirm("<?= _('Really delete this permission?') ?>"))
+        if (!confirm("<?= _('Really delete this permission?') ?>")) {
             return;
+        }
 
-        fetch("<?= BASE_URI ?>rbac/deletePermission/" + id)
-                .then(r => r.json())
+        fetchAndLog("<?= BASE_URI ?>rbac/deletePermission/" + id)
                 .then(d => {
-                    if (d.success)
+                    if (d && d.success) {
                         // Redirect on success
-                        location.href = "<?= BASE_URI . $defaultRedirect ?>";
-                    else
-                        // Display error message
-                        alert(JSON.stringify(d.error || d));
-                }).catch(e => alert(e));
+                        sendMessageAndRedirect('success', '<?= _("Delete") ?>', '<?= _("Permission successfully deleted") ?>', [], "<?= BASE_URI . $defaultRedirect ?>");
+                    } else {
+                        // Display error message (fallback to entire response if no error prop)
+                        const msg = d?.error ?? d ?? "<?= _('Unknown Error') ?>";
+                        alert(typeof msg === "string" ? msg : JSON.stringify(msg));
+                    }
+                })
+                .catch(e => {
+                    alert("<?= _('Error') ?>: " + (e && e.message ? e.message : e));
+                });
     }
 </script>
