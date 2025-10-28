@@ -39,7 +39,8 @@ $addUrl = BASE_URI . 'rbac/editPermissionSave'; // A single save endpoint
          class="ajax-form-container"
          data-form="addPermissionForm"
          data-url="<?= $listUrl ?>"
-         data-json="1">
+         data-json="1"
+         data-message="<?= _('Permission created successfully!') ?>">
 
 
         <form action="<?= $addUrl ?>" method="post" id="addPermissionForm">
