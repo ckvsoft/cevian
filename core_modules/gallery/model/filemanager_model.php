@@ -298,11 +298,13 @@ class Filemanager_Model extends GalleryManager_Model
 
         if (is_dir($absolutePath)) {
             $errorMessage = _('Directory already exists') . ": " . $newDirName;
+            // THROW 1: Directory already exists
             throw new \ckvsoft\CkvException($errorMessage);
         }
 
         if (!mkdir($absolutePath, 0755, true)) {
             $errorMessage = _('Failed to create directory') . ": {$absolutePath}. " . _('Check file permissions.');
+            // THROW 2: Failed to create directory
             throw new \ckvsoft\CkvException($errorMessage);
         }
 
@@ -409,16 +411,19 @@ class Filemanager_Model extends GalleryManager_Model
         $thumbToMove = $thumbsToMove[0] ?? null;
 
         if (!file_exists($sourcePath)) {
-            throw new \ckvsoft\CkvException("Source does not exist: {$sourcePath}");
+            // THROW 3: Source does not exist
+            throw new \ckvsoft\CkvException(_("Source file/folder does not exist") . ": {$sourcePath}");
         }
 
         if (file_exists($finalDestination)) {
-            throw new \ckvsoft\CkvException("Destination already exists: {$finalDestination}");
+            // THROW 4: Destination already exists
+            throw new \ckvsoft\CkvException(_("Destination already contains an item with the same name") . ": {$finalDestination}");
         }
 
         set_error_handler(function ($errno, $errstr) use ($sourcePath, $finalDestination) {
             if ($errno === E_WARNING) {
-                throw new \ckvsoft\CkvException("Rename failed: {$errstr} ({$sourcePath} → {$finalDestination})");
+                // THROW 5: Rename failed
+                throw new \ckvsoft\CkvException(_("Rename failed") . ": {$errstr} ({$sourcePath} → {$finalDestination})");
             }
             return false;
         });
@@ -574,7 +579,8 @@ class Filemanager_Model extends GalleryManager_Model
                 }
             }
 
-            throw new \ckvsoft\CkvException("Item not found: {$relativePath}");
+            // THROW 6: Item not found
+            throw new \ckvsoft\CkvException(_("Item not found") . ": {$relativePath}");
         }
 
         $isFolder = is_dir($absolutePath);
@@ -584,11 +590,17 @@ class Filemanager_Model extends GalleryManager_Model
         $albumData = $this->checkAlbumPermissions($albumPathToCheck);
 
         if (!$albumData) {
-            throw new \ckvsoft\CkvException("The associated album/folder could not be found for permission check: {$albumPathToCheck}");
+            // THROW 7: Associated album/folder could not be found for permission check
+            throw new \ckvsoft\CkvException(_("The associated album/folder could not be found for permission check") . ": {$albumPathToCheck}");
         }
 
-        if ((string) $albumData['owner_user_id'] !== (string) $currentUserId) {
-            throw new \ckvsoft\CkvException("Permission Denied: You do not have ownership rights to delete this item. ({$relativePath})");
+        // Only perform the strict ownership check if the user is NOT an administrator.
+        if (!\ckvsoft\Auth::hasRole('admin')) {
+            // Standard Ownership Check
+            if ((string) $albumData['owner_user_id'] !== (string) $currentUserId) {
+                // THROW 8: Permission Denied (Ownership)
+                throw new \ckvsoft\CkvException(_("Permission Denied: You do not have ownership rights to delete this item") . ". ({$relativePath})");
+            }
         }
 
         $this->deletePhysicalItem($absolutePath);
@@ -621,7 +633,8 @@ class Filemanager_Model extends GalleryManager_Model
         }
 
         if (!file_exists($absolutePath)) {
-            throw new \ckvsoft\CkvException("Cannot delete: Item not found at path: {$absolutePath}");
+            // THROW 9: Cannot delete: Item not found
+            throw new \ckvsoft\CkvException(_("Cannot delete: Item not found at path") . ": {$absolutePath}");
         }
 
         if (is_dir($absolutePath)) {
@@ -632,13 +645,15 @@ class Filemanager_Model extends GalleryManager_Model
             }
 
             if (!rmdir($absolutePath)) {
-                throw new \ckvsoft\CkvException("Failed to remove directory: {$absolutePath}. Directory might not be empty.");
+                // THROW 10: Failed to remove directory
+                throw new \ckvsoft\CkvException(_("Failed to remove directory") . ": {$absolutePath}. " . _("Directory might not be empty."));
             }
 
             return true;
         } else {
             if (!unlink($absolutePath)) {
-                throw new \ckvsoft\CkvException("Failed to delete file: {$absolutePath}. Check file permissions.");
+                // THROW 11: Failed to delete file
+                throw new \ckvsoft\CkvException(_("Failed to delete file") . ": {$absolutePath}. " . _("Check file permissions."));
             }
 
             $itemName = basename($absolutePath);
