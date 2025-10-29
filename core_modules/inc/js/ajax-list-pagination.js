@@ -184,8 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 stopProgressPolling(pollingInterval);
                 const redirectUrl = form.dataset.redirect;
                 const successMessage = form.dataset.message || '<?= _("Operation successful.") ?>';
+                const title = form.dataset.title || '<?= _("Complete") ?>';
                 if (redirectUrl) {
-                    sendMessageAndRedirect('success', '<?= _("Complete") ?>', successMessage, [], '<?= BASE_URI ?>' + redirectUrl)
+                    sendMessageAndRedirect('success', title, successMessage, [], '<?= BASE_URI ?>' + redirectUrl)
                 } else {
                     form.reset();
                     if (listUrl && listContainerId) {
@@ -370,8 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const redirectUrl = forms[0].dataset.redirect;
             const successMessage = forms[0].dataset.message || '<?= _("All changes saved!") ?>';
+            const title = form[0].dataset.title || '<?= _("Complete") ?>';
             if (redirectUrl) {
-                sendMessageAndRedirect('success', '<?= _("Complete") ?>', successMessage, [], '<?= BASE_URI ?>' + redirectUrl);
+                sendMessageAndRedirect('success', title, successMessage, [], '<?= BASE_URI ?>' + redirectUrl);
             } else {
                 displayMessage('success', '<?= _("Complete") ?>', successMessage);
                 document.querySelectorAll('.paginated').forEach(c => setupPagination(c));
