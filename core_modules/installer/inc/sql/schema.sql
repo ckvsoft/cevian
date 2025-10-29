@@ -53,7 +53,8 @@ CREATE TABLE migrations (
 INSERT INTO `migrations` (`id`, `module_name`, `migration`) VALUES
 (1, '_core_', '0.7.0'),
 (2, '_core_', '0.8.0'),
-(3, '_core_', '0.8.3');
+(3, '_core_', '0.8.3'),
+(4, '_core_', '0.15.2');
 
 -- --------------------------------------------------------
 
@@ -283,11 +284,28 @@ CREATE TABLE `gallery_media_stats` (
     `file_name` VARCHAR(255) NOT NULL COMMENT 'Media filename (e.g., image.jpg)',
     `views` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total view count for this media file',
     `last_view` DATETIME NULL DEFAULT NULL COMMENT 'Timestamp of the last view',
+    `file_mtime` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Last modification time (UNIX timestamp) for cache check',
+    `file_size` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'File size in bytes',
+    `media_type` ENUM('image', 'video') NOT NULL DEFAULT 'image' COMMENT 'Type of media: image or video',
     PRIMARY KEY (`id`),
     -- Unique key ensures only one counter entry per album/file combination
-    UNIQUE KEY `album_file_unique` (`album_id`, `file_name`),
+    UNIQUE KEY `idx_album_file_unique` (`album_id`, `file_name`),
     -- Foreign key constraint
     CONSTRAINT `fk_album_id` FOREIGN KEY (`album_id`) REFERENCES `gallery_albums` (`album_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `gallery_media_details` (
+    `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key for this details entry',
+    `media_id` int(11) UNSIGNED NOT NULL COMMENT 'Foreign key to the gallery_media_stats table (id)',
+    `title` varchar(255) DEFAULT NULL COMMENT 'The title of the media item',
+    `description` text DEFAULT NULL COMMENT 'A longer description or caption for the media item',
+  
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_media_id` (`media_id`),
+    CONSTRAINT `fk_media_details_stats` 
+      FOREIGN KEY (`media_id`) 
+      REFERENCES `gallery_media_stats` (`id`) 
+      ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;
