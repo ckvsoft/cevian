@@ -756,9 +756,24 @@
         updateDeleteButtonState(); // Disable delete button
 
         if (contents.error) {
-            displayMessage('error', '<?= _("Access Denied") ?>', contents.error);
-            fileList.innerHTML = `<li class="error-item">Error: ${contents.error}</li>`;
-            return;
+            if (!panelElement.dataset.reloaded) {
+                panelElement.dataset.reloaded = '1';
+
+                try {
+                    localStorage.removeItem(getPathKey(panelElement.id));
+                } catch (e) {
+                    console.warn('Could not remove localStorage item for panel', e);
+                }
+
+                console.log('Retrying panel with fallback path...');
+                browseDirectory(panelElement, '');
+                return;
+            } else {
+                displayMessage('error', '<?= _("Access Denied") ?>', contents.error);
+                fileList.innerHTML = `<li class="error-item">Error: ${contents.error}</li>`;
+                console.warn('Panel still failed after fallback reload');
+                return;
+            }
         }
 
         contents.forEach(item => {
