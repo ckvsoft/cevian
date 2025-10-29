@@ -36,9 +36,7 @@ ALTER TABLE `gallery_media_stats`
     ADD COLUMN `file_size` INT(11) UNSIGNED NOT NULL DEFAULT 0 
         COMMENT 'File size in bytes',
     ADD COLUMN `media_type` ENUM('image', 'video') NOT NULL DEFAULT 'image' 
-        COMMENT 'Type of media: image or video',
-    ADD UNIQUE KEY `idx_album_file_unique` (`album_id`, `file_name`);
-
+        COMMENT 'Type of media: image or video';
 
 CREATE TABLE `gallery_media_details` (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key for this details entry',
