@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-23 18:17+0200\n"
+"POT-Creation-Date: 2025-10-29 08:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,844 +17,615 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:90
-msgid "A role with this name already exists."
+#: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:86
+msgid "Session expired"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:99
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:138
-msgid "The selected parent role was not found."
+#: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:94
+msgid "Session Expired"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:102
-msgid "An unexpected error occurred during role save: "
+#: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:95
+msgid "Your session has expired. Please log in again."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:105
-msgid "An unexpected system error occurred."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:142
-msgid "A role cannot be moved into its own subtree."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:145
-msgid "An unexpected error occurred while updating the role."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:207
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:230
-msgid "A permission with this key already exists."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:210
-msgid "Database error while creating permission."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:233
-msgid "Database error while updating permission."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:251
-msgid "Database error while deleting permission."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:7
-msgid "Create New Role"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:11
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:11
-msgid "Role Name"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:15
-msgid "Parent Role (optional)"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:17
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:17
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:21
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:24
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:33
-msgid "None"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:26
-msgid "Create Role"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:27
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:60
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:35
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:23
-msgid "Clear"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:34
-msgid "Existing Roles"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/index.php:45
-msgid "Really delete this role?"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:36
-msgid "Add New Permission"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:48
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:41
-msgid "Permission Key"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:49
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:52
-msgid "e.g."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:49
-msgid "user_create"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:51
-msgid "Display Name"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:52
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:22
-msgid "Create User"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:54
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:44
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:61
-msgid "Description"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:59
-msgid "Add Permission"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:66
-msgid "Existing Permissions"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_manage.php:70
-msgid "Loading..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:32
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:239
-msgid "Edit Permission"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:38
-msgid "Permission Name"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:49
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:36
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:40
-msgid "Save"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:54
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:57
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:81
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:51
-msgid "Delete"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:61
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:33
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:37
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:44
-msgid "Cancel"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editpermission.php:75
-msgid "Really delete this permission?"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:34
-msgid "Permissions for"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:43
-msgid "Permission Key / Name"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:44
-msgid "Current Effective Access"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:45
-msgid "Direct Assignment (Override: 0/1/X)"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:57
-msgid "✅ Allowed"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:57
-msgid "❌ Denied"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:63
-msgid "Default"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:65
-msgid "Inherited"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:65
-msgid "Explicit"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
-msgid "X - Inherit"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
-msgid "Effective"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
-msgid "Allowed"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:81
-msgid "Denied"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:84
-msgid "1 - Explicitly Allow"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:84
-msgid "Allow"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:87
-msgid "0 - Explicitly Deny"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:87
-msgid "Deny"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions.php:99
-msgid "Save permissions"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:33
-msgid "No permissions defined yet."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:53
-msgid "Key"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:57
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:38
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:5
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:18
-msgid "Name"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/permissions_table_snippet.php:67
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:53
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:142
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:37
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:2
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:78
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:46
-msgid "Edit"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:5
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:148
-msgid "Edit Role"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:15
-msgid "Parent Role"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/editrole.php:29
-msgid "Save Role & Permissions"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:46
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:101
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:127
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:19
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:22
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:14
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:31
-msgid "Role"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/view/roles_table_snippet.php:63
-msgid "No roles found."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:57
-msgid "Role Management"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:92
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:184
-msgid "Role name cannot be empty."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:239
-msgid "New Permission"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:251
-msgid "Permissions Definition"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:297
-msgid "Permission name and key are required."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/controller/rbac.php:370
-msgid "Invalid role id"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:5
-msgid "Email:"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:9
-msgid "Password:"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:14
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:74
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:90
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:98
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/controller/login.php:19
-msgid "Login"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:74
-msgid "Login successful"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/view/login.php:98
-msgid "Server error! Status: "
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/login/controller/login.php:60
-msgid "No user found"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:129
-msgid "Permission Denied: You must be logged in to access the file manager."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:271
-msgid "Permission Denied: You do not own this folder."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:309
-msgid "Directory already exists"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:314
-msgid "Failed to create directory"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:314
-msgid "Check file permissions."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/partials/video-item.php:30
-msgid "Your browser does not support the video tag."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/partials/album-item.php:28
-msgid "Album"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/partials/image-item.php:28
-msgid "Image"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:215
-msgid "Create New Directory"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:216
-msgid "Delete Selected Items"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:554
-msgid "Move Canceled"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:554
-#, php-format
-msgid "Item %s is already in this folder."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:559
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:615
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:994
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1012
-msgid "Move Failed"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:559
-msgid "Cannot move an item into its own subfolder."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:610
-msgid "Move Complete with Errors"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:610
-#, php-format
-msgid "Failed to move %s of %s item(s)."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:615
-msgid "An unexpected error occurred during move processing."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:664
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:671
-#, php-format
-msgid "Upload Failed: %s"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:671
-msgid "Network or unexpected error occurred."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:681
-msgid "Upload Complete"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:681
-#, php-format
-msgid "%s file(s) uploaded successfully."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:688
-msgid "Upload Failed"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:688
-msgid "All uploads failed. Check individual error messages."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:706
-msgid "No Selection"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:706
-msgid "Please select at least one item to delete."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:711
-#, php-format
-msgid "Are you sure you want to delete the following %s item(s) from \"%s\"?%s"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:733
-msgid "Delete Failed (Invalid Server Response)"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:733
-#, php-format
-msgid "Server sent non-JSON data. First characters: \"%s\""
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:738
-msgid "Deletion failed due to server error."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:743
-msgid "Deletion Complete."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:751
-msgid "Unknown error object received."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:760
-msgid "Deletion Complete"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:762
-msgid "Deletion Failed or Completed with Errors"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:772
-msgid "Delete Failed"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:772
-msgid "A network error occurred."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:816
+#: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:104
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:759
 msgid "Access Denied"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:945
-msgid "Network Error"
+#: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:105
+msgid "You do not have the required permissions to access this page."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:945
-#, php-format
-msgid "HTTP error! status: %s when browsing %s"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.js:106
+msgid "alert"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:956
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:958
-msgid "Browsing Error"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.js:107
+msgid "Logged Out"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:961
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:966
-msgid "Browsing Failed"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.js:108
+msgid "You have been logged out in another browser tab."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:961
-msgid "Unexpected server response format."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:21
+msgid "Processing..."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:966
-msgid "A network error occurred while loading the directory."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:35
+msgid "Processing: "
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:994
-msgid "Server sent invalid response format. Check the browser console."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:36
+msgid "Complete: 100% ✅"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1000
-msgid "Move failed due to server error."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:46
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:188
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:194
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:374
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:376
+msgid "Complete"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1004
-#, php-format
-msgid "Move Failed: %s"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:57
+msgid "Error!"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1012
-msgid "A network error occurred while moving an item."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:150
+msgid "Unknown error"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1039
-msgid "Enter new directory name:"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:186
+msgid "Operation successful."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1056
-msgid "Error creating directory."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:209
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:61
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:91
+msgid "Error"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1059
-msgid "Directory Created"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:209
+msgid "Unknown error occurred."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1063
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1068
-msgid "Creation Failed"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:300
+msgid "Previous"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/filemanager/index.php:1068
-msgid "A network error occurred while creating the directory."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:304
+msgid "Next"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:46
-msgid "Rescan Operations"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:335
+msgid "Page"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:58
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:63
-msgid "[Album Folder Rescan]"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:335
+msgid "of"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:60
-msgid "Are you sure? This will synchronize the Albums DB with the filesystem."
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:360
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:384
+msgid "Saving..."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:78
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:83
-msgid "[All Media Rescan]"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:361
+msgid "Save Process"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:80
-msgid ""
-"Are you sure? This will register ALL media files found in the filesystem "
-"into the media table. It might take a while!"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:361
+msgid "Saving sequence initiated..."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:92
-msgid "Albums"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:367
+msgid "Step"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:98
-msgid "Album Path Name"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:368
+msgid "Data for"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:99
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:119
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:51
-msgid "Title"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:368
+msgid "saved successfully."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:100
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:123
-msgid "User Name"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:372
+msgid "All changes saved!"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:102
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:132
-msgid "Views"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:381
+msgid "Save Failed!"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:103
-msgid "Actions"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:381
+msgid "Process aborted:"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:109
-msgid "No albums found. Run Album Folder Rescan."
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:12
+msgid "Current/Last Backup"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:115
-msgid "Album Path"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:14
+msgid "Database"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:124
-msgid "System/N/A"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:15
+msgid "Images"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:139
-msgid "Media"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:23
+msgid "Start Database Backup"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:153
-#, php-format
-msgid "Are you sure you want to reset the View Counter for Album ID %s to 0?"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:29
+msgid "Database Backup Progress"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:154
-msgid "Reset Views"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:39
+msgid "Image Directory"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:42
-msgid "Edit Album"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:41
+msgid "Loading directories..."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:61
-msgid "Album Owner"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:49
+msgid "Start Images Backup"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:63
-msgid "-- Please select --"
+#: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:55
+msgid "Images Backup Progress"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:76
-msgid "Apply Owner to all subfolders"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/model/menu_model.php:93
+msgid "The menu already exists."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:81
-msgid "Permission Level"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/model/menu_model.php:97
+msgid "Database error: Menu entry could not be created."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:98
-msgid "Apply Permissions to all subfolders"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:2
+msgid "Menuentry"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:103
-msgid "Save Changes"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:2
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:78
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/roles_table_snippet.php:53
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_table_snippet.php:67
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/user_snipped.php:46
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:37
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:142
+msgid "Edit"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/edit.php:104
-msgid "Back to Overview"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:4
+msgid "Menuentry changes have been saved successfully."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:63
-msgid "File Manager"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:6
+msgid "Label"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:103
-msgid "Missing source or target path."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:12
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:9
+msgid "Link"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:113
-msgid "Item moved successfully."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:15
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:12
+msgid "Parent"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:116
-msgid "Move failed due to a database error."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:18
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:15
+msgid "Sort"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:146
-msgid "Missing directory name or target path."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:22
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:19
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/roles_table_snippet.php:46
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:31
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:14
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:101
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:127
+msgid "Role"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:156
-msgid "Directory created successfully."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:24
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:21
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:17
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:17
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:33
+msgid "None"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:158
-msgid "Failed to create directory due to a database error."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:25
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:22
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:34
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:17
+msgid "Admin"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:175
-msgid "Missing or invalid path list for deletion."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:26
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:23
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:35
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:16
+msgid "Owner"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:191
-msgid "Failed to delete item from database:"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:30
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:27
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:69
+msgid "Public"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:200
-msgid "Selected items deleted successfully."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:36
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:49
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:40
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:83
+msgid "Save"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:206
-msgid "Deletion completed with errors."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/edit.php:37
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:61
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:33
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:44
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:86
+msgid "Cancel"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:229
-msgid "File uploaded successfully."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:2
+msgid "Menuentry: Add"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:231
-msgid "File upload failed for unknown reason or file not registered in DB."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:3
+msgid "Menuentry created successfully!"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:234
-msgid "Upload Error: "
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:33
+msgid "Create Menuentry"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/gallery.php:46
-msgid "Gallery"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:35
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:27
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:61
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:23
+msgid "Clear"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/gallery.php:91
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/gallery.php:102
-msgid "All Albums"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/view/index.php:40
+msgid "Existing Menuentries"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:89
-msgid "Gallery Manager"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:20
+msgid "Menu"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:110
-msgid "Album: size -> "
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:53
+msgid "Yes"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:123
-msgid "Album Management"
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:53
+msgid "No"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:183
-msgid "Album permissions updated successfully."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:65
+msgid "Entry"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:186
-msgid "No changes made or update failed."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:81
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/roles_table_snippet.php:57
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:53
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:54
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:83
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/user_snipped.php:51
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:86
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:87
+msgid "Delete"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:202
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:238
-msgid "Album not found."
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:123
+msgid "Edit Menuentry"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:221
-msgid "Edit Album: "
+#: /home/chris/NetBeansProjects/cevian/core_modules/menu/controller/menu.php:146
+msgid "Changes not saved"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:253
-msgid "Media Management for: "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:90
+msgid "A role with this name already exists."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:271
-msgid "Media item not found."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:99
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:138
+msgid "The selected parent role was not found."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:282
-msgid "Edit Media: "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:102
+msgid "An unexpected error occurred during role save: "
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:298
-#, php-format
-msgid "Media ID %d and associated files deleted successfully."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:105
+msgid "An unexpected system error occurred."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:301
-#, php-format
-msgid "Failed to delete media item ID %d."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:142
+msgid "A role cannot be moved into its own subtree."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:321
-msgid "Rescan complete: "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:145
+msgid "An unexpected error occurred while updating the role."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:322
-#, php-format
-msgid "%d new albums added. "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:207
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:230
+msgid "A permission with this key already exists."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:323
-#, php-format
-msgid "%d obsolete albums deleted."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:210
+msgid "Database error while creating permission."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:339
-msgid "Media Rescan complete: "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:233
+msgid "Database error while updating permission."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:340
-#, php-format
-msgid "%d new media files registered. "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/model/rbac_model.php:251
+msgid "Database error while deleting permission."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:341
-#, php-format
-msgid "%d already present or unsupported. "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:34
+msgid "Permissions for"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:342
-#, php-format
-msgid "%d orphaned DB entries deleted. "
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:43
+msgid "Permission Key / Name"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:343
-#, php-format
-msgid "%d orphaned thumbnails deleted."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:44
+msgid "Current Effective Access"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:361
-#, php-format
-msgid "View counter for Album ID %d reset successfully. %d items affected."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:45
+msgid "Direct Assignment (Override: 0/1/X)"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:365
-#, php-format
-msgid "Failed to reset view counter for Album ID %d."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:57
+msgid "✅ Allowed"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:397
-msgid "Job not running or progress data invalid."
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:57
+msgid "❌ Denied"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:63
+msgid "Default"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:65
+msgid "Inherited"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:65
+msgid "Explicit"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:81
+msgid "X - Inherit"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:81
+msgid "Effective"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:81
+msgid "Allowed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:81
+msgid "Denied"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:84
+msgid "1 - Explicitly Allow"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:84
+msgid "Allow"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:87
+msgid "0 - Explicitly Deny"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:87
+msgid "Deny"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions.php:99
+msgid "Save permissions"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/roles_table_snippet.php:63
+msgid "No roles found."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:7
+msgid "Create New Role"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:9
+msgid "Role created successfully!"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:11
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:11
+msgid "Role Name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:15
+msgid "Parent Role (optional)"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:26
+msgid "Create Role"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:34
+msgid "Existing Roles"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:45
+msgid "Really delete this role?"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:53
+msgid "Role successfully deleted"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:56
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:86
+msgid "Unknown Error"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_table_snippet.php:33
+msgid "No permissions defined yet."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_table_snippet.php:53
+msgid "Key"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_table_snippet.php:57
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:18
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:5
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/user_snipped.php:38
+msgid "Name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_table_snippet.php:61
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:44
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:55
+msgid "Description"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:32
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:239
+msgid "Edit Permission"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:35
+msgid "Permission updated successfully!"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:38
+msgid "Permission Name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:41
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:49
+msgid "Permission Key"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:75
+msgid "Really delete this permission?"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:83
+msgid "Permission successfully deleted"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:5
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:148
+msgid "Edit Role"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:8
+msgid "Role updated successfully!"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:15
+msgid "Parent Role"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editrole.php:29
+msgid "Save Role & Permissions"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:36
+msgid "Add New Permission"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:43
+msgid "Permission created successfully!"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:50
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:53
+msgid "e.g."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:50
+msgid "user_create"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:52
+msgid "Display Name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:53
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:22
+msgid "Create User"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:60
+msgid "Add Permission"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:67
+msgid "Existing Permissions"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/permissions_manage.php:71
+msgid "Loading..."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:57
+msgid "Role Management"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:92
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:184
+msgid "Role name cannot be empty."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:239
+msgid "New Permission"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:251
+msgid "Permissions Definition"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:297
+msgid "Permission name and key are required."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/rbac/controller/rbac.php:370
+msgid "Invalid role id"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:9
 msgid "Installation Successful! ✅"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:10
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:10
 msgid ""
 "The installation was successful. A crucial point to remember is the "
 "generated HASH_KEY found in the config/app.json file. You must save this key "
@@ -862,7 +633,7 @@ msgid ""
 "in to the system."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:11
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:11
 msgid ""
 "To customize this page, you can copy the core_modules/home directory to /"
 "modules, but do not delete the original core_modules/home directory. You can "
@@ -873,11 +644,11 @@ msgid ""
 "your own modules or for customized versions of core modules."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:12
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:12
 msgid "Modular Customization"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:13
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:13
 msgid ""
 "Only the files you want to modify should be saved within the /modules "
 "directory, and they must be in the exact same path as they are in the "
@@ -885,25 +656,25 @@ msgid ""
 "files seamlessly override the originals."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:14
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:14
 msgid "For example:"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:16
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:16
 msgid ""
 "If you only want to change the header and footer in /modules/inc, you just "
 "need to copy those files from core_modules/inc and modify them. There's no "
 "need to copy the entire main module."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:17
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:17
 msgid ""
 "If you are changing a View component, it's enough to copy and modify only "
 "the View of the desired module. The same applies to Model and all other "
 "parts."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:18
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:18
 msgid ""
 "Should the inc/header be changed only for this copied module, create a "
 "header file in view/inc and also copy the corresponding controller. In the "
@@ -912,329 +683,720 @@ msgid ""
 "from <module>/view/inc/header."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:19
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:19
 msgid ""
 "If you want to use a header from another module, you must specify the module "
 "name, for example: dashboard/inc/header."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:21
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:21
 msgid "Using a Logo"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/home/view/home.php:22
+#: /home/chris/NetBeansProjects/cevian/core_modules/home/view/home.php:22
 msgid ""
 "If a file named logo.png exists in the public/images directory, it will "
 "automatically be used as the logo without any further configuration."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/model/menu_model.php:93
-msgid "The menu already exists."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/model/menu_model.php:97
-msgid "Database error: Menu entry could not be created."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:2
-msgid "Menuentry: Add"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:6
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:9
-msgid "Label"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:9
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:12
-msgid "Link"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:12
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:15
-msgid "Parent"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:15
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:18
-msgid "Sort"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:22
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:25
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:17
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:34
-msgid "Admin"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:23
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:26
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:16
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:35
-msgid "Owner"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:27
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:30
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:69
-msgid "Public"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:33
-msgid "Create Menuentry"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/index.php:40
-msgid "Existing Menuentries"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/view/edit.php:2
-msgid "Menuentry"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:20
-msgid "Menu"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:53
-msgid "Yes"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:53
-msgid "No"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:65
-msgid "Entry"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:123
-msgid "Edit Menuentry"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/menu/controller/menu.php:146
-msgid "Changes not saved"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:13
-msgid "Processing..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:30
-msgid "Processing: "
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:31
-msgid "Complete: 100% ✅"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:42
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:134
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:297
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:300
-msgid "Complete"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:54
-msgid "Error!"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:97
-msgid "Unknown error"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:134
-msgid "Operation successful. Redirecting..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:227
-msgid "Previous"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:232
-msgid "Next"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:263
-msgid "Page"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:263
-msgid "of"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:284
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:308
-msgid "Saving..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:285
-msgid "Save Process"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:285
-msgid "Saving sequence initiated..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:291
-msgid "Step"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:292
-msgid "Data for"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:292
-msgid "saved successfully."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:297
-msgid "All changes saved! Redirecting..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:300
-msgid "All changes saved!"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:305
-msgid "Save Failed!"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/inc/js/ajax-list-pagination.js:305
-msgid "Process aborted:"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:12
-msgid "Current/Last Backup"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:14
-msgid "Database"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:15
-msgid "Images"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:23
-msgid "Start Database Backup"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:29
-msgid "Database Backup Progress"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:39
-msgid "Image Directory"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:41
-msgid "Loading directories..."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:49
-msgid "Start Images Backup"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/backup/view/index.php:55
-msgid "Images Backup Progress"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:77
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/model/user_model.php:77
 msgid "The email address already exists."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:81
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/model/user_model.php:81
 msgid "Database error: User could not be created."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:102
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/model/user_model.php:102
 msgid "The email address you tried to set already exists."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:106
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/model/user_model.php:106
 msgid "Database error: Changes could not be saved."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:129
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/model/user_model.php:129
 msgid ""
 "Cannot delete user. They have active data (e.g., orders, posts) in the "
 "system."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/model/user_model.php:133
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/model/user_model.php:133
 msgid "Database error: User could not be deleted."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:39
-msgid "eMail"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/user_snipped.php:63
-msgid "No users found."
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:2
-msgid "User: Add"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:8
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:21
-msgid "Email"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:11
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:24
-msgid "Password"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/index.php:29
-msgid "Existing Users"
-msgstr ""
-
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:2
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:2
 msgid "User: Edit"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:25
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:13
+msgid "User changes have been saved successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:21
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:8
+msgid "Email"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:24
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:11
+msgid "Password"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:25
 msgid "Leave empty to keep current password"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:27
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:27
 msgid "Confirm Password"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/view/edit.php:28
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/edit.php:28
 msgid "Repeat password if changing"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:31
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:2
+msgid "User: Add"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:3
+msgid "User created successfully!"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/index.php:29
+msgid "Existing Users"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/user_snipped.php:39
+msgid "eMail"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/view/user_snipped.php:63
+msgid "No users found."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:31
 msgid "User"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:77
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:77
 msgid "User not found."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:83
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:83
 msgid "Edit Profile"
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:104
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:154
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:249
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:104
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:154
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:249
 msgid "Authorization denied."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:225
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:225
 msgid "Changes were not saved (no rows affected)."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:233
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:233
 msgid ""
 "Email changed successfully. Please log in again with your new email address."
 msgstr ""
 
-#: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/user/controller/user.php:260
+#: /home/chris/NetBeansProjects/cevian/core_modules/user/controller/user.php:260
 msgid "User was not found or could not be deleted."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:121
+msgid "Permission Denied: You must be logged in to access the file manager."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:237
+msgid "Permission Denied: You do not own this folder."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:273
+msgid "Directory already exists"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:278
+msgid "Failed to create directory"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:278
+msgid "Check file permissions."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:35
+msgid "No Title Available"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:39
+msgid "Media Edit"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:44
+msgid "Edit Media Item:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:48
+msgid "Back to Media Overview"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:53
+msgid "Thumbnail for"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:55
+msgid "File:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:56
+msgid "Album Path:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:65
+#, php-format
+msgid "Details for media \"%s\" updated successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:70
+msgid "Display Name:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:74
+msgid "Displayed below the image (optional)."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:77
+msgid "Description:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:79
+msgid "Additional image description. Max 1024 characters."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:42
+msgid "Edit Album"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:51
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:99
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:119
+msgid "Title"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:61
+msgid "Album Owner"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:63
+msgid "-- Please select --"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:76
+msgid "Apply Owner to all subfolders"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:81
+msgid "Permission Level"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:98
+msgid "Apply Permissions to all subfolders"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:103
+msgid "Save Changes"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit.php:104
+msgid "Back to Overview"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:46
+msgid "Rescan Operations"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:58
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:63
+msgid "[Album Folder Rescan]"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:60
+msgid "Are you sure? This will synchronize the Albums DB with the filesystem."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:78
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:83
+msgid "[All Media Rescan]"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:80
+msgid ""
+"Are you sure? This will register ALL media files found in the filesystem "
+"into the media table. It might take a while!"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:92
+msgid "Albums"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:98
+msgid "Album Path Name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:100
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:123
+msgid "User Name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:102
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:132
+msgid "Views"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:103
+msgid "Actions"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:109
+msgid "No albums found. Run Album Folder Rescan."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:115
+msgid "Album Path"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:124
+msgid "System/N/A"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:139
+msgid "Media"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:153
+#, php-format
+msgid "Are you sure you want to reset the View Counter for Album ID %s to 0?"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/index.php:154
+msgid "Reset Views"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:70
+msgid "N/A"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:74
+msgid "Size:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:75
+msgid "Views:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:76
+msgid "Last View:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:77
+msgid "Date:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/media.php:82
+msgid "Edit Details"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:204
+msgid "Create New Directory"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:205
+msgid "Delete Selected Items"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:503
+msgid "Move Canceled"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:503
+#, php-format
+msgid "Item %s is already in this folder."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:508
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:555
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:917
+msgid "Move Failed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:508
+msgid "Cannot move an item into its own subfolder."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:550
+msgid "Move Complete with Errors"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:550
+#, php-format
+msgid "Failed to move %s of %s item(s)."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:555
+msgid "An unexpected error occurred during move processing."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:596
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:603
+#, php-format
+msgid "Upload Failed: %s"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:603
+msgid "Network or unexpected error occurred."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:611
+msgid "Upload Complete"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:611
+#, php-format
+msgid "%s file(s) uploaded successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:617
+msgid "Upload Failed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:617
+msgid "All uploads failed. Check individual error messages."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:635
+msgid "No Selection"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:635
+msgid "Please select at least one item to delete."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:640
+#, php-format
+msgid "Are you sure you want to delete the following %s item(s) from \"%s\"?%s"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:656
+msgid "Deletion failed due to server error."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:660
+msgid "Deletion Complete."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:661
+msgid "Deletion Complete"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:667
+msgid "Unknown error object received."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:669
+msgid "Deletion Failed or Completed with Errors"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:679
+msgid "Delete Failed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:679
+msgid "A network error occurred."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:781
+msgid "(Parent Folder)"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:875
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:883
+msgid "Browsing Error"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:875
+msgid "Unknown error."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:886
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:891
+msgid "Browsing Failed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:886
+msgid "Unexpected server response format."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:891
+msgid "A network error occurred while loading the directory."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:907
+msgid "Move failed due to server error."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:910
+#, php-format
+msgid "Move Failed: %s"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:917
+msgid "A network error occurred while moving an item."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:942
+msgid "Enter new directory name:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:955
+msgid "Error creating directory."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:958
+msgid "Directory Created"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:961
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:966
+msgid "Creation Failed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:966
+msgid "A network error occurred while creating the directory."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/index.php:85
+msgid "Automatische Diashow (5 Sek.)"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/partials/image-item.php:39
+msgid "Image"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/partials/album-item.php:28
+msgid "Album"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/partials/video-item.php:39
+msgid "Your browser does not support the video tag."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:57
+msgid "File Manager"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:97
+msgid "Missing source or target path."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:107
+msgid "Item moved successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:109
+msgid "Move failed due to a database error."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:137
+msgid "Missing directory name or target path."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:147
+msgid "Directory created successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:149
+msgid "Failed to create directory due to a database error."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:165
+msgid "Missing or invalid path list for deletion."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:178
+msgid "Failed to delete item from database:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:186
+msgid "Selected items deleted successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:192
+msgid "Deletion completed with errors."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:215
+msgid "File uploaded successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:217
+msgid "File upload failed for unknown reason or file not registered in DB."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/filemanager.php:220
+msgid "Upload Error: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:46
+msgid "Gallery"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:91
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:102
+msgid "All Albums"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:86
+msgid "Gallery Manager"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:107
+msgid "Album: size -> "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:119
+msgid "Album Management"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:170
+msgid "Album permissions updated successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:172
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:268
+msgid "No changes made or update failed."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:184
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:216
+msgid "Album not found."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:200
+msgid "Edit Album: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:228
+msgid "Media Management for: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:251
+msgid "Security check failed: Media ID mismatch."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:266
+msgid "Media details updated successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:280
+msgid "Media item not found."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:287
+msgid "Edit Media: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:287
+msgid "Unknown"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:302
+#, php-format
+msgid "Media ID %d and associated files deleted successfully."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:304
+#, php-format
+msgid "Failed to delete media item ID %d."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:322
+msgid "Rescan complete: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:323
+#, php-format
+msgid "%d new albums added. "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:324
+#, php-format
+msgid "%d obsolete albums deleted."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:338
+msgid "Media Rescan complete: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:339
+#, php-format
+msgid "%d new media files registered. "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:340
+#, php-format
+msgid "%d already present or unsupported. "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:341
+#, php-format
+msgid "%d orphaned DB entries deleted. "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:342
+#, php-format
+msgid "%d orphaned thumbnails deleted."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:359
+#, php-format
+msgid "View counter for Album ID %d reset successfully. %d items affected."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:362
+#, php-format
+msgid "Failed to reset view counter for Album ID %d."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/manager.php:391
+msgid "Job not running or progress data invalid."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:5
+msgid "Email:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:9
+msgid "Password:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:14
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:74
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:90
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:98
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/controller/login.php:19
+msgid "Login"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:74
+msgid "Login successful"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:98
+msgid "Server error! Status: "
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/controller/login.php:60
+msgid "No user found"
 msgstr ""
