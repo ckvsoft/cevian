@@ -115,13 +115,13 @@ header {
 }
 
 .fixed-header .logo {
-    max-height: 80px; 
+    max-height: 80px;
     width: auto;
     transition: max-height 0.3s ease-in-out; /* NEU: Animation für das Logo */
 }
 
 .fixed-header.shrink .logo {
-    max-height: 40px; 
+    max-height: 40px;
 }
 
 /* Fixed Header and Footer */
@@ -136,7 +136,7 @@ header {
     padding: 10px;
     border-bottom: 5px solid #e84c11;
     text-align: left;
-    transition: all 0.3s ease-in-out;    
+    transition: all 0.3s ease-in-out;
     overflow-x: hidden;
 }
 .fixed-footer{
@@ -299,6 +299,14 @@ form input, form select, textarea {
     width: 100%;
     clear: both;
 }
+.form-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
 .form-group label {
     text-align: left;
     width: 100%;
