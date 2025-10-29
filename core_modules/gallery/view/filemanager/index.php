@@ -159,19 +159,37 @@
         background: rgba(0, 0, 0, 0.6);
         display: none;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         z-index: 99999;
-        padding-top: 0;
+    }
+
+    #uploadProgressContent {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80%;
+        max-width: 500px;
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    #uploadStatusText {
+        color: #333;
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-bottom: 15px; /* Abstand zum Ladebalken */
+        text-align: center;
     }
 
     #uploadProgressBar {
-        width: 80%;
+        width: 100%; /* Nun 100% der Breite des Content-Containers */
         max-width: 500px;
         height: 10px;
         background-color: #ddd;
         border-radius: 5px;
         overflow: hidden;
-        margin-top: 20px;
     }
 
     #uploadProgressBar::after {
@@ -194,7 +212,10 @@
 </style>
 
 <div id="uploadProgressOverlay">
-    <div id="uploadProgressBar"></div>
+    <div id="uploadProgressContent">
+        <span id="uploadStatusText"></span>
+        <div id="uploadProgressBar"></div>
+    </div>
 </div>
 
 <fieldset>
@@ -563,9 +584,18 @@
      * @param {File[]} files - An array of File objects to upload.
      * @param {string} targetPath - The server path to upload the files to.
      */
+    /**
+     * Handles the upload of files dropped from the local system, showing a loading indicator
+     * and updating the progress with the "File X of Y" status.
+     * @param {File[]} files - An array of File objects to upload.
+     * @param {string} targetPath - The server path to upload the files to.
+     */
     function uploadFiles(files, targetPath) {
         const uri = LOCAL_BASE_URI + 'gallery/filemanager/upload';
         const progressOverlay = document.getElementById('uploadProgressOverlay');
+
+        // Retrieve the status text element for "File X of Y" display
+        const statusTextElement = document.getElementById('uploadStatusText');
 
         let successCount = 0;
         let failCount = 0;
@@ -573,11 +603,23 @@
         let processedFiles = 0;
         const panelToReload = document.querySelector(`.file-panel[data-current-path="${targetPath}"]`);
 
-        // Show progress overlay
+        /**
+         * Updates the status text display (e.g., "Processing file 5 of 141...")
+         */
+        function updateProgressDisplay() {
+            if (statusTextElement) {
+                statusTextElement.textContent = `<?= _("Processing file") ?> ${processedFiles} <?= _("of") ?> ${totalFiles} ...`;
+            }
+        }
+
+        // Show progress overlay and position it correctly below a fixed header
         const headerElement = document.querySelector('.fixed-header');
         const headerHeight = headerElement && window.getComputedStyle(headerElement).position === 'fixed' ? headerElement.offsetHeight : 0;
         progressOverlay.style.top = headerHeight + 'px';
         progressOverlay.style.display = 'flex';
+
+        // Set initial status display
+        updateProgressDisplay();
 
         files.forEach(file => {
             const formData = new FormData();
@@ -587,41 +629,55 @@
 
             fetchAndLog(uri, {method: 'POST', body: formData})
                     .then(data => {
-                        processedFiles++;
                         if (data.success === 1) {
                             successCount++;
                         } else {
                             failCount++;
+                            // Display error message for the specific file
                             const message = data.errorMessage && data.errorMessage.message ? data.errorMessage.message : 'Unknown upload error.';
                             displayMessage('error', `<?= _("Upload Failed: %s") ?>`.replace('%s', file.name), message);
                         }
                     })
                     .catch(error => {
-                        processedFiles++;
                         failCount++;
+                        // Log and display error message for network/unexpected errors
                         console.error('Upload failed for %s:'.replace('%s', file.name), error);
                         displayMessage('error', `<?= _("Upload Failed: %s") ?>`.replace('%s', file.name), '<?= _("Network or unexpected error occurred.") ?>');
                     })
                     .finally(() => {
+                        // Increment the counter for processed files
+                        processedFiles++;
+
+                        // Update the "File X of Y" display
+                        updateProgressDisplay();
+
                         // When all files are done
                         if (processedFiles === totalFiles) {
                             progressOverlay.style.display = 'none';
 
+                            // Final success handling
                             if (successCount > 0) {
                                 displayMessage('success', '<?= _("Upload Complete") ?>', `<?= _("%s file(s) uploaded successfully.") ?>`.replace('%s', successCount));
+
+                                // Reload the directory panel to show new files
                                 if (panelToReload)
                                     browseDirectory(panelToReload, targetPath);
                             }
 
+                            // Final failure handling (only show if ALL failed)
                             if (failCount > 0 && successCount === 0) {
                                 displayMessage('error', '<?= _("Upload Failed") ?>', '<?= _("All uploads failed. Check individual error messages.") ?>');
                             }
+
+                            // Clear the final status text
+                            if (statusTextElement)
+                                statusTextElement.textContent = '';
                         }
                     });
         });
     }
 
-    // --- CORE FUNCTION: deleteSelectedItems ---
+// --- CORE FUNCTION: deleteSelectedItems ---
     /**
      * Deletes the currently selected items in the active panel after user confirmation.
      */
