@@ -48,7 +48,7 @@ class Filemanager_Model extends GalleryManager_Model
             $parentPath = dirname($currentPath);
             $parentPath = ($parentPath === '.') ? '' : $parentPath;
 
-            // Stop if we hit the Virtual Root
+// Stop if we hit the Virtual Root
             if (empty($parentPath)) {
                 return '';
             }
@@ -66,6 +66,17 @@ class Filemanager_Model extends GalleryManager_Model
 
     /**
      * Lists directory contents for the File Manager, filtering by ownership for regular users.
+     *
+     * Rules for non-Admin users (Owner-based Access):
+     * 1. If current path is NOT owned, access is denied.
+     * 2. In the Root (empty path), display:
+     * a. Top-level albums owned directly by the user (e.g., 'Motorrad').
+     * b. Owned albums nested under non-owned top-level paths, shown as a jump path
+     * (e.g., 'Auspuff -> BOS' if Auspuff is not owned, but BOS is).
+     * 3. In a Nested Album (owned path), display:
+     * a. Direct sub-albums also owned by the user (strict hierarchy).
+     * b. Owned albums nested deeper under a non-owned immediate child, shown as a jump path.
+     *
      * @param string $relativePath The relative path (e.g., 'user_a/docs').
      * @return array List of items, or ['error' => ...] on access problems.
      */
@@ -76,10 +87,10 @@ class Filemanager_Model extends GalleryManager_Model
         $normalizedPath = trim($relativePath, '/');
 
         if ($isAdmin) {
-            if (!empty($normalizedPath) && !$this->db->selectOne("SELECT 1 FROM `gallery_albums` WHERE `album_path` = :path", ['path' => $normalizedPath])) {
-
-            }
-
+            // if (!empty($normalizedPath) && !$this->db->selectOne("SELECT 1 FROM `gallery_albums` WHERE `album_path` = :path", ['path' => $normalizedPath])) {
+            //     // Logic to handle unmanaged folders for Admin
+            // }
+            // Retrieve all sub-albums and media (Admin ignores ownership/permissions checks here, using Model's methods that handle permissions on read if applicable)
             $subAlbums = $this->getSubAlbums($normalizedPath);
             $mediaItems = $this->getMediaByAlbum($normalizedPath);
             $items = [];
@@ -102,7 +113,7 @@ class Filemanager_Model extends GalleryManager_Model
                     'path' => $album['path'],
                 ];
             }
-            // List media items
+
             foreach ($mediaItems as $media) {
                 $items[] = [
                     'name' => basename($media['file']),
@@ -124,27 +135,46 @@ class Filemanager_Model extends GalleryManager_Model
         if (empty($normalizedPath)) {
             $items = [];
             $ownedAlbums = $this->getOwnedAlbums($currentUserId);
-            $topLevelPaths = [];
+            $alreadyListedTopPaths = [];
 
             foreach ($ownedAlbums as $album) {
-                $pathSegments = explode('/', $album['album_path']);
+                $fullPath = $album['album_path'];
+                $pathSegments = explode('/', $fullPath);
                 $topPath = $pathSegments[0];
 
-                if (!isset($topLevelPaths[$topPath])) {
-                    $topLevelPaths[$topPath] = $topPath;
+                // If this top-level path has already been processed, skip (handles jump-path logic cleanly)
+                if (isset($alreadyListedTopPaths[$topPath])) {
+                    continue;
+                }
+
+                if (count($pathSegments) === 1) {
+                    $albumData = $this->checkAlbumPermissions($topPath);
+                    if ($albumData && (string) $albumData['owner_user_id'] === (string) $currentUserId) {
+                        $items[] = [
+                            'name' => $albumData['title'] ?? basename($topPath),
+                            'type' => 'album',
+                            'path' => $topPath,
+                        ];
+                        $alreadyListedTopPaths[$topPath] = true;
+                    }
+                } else {
+                    $topAlbumData = $this->checkAlbumPermissions($topPath);
+
+                    if ($topAlbumData && (string) $topAlbumData['owner_user_id'] !== (string) $currentUserId) {
+
+                        $displayName = str_replace('/', ' -> ', $fullPath);
+
+                        $items[] = [
+                            'name' => $displayName,
+                            'type' => 'album',
+                            'path' => $fullPath,
+                        ];
+                        $alreadyListedTopPaths[$topPath] = true;
+                    }
                 }
             }
 
-            foreach ($topLevelPaths as $topPath) {
-                $albumData = $this->checkAlbumPermissions($topPath);
-                if ($albumData && (string) $albumData['owner_user_id'] === (string) $currentUserId) {
-                    $items[] = [
-                        'name' => $albumData['title'] ?? basename($topPath),
-                        'type' => 'album',
-                        'path' => $topPath,
-                    ];
-                }
-            }
+            usort($items, fn($a, $b) => strcmp($a['name'], $b['name']));
             return $items;
         }
 
@@ -155,10 +185,8 @@ class Filemanager_Model extends GalleryManager_Model
             $subAlbums = $this->getSubAlbums($normalizedPath); // Direct children only
             $mediaItems = $this->getMediaByAlbum($normalizedPath);
             $items = [];
-            $alreadyListedPaths = [];
-
+            $alreadyListedPaths = []; // To track direct children added
             if (!empty($normalizedPath)) {
-
                 $backPath = $this->getNearestOwnedAncestor($normalizedPath, $currentUserId);
 
                 $items[] = [
@@ -168,7 +196,6 @@ class Filemanager_Model extends GalleryManager_Model
                     'isParent' => true
                 ];
             }
-
 
             $allOwnedUnderPath = $this->db->select("
                 SELECT album_path, title FROM gallery_albums
@@ -204,14 +231,13 @@ class Filemanager_Model extends GalleryManager_Model
 
                     $pathRelativeToCurrent = substr($fullPath, strlen($normalizedPath) + 1);
                     $pathSegments = explode('/', $pathRelativeToCurrent);
-
-                    $immediateChildPath = $normalizedPath . '/' . $pathSegments[0];
+                    $immediateChildName = $pathSegments[0];
+                    $immediateChildPath = $normalizedPath . '/' . $immediateChildName;
 
                     $immediateChildData = $this->checkAlbumPermissions($immediateChildPath);
                     $isImmediateChildOwned = ($immediateChildData && (string) $immediateChildData['owner_user_id'] === (string) $currentUserId);
 
                     if (!$isImmediateChildOwned) {
-
                         $displayName = str_replace('/', ' -> ', $pathRelativeToCurrent);
 
                         $items[] = [
@@ -223,7 +249,6 @@ class Filemanager_Model extends GalleryManager_Model
                 }
             }
 
-            // List media items
             foreach ($mediaItems as $media) {
                 $items[] = [
                     'name' => basename($media['file']),
@@ -232,6 +257,8 @@ class Filemanager_Model extends GalleryManager_Model
                     'url' => $media['url']
                 ];
             }
+
+            usort($items, fn($a, $b) => strcmp($a['name'], $b['name']));
             return $items;
         } else {
             return ['error' => _('Permission Denied: You do not own this folder.')];
