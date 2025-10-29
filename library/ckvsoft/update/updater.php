@@ -8,7 +8,7 @@ class Updater extends \ckvsoft\mvc\Config
     protected string $configPath;
     protected array $config;
 
-    public function __construct(string $configPath = __DIR__ . '/update.json')
+    public function __construct(string $configPath = __DIR__ . '/../../../var/update.json')
     {
         parent::__construct();
         $this->configPath = $configPath;
