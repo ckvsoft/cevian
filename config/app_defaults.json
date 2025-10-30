@@ -28,10 +28,10 @@
             "mobile": ["/inc/css/mobile.css"]
         },
         "js": [
-            "/inc/js/ajax-list-pagination.js",
-            "/inc/js/cevian.js",
-            "/inc/js/x-notify.js",
-            "/inc/js/theme-js-vanilla.js"
+            "/inc/js/ajax-list-pagination.min.js",
+            "/inc/js/cevian.min.js",
+            "/inc/js/x-notify.min.js",
+            "/inc/js/theme-js-vanilla.min.js"
         ]
     }
 }
