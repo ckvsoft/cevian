@@ -52,7 +52,7 @@ class Gallery extends ckvsoft\mvc\BaseController
                 . "</style>";
 
         // Load extra JavaScript file inline
-        $extraJs = "<script>" . $this->loadScript("/inc/js/simple-lightbox.js") . "</script>";
+        $extraJs = "<script>" . $this->loadScript("/inc/js/simple-lightbox.min.js") . "</script>";
 
         // Render the complete page structure (header, content, footer)
         $this->renderPage([
