@@ -6,7 +6,7 @@ require_once 'library/ckvsoft/autoload.php';
 $autoload = new \ckvsoft\Autoload([
     __DIR__ . '/library',
     __DIR__ . '/modules',
-]);
+        ]);
 
 $config = new \ckvsoft\mvc\Config();
 $configData = $config->getMergedConfig();
