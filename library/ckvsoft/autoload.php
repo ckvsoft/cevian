@@ -2,6 +2,8 @@
 
 namespace ckvsoft;
 
+require_once __DIR__ . '/helper/i18n_helper.php';
+
 class Autoload
 {
 
@@ -10,7 +12,7 @@ class Autoload
 
     /**
      * Constructor
-     * 
+     *
      * @param array $dirs Basisverzeichnisse für Autoloading (Framework + Module)
      */
     public function __construct(array $dirs)
