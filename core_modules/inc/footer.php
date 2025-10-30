@@ -1,4 +1,4 @@
-</div>
+</main>
 <div class="fixed-footer">
     <div class="container">cevian - Copyright &copy; 1998 - <?= date("Y"); ?> Christian Kvasny (ckvsoft.at) Version <?= \ckvsoft\Version::version() ?></div>
 </div>
