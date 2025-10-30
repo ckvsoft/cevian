@@ -82,7 +82,7 @@ if ($isRootView) {
         <div class="slideshow-controls" style="margin-bottom: 15px; display: flex; align-items: center;">
             <input type="checkbox" id="autoSlideshowToggle" name="auto_slideshow" style="margin-right: 8px;">
             <label for="autoSlideshowToggle" style="font-weight: normal; margin: 0; padding: 0;">
-                <?= _('Automatische Diashow (5 Sek.)') ?>
+                <?= _('Automatic slideshow (5 sec.)') ?>
             </label>
         </div>
     <?php endif; ?>
