@@ -79,7 +79,7 @@ class Manager extends BaseController
                 . "</style>";
 
         // Load custom JavaScript
-        $extraJs = "<script>" . $this->loadScript("/inc/js/simple-lightbox.js") . "</script>";
+        $extraJs = "<script>" . $this->loadScript("/inc/js/simple-lightbox.min.js") . "</script>";
 
         $this->renderPage([
             // Use _() for the default page title
