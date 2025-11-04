@@ -6,6 +6,16 @@
     overflow: hidden;
 }
 
+.gallery-meta {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 1rem;
+}
+
+.gallery-meta span {
+    margin-right: 0.5rem;
+}
+
 .image-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, auto));
