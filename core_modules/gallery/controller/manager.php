@@ -305,6 +305,58 @@ class Manager extends BaseController
         }
     }
 
+// Angenommen, dies ist Ihre Controller-Klasse, z.B. GalleryManagerController.php
+
+    /**
+     * Handles AJAX request to physically rotate an image file on the server.
+     * Requires mediaId in the URL and 'degrees' (int) in the JSON POST body.
+     *
+     * @param int $mediaId The ID of the media item to rotate.
+     * @return void JSON response (success or error).
+     */
+    public function rotate_media($mediaId = null)
+    {
+        $mediaId = (int) $mediaId;
+        if ($mediaId <= 0) {
+            \ckvsoft\Output::error(['errorMessage' => _('Invalid media ID provided.')]);
+            return;
+        }
+
+        try {
+            $this->input->post('degrees', true)->submit();
+            $jsonData = $this->input->fetchAllJson();
+
+            if (empty($jsonData)) {
+                \ckvsoft\Output::error(['errorMessage' => _('No JSON data received.')]);
+                return;
+            }
+            if (!empty($this->input->fetchErrors())) {
+                $errorMsg = implode('; ', $this->input->fetchErrors());
+                \ckvsoft\Output::error(['errorMessage' => $errorMsg]);
+                return;
+            }
+
+            $degrees = (int) $jsonData['degrees'];
+
+            $managerModel = $this->getGalleryManagerModel();
+            $result = $managerModel->rotateMedia($mediaId, $degrees);
+
+            // 4. English comment: Output Handling
+            if ($result === true) {
+                \ckvsoft\Output::success(['message' => _('Image rotated successfully.')]);
+                return;
+            } else {
+                \ckvsoft\Output::error(['errorMessage' => $result ?: _('Failed to rotate image. Check file permissions or format.')]);
+                return;
+            }
+        } catch (\ckvsoft\CkvException $e) {
+            // English comment: Catch exceptions related to validation or input parsing
+            $errorMsg = implode('; ', $this->input->fetchErrors());
+            \ckvsoft\Output::error(['errorMessage' => $errorMsg ?: $e->getMessage()]);
+            return;
+        }
+    }
+
     // ------------------------------------------------------------------
     // RESCAN ACTIONS (AJAX)
     // ------------------------------------------------------------------
