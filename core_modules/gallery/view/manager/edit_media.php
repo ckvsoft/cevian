@@ -51,11 +51,35 @@ $displayTitle = $item['title'] ?? $item['file'] ?? _('No Title Available');
         <div class="media-details-block">
             <img src="<?= htmlspecialchars($item['thumburl']) ?>"
                  alt="<?= _('Thumbnail for') ?> <?= htmlspecialchars($item['file']) ?>"
-                 class="media-preview-thumb-minimal">
+                 class="media-preview-thumb-minimal"
+                 data-media-id="<?= $item['id'] ?>">
             <p><?= _('File:') ?> <strong><?= htmlspecialchars($item['file']) ?></strong> (ID: <?= $item['id'] ?>)</p>
             <p><?= _('Album Path:') ?> <?= htmlspecialchars($item['album_path']) ?></p>
         </div>
 
+        <div class="media-actions-rotate" style="margin-bottom: 20px;"
+             data-base-uri="<?= $baseUri ?>"
+             data-msg-rotating="<?= _('... starting') ?>"
+             data-msg-title="<?= _('Rotating...') ?>"
+             data-msg-success-title="<?= _('Success') ?>"
+             data-msg-success-body="<?= _('Image rotated successfully.') ?>"
+             data-msg-connection-error="<?= _('Could not reach server for rotation.') ?>">
+
+            <h4><?= _('Image Manipulation') ?></h4>
+            <button type="button" class="button small-action edit rotate-action" data-degrees="90"
+                    data-media-id="<?= $item['id'] ?>">
+                <?= _('Rotate Left') ?> (90°)
+            </button>
+            <button type="button" class="button small-action edit rotate-action" data-degrees="-90"
+                    data-media-id="<?= $item['id'] ?>">
+                <?= _('Rotate Right') ?> (90°)
+            </button>
+            <button type="button" class="button small-action edit rotate-action" data-degrees="180"
+                    data-media-id="<?= $item['id'] ?>">
+                        <?= _('Rotate 180°') ?>
+            </button>
+            <p class="form-hint-simple"><?= _('Rotates the original image file physically on the server.') ?></p>
+        </div>
         <div class="clear-both"></div>
         <hr style="margin: 20px 0; border-color: #555;">
 
