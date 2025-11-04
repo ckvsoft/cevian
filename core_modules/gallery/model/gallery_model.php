@@ -543,7 +543,7 @@ class Gallery_Model extends Model
             $fileName = $item['file'];
             $albumPath = $item['album_path'];
 
-            $mediaPath = trim($albumPath, '/') . '/' . urlencode($fileName);
+            $mediaPath = trim($albumPath, '/') . '/' . $fileName;
             $item['url'] = BASE_URI . 'gallery/media/' . $mediaPath;
 
             $fileParts = pathinfo($fileName);
@@ -555,7 +555,7 @@ class Gallery_Model extends Model
             $thumbFileName = $baseName . '_thumb.' . $thumbExt;
 
             if ($this->_doesThumbnailExist($albumPath, $thumbFileName)) {
-                $thumbPath = trim($albumPath, '/') . '/' . urlencode($thumbFileName);
+                $thumbPath = trim($albumPath, '/') . '/' . $thumbFileName;
                 $item['thumburl'] = BASE_URI . 'gallery/media/' . $thumbPath;
             } else {
                 if ($item['type'] === 'video') {
