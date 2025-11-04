@@ -1,5 +1,29 @@
 <?php
 
+/*
+ * The MIT License
+ *
+ * Copyright 2025 chris.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 namespace ckvsoft;
 
 class MultiLoginManager extends \ckvsoft\mvc\Config
@@ -19,7 +43,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Prüfen ob Framework (ckvsoft) eingeloggt ist
+     * Checks if the Framework (ckvsoft) is logged in
      */
     public static function isFrameworkLoggedIn(): bool
     {
@@ -43,7 +67,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * User-ID für beliebiges Modul zurückgeben
+     * Returns the User-ID for a specified module
      */
     public static function getUser(string $module): ?string
     {
@@ -64,7 +88,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Beliebige User-Daten holen (inkl. Rollen)
+     * Fetches arbitrary user data (including roles)
      */
     public static function getUserData(string $module): ?array
     {
@@ -89,13 +113,13 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Login eines Users in ein Modul
+     * Logs a user into a module
      */
     public static function login(string $module, string $userId, array $data = []): void
     {
         $userKey = \ckvsoft\Hash::create('sha256', $userId, HASH_KEY);
 
-        // Rollen absichern
+        // Secure roles
         if (isset($data['roles'])) {
             $data['roles_key'] = \ckvsoft\Hash::create('sha256', implode(',', (array) $data['roles']), HASH_KEY);
         }
@@ -114,7 +138,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Logout eines Users aus einem Modul
+     * Logs a user out from a module
      */
     public static function logout(string $module): void
     {
@@ -132,12 +156,12 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Holt das Mapping für die aktuelle Session **nur für ein bestimmtes Modul**.
+     * Fetches the mapping for the current session **only for a specific module**.
      */
     public static function getMappedUserForModule(string $module): ?array
     {
         try {
-            // Aktuellen Framework-User anhand der aktuellen Session ermitteln
+            // Determine the current Framework user based on the current session
             $fwRows = self::$sharedDb->select("
                 SELECT user_id
                 FROM multi_login_sessions
@@ -149,7 +173,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
                 return null;
             }
 
-            // Mapping für das angeforderte Modul abfragen
+            // Query the mapping for the requested module
             $mapRows = self::$sharedDb->select("
                 SELECT module_user_id
                 FROM module_user_mapping
@@ -173,7 +197,7 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Mapping-Login für ein Modul ausführen
+     * Executes a mapping login for a module
      */
     public static function applyMappedUser(string $module): bool
     {
@@ -187,17 +211,69 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Session-abhängiges Logout
+     * Session-dependent logout (clears all modules for current session)
      */
     public static function logoutCurrentSession(): void
     {
         try {
+            // This deletes the currently active session entry.
             self::$sharedDb->delete("multi_login_sessions",
                     "session_id = :session_id",
                     ['session_id' => self::sessionId()]
             );
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::logoutCurrentSession failed: " . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Updates the last_activity timestamp for the current session in the database.
+     * This should be called on every page load to prevent the session
+     * from being deleted by Garbage Collection.
+     */
+    public static function updateActivityTimestamp(): void
+    {
+        try {
+            // Format time as YYYY-MM-DD HH:MM:SS for database insertion
+            $currentTime = date('Y-m-d H:i:s');
+
+            // Update the 'last_activity' column to the current time for the current session ID
+            self::$sharedDb->update("multi_login_sessions",
+                    ['last_active' => $currentTime],
+                    "session_id = :session_id",
+                    ['session_id' => self::sessionId()]
+            );
+        } catch (\PDOException $e) {
+            // Log the error but do not throw a hard exception for background activity update
+            error_log("MultiLoginManager::updateActivityTimestamp failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Executes the Garbage Collection and deletes all expired sessions
+     * (regardless of the current session ID).
+     * @param int $timeoutSeconds The timeout in seconds (from the configuration).
+     */
+    public static function runGarbageCollection(int $timeoutSeconds): void
+    {
+        try {
+            // Calculates the time before which sessions are considered expired.
+            $cutoffTime = date('Y-m-d H:i:s', time() - $timeoutSeconds);
+
+            // Deletes all entries whose last activity is before the cutoff time.
+            // It is assumed that the table has a 'last_activity' column.
+            $deletedRows = self::$sharedDb->delete("multi_login_sessions",
+                    "last_active < :cutoff_time",
+                    ['cutoff_time' => $cutoffTime]
+            );
+
+            // Optional logging
+            if ($deletedRows > 0) {
+                error_log("MultiLoginManager: Garbage Collection deleted {$deletedRows} expired session entries.");
+            }
+        } catch (\PDOException $e) {
+            // Executed in the background, so only log, do not throw
+            error_log("MultiLoginManager::runGarbageCollection failed: " . $e->getMessage());
         }
     }
 }
