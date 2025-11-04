@@ -211,6 +211,97 @@ class Gallery_Model extends Model
         return rtrim($this->basePath, '/') . '/' . trim($albumName, '/') . '/' . $fileName;
     }
 
+    public function getFileModifiedTimeFromDB(string $album, string $file): ?int
+    {
+        // Remove "_thumb" suffix from filename before extension. Thumbs are not in the DB
+        $pathInfo = pathinfo($file);
+        $name = $pathInfo['filename'];
+        $ext = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
+
+        if (str_ends_with(strtolower($name), '_thumb')) {
+            $name = substr($name, 0, -6); // remove "_thumb" (6 chars)
+        }
+
+        $normalizedFile = $name . $ext;
+
+        try {
+            $albumId = $this->getAlbumIdByPath($album);
+        } catch (CkvException $e) {
+            error_log("DB error retrieving album ID: " . $e->getMessage());
+            return null;
+        }
+
+        $file_mtime = $this->db->selectOne("SELECT file_mtime FROM gallery_media_stats WHERE album_id = :id AND file_name = :file_name",
+                ['id' => $albumId, 'file_name' => $normalizedFile]
+        );
+
+        return $file_mtime ? strtotime($file_mtime) : null;
+    }
+
+    /**
+     * Return counts for sub-albums:
+     *  - direct: number of direct children (one level deeper) that the current user may access
+     *  - recursive: number of all descendant albums (any depth) that the current user may access
+     *
+     * This does permission-checking to only count albums the current user is allowed to see.
+     *
+     * @param string $albumPath parent album path
+     * @return array ['direct' => int, 'recursive' => int]
+     */
+    public function getSubAlbumCounts(string $albumPath): array
+    {
+        $normalized = trim($albumPath, '/');
+
+        // --- Get candidate descendant paths from DB ---
+        // We fetch all paths that start with parent (including exact parent) and then filter.
+        // This avoids multiple DB calls per album; we do permission checks in PHP afterwards.
+        $prefix = $normalized === '' ? '%' : $normalized . '/%';
+
+        $sql = "
+        SELECT album_path
+        FROM gallery_albums
+        WHERE album_path = :exact OR album_path LIKE :likePrefix
+    ";
+        $rows = $this->db->select($sql, [
+            'exact' => $normalized,
+            'likePrefix' => $prefix
+        ]);
+
+        if (empty($rows)) {
+            return ['direct' => 0, 'recursive' => 0];
+        }
+
+        $paths = array_column($rows, 'album_path');
+
+        // Determine depths
+        $parentDepth = $normalized === '' ? 0 : substr_count($normalized, '/') + 1;
+        $directDepth = $parentDepth + 1;
+
+        $directCount = 0;
+        $recursiveCount = 0;
+
+        foreach ($paths as $path) {
+            if ($path === $normalized || $path === '') {
+                continue; // skip the parent itself
+            }
+
+            // permission check: only count albums the user may access
+            if ($this->checkAlbumPermissions($path) === false) {
+                continue;
+            }
+
+            $depth = substr_count($path, '/') + 1; // e.g. 'a/b' => 2
+            if ($depth === $directDepth) {
+                $directCount++;
+                $recursiveCount++; // direct are also recursive
+            } elseif ($depth > $directDepth) {
+                $recursiveCount++;
+            }
+        }
+
+        return ['direct' => $directCount, 'recursive' => $recursiveCount];
+    }
+
     /**
      * Retrieves all root-level albums.
      * @return array List of permitted root-level albums.
