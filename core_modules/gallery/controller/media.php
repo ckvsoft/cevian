@@ -39,6 +39,9 @@ class Media extends ckvsoft\mvc\BaseController
             exit;
         }
 
+        // Create a Request instance (ideally injected via controller constructor)
+        $request = new \ckvsoft\Request();
+
         $encodedFileName = array_pop($pathParts);
         $decodedAlbum = implode('/', array_map('urldecode', $pathParts));
         $decodedFile = urldecode($encodedFileName);
@@ -46,64 +49,52 @@ class Media extends ckvsoft\mvc\BaseController
         $model = $this->loadModel('gallery', 'gallery');
         $filePath = $model->getFilePath($decodedAlbum, $decodedFile);
 
+        // 🔸 Fallback handling for default or deny images
         if ($filePath === null) {
-
             $defaultAssetBaseDir = __DIR__ . '/../view/inc/images/';
 
-            if ($decodedAlbum === 'default' && $decodedFile === 'video_thumb.jpg') {
-                $potentialPath = $defaultAssetBaseDir . 'video_thumb.jpg';
-                if (file_exists($potentialPath)) {
-                    $filePath = $potentialPath;
-                }
-            } elseif ($decodedAlbum === 'default' && $decodedFile === 'image_thumb.jpg') {
-                $potentialPath = $defaultAssetBaseDir . 'image_thumb.jpg';
+            if ($decodedAlbum === 'default' && in_array($decodedFile, ['video_thumb.jpg', 'image_thumb.jpg'])) {
+                $potentialPath = $defaultAssetBaseDir . $decodedFile;
                 if (file_exists($potentialPath)) {
                     $filePath = $potentialPath;
                 }
             }
         }
 
+        // 🔸 Access denied fallback image
         if ($filePath === null) {
             $nameNoExt = pathinfo($decodedFile, PATHINFO_FILENAME);
-
             $isFileAThumb = str_ends_with(strtolower($nameNoExt), '_thumb');
-
             $denyImageBaseDir = __DIR__ . '/../view/inc/images/';
-
-            if ($isFileAThumb) {
-                $denyImagePath = $denyImageBaseDir . 'deny_thumb.png';
-            } else {
-                $denyImagePath = $denyImageBaseDir . 'deny.png';
-            }
+            $denyImagePath = $denyImageBaseDir . ($isFileAThumb ? 'deny_thumb.png' : 'deny.png');
 
             header("HTTP/1.0 403 Forbidden");
 
             if (file_exists($denyImagePath)) {
                 $mimeType = mime_content_type($denyImagePath);
-
                 header("Content-Type: $mimeType");
                 header("Content-Length: " . filesize($denyImagePath));
                 header('Cache-Control: public, max-age=3600');
-
                 readfile($denyImagePath);
-                exit;
             } else {
-                header("HTTP/1.0 403 Forbidden");
-                echo "Access Denied. Specific deny image ({$denyImagePath}) missing.";
-                exit;
+                echo "Access Denied. Missing deny image.";
             }
+            exit;
         }
 
+        // Redirect if the path points to a directory
         if (is_dir($filePath)) {
             $this->redirect(BASE_URI . 'gallery/index/' . implode('/', $pathParts) . '/' . $encodedFileName);
             exit;
         }
 
+        // File not found
         if (!file_exists($filePath)) {
             header("HTTP/1.0 404 Not Found");
             exit;
         }
 
+        // Determine MIME type based on file extension
         $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         $mimeType = match ($ext) {
             'jpg', 'jpeg' => 'image/jpeg',
@@ -113,10 +104,33 @@ class Media extends ckvsoft\mvc\BaseController
             default => mime_content_type($filePath),
         };
 
+        // 💡 File metadata for caching validation
+        $lastModifiedTime = filemtime($filePath);
+        $etag = md5_file($filePath);
+        $lastModifiedHttp = gmdate('D, d M Y H:i:s', $lastModifiedTime) . ' GMT';
+
+        // Retrieve client cache headers via Request class
+        $ifNoneMatch = $request->getServerVar('HTTP_IF_NONE_MATCH');
+        $ifModifiedSince = $request->getServerVar('HTTP_IF_MODIFIED_SINCE');
+
+        // Send standard file headers
         header("Content-Type: $mimeType");
         header("Content-Length: " . filesize($filePath));
-        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Cache-Control: private, max-age=86400, must-revalidate');
+        header("Last-Modified: $lastModifiedHttp");
+        header("ETag: \"$etag\"");
 
+        // ✅ Client-side cache validation
+        $etagMatch = $ifNoneMatch && trim($ifNoneMatch) === "\"$etag\"";
+        $timeMatch = $ifModifiedSince && strtotime($ifModifiedSince) === $lastModifiedTime;
+
+        // If the file has not changed, return 304 (no body)
+        if ($etagMatch || $timeMatch) {
+            header("HTTP/1.1 304 Not Modified");
+            exit;
+        }
+
+        // Otherwise, send the file content
         readfile($filePath);
         exit;
     }
