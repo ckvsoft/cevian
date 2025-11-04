@@ -153,7 +153,7 @@ class Controller extends \stdClass
      * @return string The content of the script file
      * @throws \ckvsoft\CkvException if the file does not exist in both module and core_modules
      */
-    public function loadScript(string $script)
+    public function loadScript(string $script, array $data = [])
     {
         // absoluter Basis-Pfad = Arbeitsverzeichnis + BASE_URI
         // $baseFs = rtrim(getcwd(), '/') . '/' . ltrim(BASE_URI, '/');
