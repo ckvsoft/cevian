@@ -57,10 +57,14 @@ class Login extends \ckvsoft\mvc\BaseController
 
             // Check if the user was found and logged in successfully
             if (!$result) {
-                \ckvsoft\Output::error([_("No user found")]);
-                return;
+                // Bei Fehler: PHP-Redirect zurück zum Login mit Flash Message
+                \ckvsoft\Auth::sendFlashRedirect(
+                        BASE_URI . 'login',
+                        'error',
+                        _('Login Failed'),
+                        _("No user found or invalid password.")
+                );
             }
-
             // Set old session variables (Fallback for legacy modules)
             $_SESSION['user_id'] = $result[0]['user_id'];
             $_SESSION['user_key'] = \ckvsoft\Hash::create('sha256', $result[0]['user_id'], HASH_KEY);
@@ -77,7 +81,12 @@ class Login extends \ckvsoft\mvc\BaseController
             ]);
 
             // Respond with success
-            \ckvsoft\Output::success();
+            \ckvsoft\Auth::sendFlashRedirect(
+                    BASE_URI . 'dashboard',
+                    'success',
+                    _('Login'),
+                    _('Login successful')
+            );
         } catch (\ckvsoft\CkvException $e) {
             // Handle exceptions, typically input validation errors
             \ckvsoft\Output::error($input->fetchErrors());
