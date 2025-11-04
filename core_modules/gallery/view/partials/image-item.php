@@ -23,8 +23,13 @@
  * THE SOFTWARE.
  */
 
-$titleText = $this->item['title'] ?? $this->item['name'];
-$descriptionText = $this->item['description'] ?? '';
+$item = $this->item;
+$titleText = $item['title'] ?? $item['name'];
+$descriptionText = $item['description'] ?? '';
+$mediaId = $item['id'] ?? null;
+
+$isAdmin = $this->isAdmin ?? null;
+$managerBasePath = BASE_URI . 'gallery/manager/rotate_media/';
 
 $captionContent = $titleText;
 
@@ -33,10 +38,36 @@ if (!empty($descriptionText)) {
 }
 ?>
 
-<a href="<?= htmlspecialchars($this->item['url']) ?>"
-   class="media-item image-item">
-    <img title="<?= htmlspecialchars($captionContent) ?>" src="<?= htmlspecialchars($this->item['thumburl']) ?>"
-         alt="<?= _('Image') ?> <?= htmlspecialchars($titleText) ?>"
-         loading="lazy">
-    <span class="image-caption"><?= htmlspecialchars($titleText) ?></span>
-</a>
+<div class="gallery-item-wrapper">
+
+    <?php if ($isAdmin && $mediaId !== null): ?>
+        <div class="media-rotate-actions"
+             data-media-id="<?= $mediaId ?>"
+             data-rotation-url="<?= htmlspecialchars($managerBasePath . $mediaId) ?>">
+
+            <button type="button" class="button small-action rotate-action rotate-left edit"
+                    data-degrees="90"
+                    title="<?= _('Rotate Left (90°)') ?>">
+                <span class="rotate-icon" aria-hidden="true">↺</span>
+            </button>
+
+            <button type="button" class="button small-action rotate-action rotate-right edit"
+                    data-degrees="-90"
+                    title="<?= _('Rotate Right (90°)') ?>">
+                <span class="rotate-icon" aria-hidden="true">↻</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <a href="<?= htmlspecialchars($item['url']) ?>"
+       class="media-item image-item"
+       data-media-id="<?= $mediaId ?>">
+
+        <img title="<?= htmlspecialchars($captionContent) ?>"
+             src="<?= htmlspecialchars($item['thumburl']) ?>"
+             alt="<?= _('Image') ?> <?= htmlspecialchars($titleText) ?>"
+             loading="lazy">
+
+        <span class="image-caption"><?= htmlspecialchars($titleText) ?></span>
+    </a>
+</div>
