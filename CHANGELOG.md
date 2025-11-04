@@ -1,3 +1,44 @@
+# [0.17.0](https://github.com/ckvsoft/cevian/compare/v0.16.0...v0.17.0) (2025-11-04)
+
+
+### Bug Fixes
+
+* **bootstrap:** integrate multi-login session management and activity tracking ([5e7b5d0](https://github.com/ckvsoft/cevian/commit/5e7b5d0b580d740067f0e5da06bd3287a19abd45))
+* **db:** apply utf8mb4_bin collation fix via migration 0.17.0 ([89adc11](https://github.com/ckvsoft/cevian/commit/89adc11461b693d82e87b2fe3537e48e6a6fb3fb))
+* enforce utf8mb4_bin collation for gallery paths and filenames ([95afbc4](https://github.com/ckvsoft/cevian/commit/95afbc4e151da1c3ae6504c5056245aeea7b4ab9))
+* **filemanager:** Implement auto-fallback on panel render error ([cf1f8aa](https://github.com/ckvsoft/cevian/commit/cf1f8aa0181d0292c848f8c3f087a61412adf810))
+* **i18n:** Correct source string for slideshow toggle label ([9c4e7c1](https://github.com/ckvsoft/cevian/commit/9c4e7c1cebfc75cf752118d815c101e727e2e1f4))
+* improve fetch error handling and simplify redirect logic ([7272692](https://github.com/ckvsoft/cevian/commit/72726925c2c2d86eaf25313907bd32703f8c4c07))
+
+
+### Features
+
+* add AJAX endpoint for physical image rotation ([b76f7d2](https://github.com/ckvsoft/cevian/commit/b76f7d262d44970fe9efb562fa9fbd9b559e2dd8))
+* add image rotation and EXIF orientation correction ([8b61bf1](https://github.com/ckvsoft/cevian/commit/8b61bf120c88b51593648ba9b0e1137bc4d12ba4))
+* add in-gallery rotation actions for admin users ([8e2cc2b](https://github.com/ckvsoft/cevian/commit/8e2cc2bcfee435dbf3675af5c009d15dfcc6df32))
+* add model methods for media time and album counts ([bd5d9f0](https://github.com/ckvsoft/cevian/commit/bd5d9f04154cb5a2a8c02f738736c05a6c0f27dc))
+* add rotation controls to edit_media page ([65ada93](https://github.com/ckvsoft/cevian/commit/65ada9355dfa65a7a6a6e16f5b07a0a3c4686bd7))
+* expose album and media counts to gallery view ([433f7fb](https://github.com/ckvsoft/cevian/commit/433f7fbb45fda3f6774faeab0839927f9e769a0b))
+* **i18n:** Introduce global translation helper functions ([fe58f2f](https://github.com/ckvsoft/cevian/commit/fe58f2f3dbefb149d8107bf048d5b1fe6e103ad7))
+* implement client-side file manager logic in filemanager.js ([7a47aa5](https://github.com/ckvsoft/cevian/commit/7a47aa59bb17baa1c255fcb6d85d41a884e57810))
+* implement dynamic pagination and AJAX image rotation ([fd47aac](https://github.com/ckvsoft/cevian/commit/fd47aac62d856c0fc28e12a62b868080f63fc0e6))
+* implement image rotation logic and refactor thumbnail generation ([b42cc87](https://github.com/ckvsoft/cevian/commit/b42cc87b2cba3e4ff62e053f3a4ca31a4ceb64d4))
+* implement server-side flash message display ([8762509](https://github.com/ckvsoft/cevian/commit/87625096657621ff6566d313c14fb32f853fa485))
+* implement transactional folder merging during move operation ([b30c65a](https://github.com/ckvsoft/cevian/commit/b30c65aa6a6e268914a532179045d7459761df27))
+* **session:** add activity tracking and database garbage collection ([243de9b](https://github.com/ckvsoft/cevian/commit/243de9b41a5cfad1d2f2c99962c62687c3afa38f))
+* **ui:** Allow custom success title for AJAX redirects ([8e005f7](https://github.com/ckvsoft/cevian/commit/8e005f7fe7a4c5dd6951f551599981e81061ff49))
+* **ui:** Enhance file upload progress with per-file status ([944bf07](https://github.com/ckvsoft/cevian/commit/944bf0735d967d1be43ea1d898c0e81ca3d1ed06))
+
+
+### Performance Improvements
+
+* **assets:** Integrate and utilize newly added minified JavaScript assets ([8424938](https://github.com/ckvsoft/cevian/commit/84249383bbd250cc90d24e879500f76c91065beb))
+* **build:** Switch default JS loading to minified files ([8c630ed](https://github.com/ckvsoft/cevian/commit/8c630ed1c403cd88b0ac5b8acbeb6148ceda2651))
+* **filemanager:** Load minified simple-lightbox script ([ec0851e](https://github.com/ckvsoft/cevian/commit/ec0851e7e24907f334544a6be26b7badec2b02c7))
+* **gallery:** Load minified simple-lightbox script ([8212007](https://github.com/ckvsoft/cevian/commit/82120070c4b18319a00af6948c15133b047014f0))
+
+
+
 # [0.16.0](https://github.com/ckvsoft/cevian/compare/v0.15.0...v0.16.0) (2025-10-28)
 
 
@@ -77,26 +118,6 @@
 * **backup/view:** Implement i18n support and enhance image backup robustness ([3b812b3](https://github.com/ckvsoft/cevian/commit/3b812b3d7f0d13306f5e25c14ebd860972e7d6ab))
 * **gallery/helper:** Implement breadcrumb data helper and use DB album titles ([24fbc75](https://github.com/ckvsoft/cevian/commit/24fbc759c69fdee23aafc14baac0f993308e46d5))
 * **gallerymanager/model:** Add initial title generation during sync and enhance recursive updates ([120f5a8](https://github.com/ckvsoft/cevian/commit/120f5a8717c3b54ece263e1ff4b5b862751aeab6))
-
-
-
-# [0.12.0](https://github.com/ckvsoft/cevian/compare/v0.11.0...v0.12.0) (2025-10-16)
-
-
-### Bug Fixes
-
-* **auth:** Correct and elevate admin permission level ([55e573e](https://github.com/ckvsoft/cevian/commit/55e573e6edd7b9958e8f8a6f68acee6dfa41a553))
-* **user:** Include username in userSingleList query ([249d4ea](https://github.com/ckvsoft/cevian/commit/249d4ea8d3350a8776f4c9d17c0e9be19835324c))
-
-
-### Features
-
-* **gallery/manager:** Implement internationalization for permissions and add subfolder inheritance flags ([269968f](https://github.com/ckvsoft/cevian/commit/269968ffcd4296c8c0213158582c076de46e4051))
-* **gallery/manager:** Implement recursive album permission/owner update and refine media fetching ([090aac5](https://github.com/ckvsoft/cevian/commit/090aac5374c61d830004ea66b0818629cfb8b454))
-* **gallery/view:** Enhance album edit view with title field, i18n, and subfolder inheritance options ([992af15](https://github.com/ckvsoft/cevian/commit/992af15722ebea37511bdae8cca39a8bd8456b29))
-* **i18n:** Introduce gettext fallback functions for internationalization ([69c9ba2](https://github.com/ckvsoft/cevian/commit/69c9ba22f757166a7fb1872d43a0f4ba63fb05c6))
-* **user/view:** Add 'Clear' button to user creation form ([a2603bb](https://github.com/ckvsoft/cevian/commit/a2603bb4019b525c7d1628efa8f53bfc18ce7c70))
-* **validation:** Implement 'matches' rule for cross-field comparison ([5420897](https://github.com/ckvsoft/cevian/commit/5420897365e43430bf5d414ed4d85c423dee8b8e))
 
 
 
