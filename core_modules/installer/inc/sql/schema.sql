@@ -269,7 +269,7 @@ CREATE TABLE `user_roles` (
 
 CREATE TABLE `gallery_albums` (
     `album_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `album_path` VARCHAR(512) NOT NULL COMMENT 'Relative path to the album, e.g., events/hochzeit',
+    `album_path` VARCHAR(512) SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Relative path to the album, e.g., events/hochzeit',
     `title` VARCHAR(255) NULL DEFAULT NULL COMMENT 'Display title of the album',
     `owner_user_id` INT(11) UNSIGNED NULL DEFAULT NULL COMMENT 'ID of the user who owns the album (NULL if public/system-owned)',
     `permissions_level` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '0=Public, 1=User, 2=Admin etc.',
@@ -281,15 +281,15 @@ CREATE TABLE `gallery_albums` (
 CREATE TABLE `gallery_media_stats` (
     `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `album_id` INT(11) UNSIGNED NOT NULL COMMENT 'Foreign key to the gallery_albums table',
-    `file_name` VARCHAR(255) NOT NULL COMMENT 'Media filename (e.g., image.jpg)',
+    `file_name` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Media filename (e.g., image.jpg)', 
     `views` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total view count for this media file',
     `last_view` DATETIME NULL DEFAULT NULL COMMENT 'Timestamp of the last view',
     `file_mtime` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Last modification time (UNIX timestamp) for cache check',
     `file_size` INT(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'File size in bytes',
     `media_type` ENUM('image', 'video') NOT NULL DEFAULT 'image' COMMENT 'Type of media: image or video',
     PRIMARY KEY (`id`),
-    -- Unique key ensures only one counter entry per album/file combination
-    UNIQUE KEY `idx_album_file_unique` (`album_id`, `file_name`),
+    -- Der Unique Key verwendet automatisch die Collation der Spalte (utf8mb4_bin)
+    UNIQUE KEY `idx_album_file_unique` (`album_id`, `file_name`), 
     -- Foreign key constraint
     CONSTRAINT `fk_album_id` FOREIGN KEY (`album_id`) REFERENCES `gallery_albums` (`album_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
