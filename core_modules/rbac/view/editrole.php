@@ -5,7 +5,7 @@ $defaultRedirect = 'rbac';
     <legend><?= _('Edit Role') ?>: <?= htmlspecialchars($this->role['roleName']); ?></legend>
     <div data-form="editRoleForm" data-json="1">
 
-        <form action="<?= BASE_URI ?>rbac/editRoleSave" method="post" id="editRoleForm" data-message="<?= _('Role updated successfully!') ?>" data-redirect="<?= $defaultRedirect ?>">
+        <form action="<?= BASE_URI ?>rbac/editRoleSave" method="post" id="editRoleForm" data-message="<?= _('Role and Permissions updated successfully!') ?>" data-redirect="<?= $defaultRedirect ?>">
             <input type="hidden" name="role_id" value="<?= $this->role['id'] ?>">
 
             <label for="roleName"><?= _('Role Name') ?>:</label>
