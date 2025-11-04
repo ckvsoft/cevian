@@ -649,4 +649,18 @@ class Gallery_Model extends Model
 
         return array_unique($directSubAlbums);
     }
+
+    /**
+     * Formats a filename into a human-readable name (e.g., 'my_photo.jpg' -> 'My Photo').
+     * NOTE: This is a utility function used by file scanning methods, but not DB-based methods.
+     * @param string $fileName The media file name.
+     * @return string The formatted name.
+     *
+     */
+    public function formatMediaName(string $fileName): string
+    {
+        $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+        $nameCleaned = str_replace('_', ' ', $nameWithoutExt);
+        return ucwords(strtolower($nameCleaned));
+    }
 }

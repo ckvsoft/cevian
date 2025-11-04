@@ -99,7 +99,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             $contentList[] = [
                 'id' => $item['id'] ?? null,
                 'type' => $item['type'] ?? 'media',
-                'name' => $item['title'] ?? basename($item['url']),
+                'name' => $item['title'] ?? $model->formatMediaName(basename($item['url'])),
                 'description' => $item['description'] ?? '',
                 'url' => $item['url'],
                 'thumburl' => $item['thumburl'] ?? $item['url'],
