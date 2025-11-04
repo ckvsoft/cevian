@@ -48,6 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (error) {
+                if (error && error.message === "Browser Aborted") {
+                    console.warn('Polling fetch aborted silently.', progressUrl + progressId);
+                    clearInterval(interval);
+                    return;
+                }
                 console.error('Polling error:', error);
                 clearInterval(interval);
                 if (container) {
@@ -57,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     text.textContent = '<?= _("Error!") ?>';
                 }
             }
-        }, 200);
+        }, 1000);
         return interval;
     }
 
@@ -71,9 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-// ----------------------------
-// Pagination State Storage (per container/album ID)
-// ----------------------------
+    // ----------------------------
+    // Pagination State Storage (per container/album ID)
+    // ----------------------------
 
     /**
      * Creates a unique key based on the container ID (which should represent the album ID).
@@ -141,15 +146,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // fetchAndLog returns the parsed JSON data directly on success
-        const data = await fetchAndLog(url, options);
-        if (data.success !== 1) {
-            // Error handling for business logic failure (e.g., validation errors)
-            const errorMsg = Object.entries(data.errorMessage || {})
-                    .map(([k, v]) => k + ' ' + v)
-                    .join('<br />');
-            throw new Error(errorMsg || '<?= _("Unknown error") ?>');
+        try {
+            const data = await fetchAndLog(url, options);
+            if (data.success !== 1) {
+                // Error handling for business logic failure (e.g., validation errors)
+                const errorMsg = Object.entries(data.errorMessage || {})
+                        .map(([k, v]) => k + ' ' + v)
+                        .join('<br />');
+                throw new Error(errorMsg || '<?= _("Unknown error") ?>');
+            }
+            return data;
+        } catch (error) {
+            if (error && error.message === "Browser Aborted") {
+                console.warn("Harmless form submit abort detected and silenced.");
+                return;
+            }
         }
-        return data;
     }
 
     // ----------------------------
@@ -192,9 +204,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (listUrl && listContainerId) {
                         await loadList(listUrl, listContainerId);
                     }
-                    displayMessage('success', '<?= _("Complete") ?>', successMessage);
+                    displayMessage('success', title, successMessage);
                 }
             } catch (error) {
+                if (error && error.message === "Browser Aborted") {
+                    console.warn("Harmless form submit abort detected and silenced.");
+                    return;
+                }
                 stopProgressPolling(pollingInterval);
                 if (submitButton) {
                     submitButton.disabled = false;
@@ -244,6 +260,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------
     // Setup pagination for table or generic list
     // ----------------------------
+    // ----------------------------
+    // Dynamic Pagination Helper
+    // ----------------------------
+    /**
+     * Calculates the number of items per page dynamically based on the current 
+     * grid column count and a specified number of rows.
+     * @param {HTMLElement} paginatedContent - The container element (e.g., .image-grid).
+     * @param {number} rowCountForCalculation - The number of rows to assume for the calculation (e.g., 3).
+     * @returns {number} The calculated number of items that should be displayed per page.
+     */
+    function getDynamicItemsPerPage(paginatedContent, rowCountForCalculation) {
+        if (!paginatedContent.classList.contains('image-grid')) {
+            // Fallback if not a recognized grid.
+            return 15;
+        }
+
+        // Get the computed style to access the CSS properties.
+        const style = window.getComputedStyle(paginatedContent);
+        const gridColumnsValue = style.getPropertyValue('grid-template-columns');
+        // Count the columns currently rendered by analyzing the CSS property string.
+        const columnCount = gridColumnsValue.split(/\s+/).filter(v => v !== 'none').length;
+        if (columnCount === 0)
+            return 15; // Safety fallback
+
+        // Calculate final items per page: Columns * Desired Rows
+        const dynamicPerPage = columnCount * rowCountForCalculation;
+        return Math.max(1, dynamicPerPage);
+    }
+
+
+    // ----------------------------
+    // Setup pagination for table or generic list (MODIFIED)
+    // ----------------------------
     /**
      * Applies client-side pagination to a content container based on its data-per-page attribute.
      * Handles state persistence using localStorage if the container has an ID.
@@ -274,7 +323,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (totalItems <= 0)
             return;
-        const rowsPerPage = parseInt(container.dataset.perPage, 10) || 15;
+        // ----------------------------------------------------
+        // LOGIC: Determine the final rowsPerPage (Images per Page)
+        // ----------------------------------------------------
+
+        // 1. Check for explicit number of items per page (data-per-page).
+        let rowsPerPage = parseInt(container.dataset.perPage, 10);
+        let rowCountForCalculation = 3; // Default row count for dynamic calculation (as requested)
+
+        // If the static data-per-page is NOT set or invalid, calculate the dynamic page size.
+        if (isNaN(rowsPerPage) || rowsPerPage < 1) {
+
+            // Check if a custom row count is provided for the calculation (data-rows-per-page).
+            const customRows = parseInt(container.dataset.rowsPerPage, 10);
+            if (!isNaN(customRows) && customRows >= 1) {
+                // If provided and valid, use the custom row count.
+                rowCountForCalculation = customRows;
+            }
+            // If not provided, rowCountForCalculation remains the default of 3.
+
+            // Calculate the final number of items per page using the determined row count.
+            rowsPerPage = getDynamicItemsPerPage(paginatedContent, rowCountForCalculation);
+            // console.log(`Pagination: Dynamic calculation used (${rowCountForCalculation} rows). Items per page: ${rowsPerPage}`); 
+
+        } else {
+            // If data-per-page IS provided, use it directly (static mode).
+            console.log(`Pagination: Static value from data-per-page used. Items per page: ${rowsPerPage}`);
+        }
+
         let currentPage = 1; // Default starting page is always 1
 
         if (hasPersistenceId) {
@@ -342,6 +418,188 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------
+    // Image Rotation Handler
+    // ----------------------------
+    /**
+     * Sets up the event listeners for image rotation buttons.
+     * Relies on baseUri and messages being set via data attributes on .media-actions-rotate.
+     */
+    function setupRotationHandler() {
+        const rotateContainer = document.querySelector('.media-actions-rotate');
+        const rotateButtons = document.querySelectorAll('.rotate-action');
+        const mediaPreview = document.querySelector('.media-preview-thumb-minimal');
+
+        // Security check: exit silently if elements are not present.
+        if (!rotateContainer || rotateButtons.length === 0 || !mediaPreview) {
+            return;
+        }
+
+        // Read configuration and messages from the DOM
+        const baseUri = rotateContainer.dataset.baseUri;
+        const rotatingMsg = rotateContainer.dataset.msgRotating;
+        const title = rotateContainer.dataset.title;
+        const successTitle = rotateContainer.dataset.msgSuccessTitle;
+        const successBody = rotateContainer.dataset.msgSuccessBody;
+        const connectionErrorMsg = rotateContainer.dataset.msgConnectionError;
+        const mediaId = mediaPreview.dataset.mediaId;
+
+        if (!baseUri || !mediaId) {
+            console.error('Rotation handler failed: Missing base URI or media ID.');
+            return;
+        }
+
+        rotateButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const degrees = parseInt(button.dataset.degrees);
+                const originalText = button.textContent;
+
+                button.disabled = true;
+                button.textContent = rotatingMsg;
+
+                displayMessage('info', title, rotatingMsg);
+
+                try {
+                    const url = baseUri + 'gallery/manager/rotate_media/' + mediaId;
+
+                    const data = await fetchAndLog(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({degrees: degrees})
+                    });
+
+                    if (data.success) {
+                        displayMessage('success', successTitle, data.message || successBody);
+
+                        const thumbUrl = mediaPreview.getAttribute('src').split('?')[0];
+                        mediaPreview.setAttribute('src', thumbUrl + '?' + Date.now());
+
+                    } else {
+                        displayMessage('error', title, data.errorMessage || successBody);
+                    }
+
+                } catch (error) {
+
+                    if (error && error.message === "Browser Aborted") {
+                        console.warn("Harmless rotation abort detected and silenced.");
+                        return;
+                    }
+
+                    console.error('Rotation AJAX Error:', error);
+
+                    if (typeof displayMessage === 'function') {
+                        const errorMessage = error.message.includes('HTTP Error') ? error.message : connectionErrorMsg;
+                        displayMessage('error', title, errorMessage);
+                    }
+                } finally {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            });
+        });
+    }
+
+    // This is the handler for rotation buttons that appear under every item in the grid view.
+    // It uses event delegation as the grid items are often loaded dynamically.
+    function setupGridRotationHandler() {
+
+        document.addEventListener('click', async (event) => {
+
+            const button = event.target.closest('.rotate-action');
+            if (!button) {
+                return; // Not a rotation button
+            }
+
+            event.preventDefault();
+
+            const actionContainer = button.closest('.media-rotate-actions');
+            if (!actionContainer) {
+                console.error("Error: Could not find media-rotate-actions container for grid item.");
+                return;
+            }
+
+            const mediaId = actionContainer.getAttribute('data-media-id');
+            const rotationUrlBase = actionContainer.getAttribute('data-rotation-url'); // Should be the full endpoint URL
+            const degrees = button.getAttribute('data-degrees');
+
+            const imageWrapper = button.closest('.gallery-item-wrapper');
+
+            if (!mediaId || !rotationUrlBase) {
+                console.error("Missing data (ID, URL, or image element) for grid rotation.");
+                return;
+            }
+
+            const originalText = button.textContent;
+            const rotatingMsg = '↻'; // Use a simple symbol or load a localization string
+
+            button.disabled = true;
+            button.textContent = rotatingMsg;
+
+            const url = rotationUrlBase;
+
+            try {
+                const data = await fetchAndLog(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({degrees: parseInt(degrees), mediaId: parseInt(mediaId)})
+                });
+
+                if (data.success) {
+                    console.log('Grid image rotation success for ID:', mediaId);
+                    displayMessage('success', '<?= _("Rotation") ?>', '<?= _("Grid image rotation success for ID:") ?> ' + mediaId);
+                } else {
+                    displayMessage('error', '<?= _("Error") ?>', '<?= _("Rotation Failed:") ?> ' + (data.errorMessage || '<?= _("Unknown server error.") ?>'));
+                }
+
+            } catch (error) {
+                if (error && error.message === "Browser Aborted") {
+                    console.warn("Harmless grid rotation abort detected and silenced.");
+                    return;
+                }
+                console.error('Grid Rotation AJAX Error:', error);
+                alert('<?= _("Connection Error during rotation.") ?>');
+            } finally {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        });
+    }
+
+    // ----------------------------
+    // Global initialization (MODIFIED)
+    // ----------------------------
+
+    // Setup AJAX forms based on data-form attribute
+    document.querySelectorAll('[data-form]').forEach(container => {
+        const formId = container.dataset.form;
+        const listUrl = container.dataset.url;
+        const listContainer = listUrl ? document.querySelector('[data-list="' + listUrl + '"]') : null;
+        const listContainerId = listContainer ? listContainer.id : null;
+        if (document.getElementById(formId)) {
+            setupAjaxForm(formId, listUrl, listContainerId);
+        }
+    });
+    document.querySelectorAll('[data-list]').forEach(container => {
+        const listUrl = container.dataset.list;
+        const containerId = container.id;
+        loadList(listUrl, containerId);
+    });
+    initSequentialSave();
+    // Initial pagination setup
+    document.querySelectorAll('.paginated').forEach(container => {
+        setupPagination(container);
+    });
+    // Add resize listener to re-calculate dynamic pagination on screen width change
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            document.querySelectorAll('.paginated').forEach(container => {
+                setupPagination(container);
+            });
+        }, 250); // Debounce to prevent excessive calculations during resize
+    });
+    // 
+    // ----------------------------
     // Sequential save for multiple forms
     // ----------------------------
     /**
@@ -367,20 +625,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 await submitFormLogic(form);
                 displayMessage('success', '<?= _("Step") ?> ' + (i + 1) + '/' + forms.length,
                         '<?= _("Data for") ?> "' + form.id + '" <?= _("saved successfully.") ?>');
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
 
             const redirectUrl = forms[0].dataset.redirect;
             const successMessage = forms[0].dataset.message || '<?= _("All changes saved!") ?>';
-            const title = form[0].dataset.title || '<?= _("Complete") ?>';
+            const title = forms[0].dataset.title || '<?= _("Complete") ?>';
             if (redirectUrl) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 sendMessageAndRedirect('success', title, successMessage, [], '<?= BASE_URI ?>' + redirectUrl);
             } else {
-                displayMessage('success', '<?= _("Complete") ?>', successMessage);
+                displayMessage('success', title, successMessage);
                 document.querySelectorAll('.paginated').forEach(c => setupPagination(c));
             }
         } catch (error) {
             console.error('Save failed:', error);
-            displayMessage('error', '<?= _("Save Failed!") ?>', '<?= _("Process aborted:") ?> ' + error.message);
+            const redirectUrl = forms[0].dataset.redirect;
+            const errorTitle = '<?= _("Save Failed!") ?>';
+            const errorMessage = '<?= _("Process aborted:") ?> ' + error.message;
+
+            displayMessage('error', errorTitle, errorMessage);
+
+            if (redirectUrl && error.criticalRedirect === true) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                sendMessageAndRedirect('error', errorTitle, errorMessage, [], '<?= BASE_URI ?>' + redirectUrl);
+            }
         } finally {
             triggerButton.disabled = false;
             if (triggerButton.textContent === '<?= _("Saving...") ?>')
@@ -423,7 +692,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const containerId = container.id;
         loadList(listUrl, containerId);
     });
-    initSequentialSave();
+    if (document.getElementById('mediaGridContainer')) {
+        setupGridRotationHandler();
+    }
+
+    if (document.getElementById('mediaEditContainer')) {
+        setupRotationHandler();
+    }
     document.querySelectorAll('.paginated').forEach(container => {
         setupPagination(container);
     });
