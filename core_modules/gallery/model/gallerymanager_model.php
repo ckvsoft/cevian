@@ -187,19 +187,7 @@ class GalleryManager_Model extends Gallery_Model
                 $shouldRegenerateThumb = $isModified || !file_exists($thumbFile);
 
                 if ($shouldRegenerateThumb && $mediaType === 'image') {
-                    try {
-                        if ($isModified && file_exists($thumbFile)) {
-                            unlink($thumbFile);
-                            $deletedThumbs++;
-                        }
-
-                        if (!file_exists($thumbFile)) {
-                            $image = new Image($filePath, $thumbFileName, $fullPath . '/');
-                            $image->resize();
-                        }
-                    } catch (\Exception $e) {
-                        error_log("Failed to create/check thumbnail for {$filePath}: " . $e->getMessage());
-                    }
+                    $this->ensureThumbnail($filePath, $thumbFile, $isModified, $deletedThumbs);
                 }
                 if ($isNew || $isModified) {
                     $dataToSave = [
@@ -868,6 +856,56 @@ class GalleryManager_Model extends Gallery_Model
         $dbDeleted = $this->db->delete('gallery_media_stats', 'id = :id', ['id' => $mediaId]);
 
         return (bool) $dbDeleted;
+    }
+
+    public function rotateMedia(int $mediaId, int $degrees): bool|string
+    {
+        if (!in_array($degrees, [-90, 90, 180]))
+            return _('Invalid rotation degree provided.');
+
+        $media = $this->getMediaItemById($mediaId);
+        if (!$media)
+            return _('Media item not found.');
+
+        $filePath = $this->getFilePath($media['album_path'], $media['file']);
+        if (!file_exists($filePath) || !is_writable($filePath))
+            return _('Media file missing or not writable.');
+
+        try {
+            $image = new Image($filePath);
+            $result = $image->rotate($degrees);
+            if ($result === true) {
+                $pathInfo = pathinfo($media['file']);
+                $nameNoExt = $pathInfo['filename'];
+                $origExt = $pathInfo['extension'];
+
+                $thumbFile = $media['media_type'] === 'image' ? $this->basePath . $media['album_path'] . '/' . $nameNoExt . '_thumb.' . $origExt : $this->basePath . $media['album_path'] . '/' . $nameNoExt . '_thumb.jpg';
+
+                $deletedThumbs = 0;
+                $this->ensureThumbnail($filePath, $thumbFile, true, $deletedThumbs);
+            } else
+                return _('Rotation failed.');
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+
+        return true;
+    }
+
+    private function ensureThumbnail(string $filePath, string $thumbFile, bool $isModified, int &$deletedThumbs): void
+    {
+        try {
+            if ($isModified && file_exists($thumbFile)) {
+                unlink($thumbFile);
+                $deletedThumbs++;
+            }
+            if (!file_exists($thumbFile)) {
+                $image = new Image($filePath, basename($thumbFile), dirname($thumbFile) . '/');
+                $image->resize();
+            }
+        } catch (\Exception $e) {
+            error_log("Thumbnail creation failed for {$filePath}: " . $e->getMessage());
+        }
     }
 
     /**
