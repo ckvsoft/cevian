@@ -41,10 +41,13 @@ class Filemanager extends ckvsoft\mvc\BaseController
      */
     public function index(string ...$pathParts)
     {
+        // Load extra CSS files inline
+        $extraCss = "<style>"
+                . $this->loadHelper("css", ['method' => 'getCss', 'args' => ['inc/css/filemanager.css']])
+                . "</style>";
+
         $fileManagerModel = $this->loadModel('filemanager', 'gallery');
-
         $currentPath = trim(implode('/', $pathParts), '/');
-
         $leftPanelData = $fileManagerModel->listDirectoryContents($currentPath);
 
         $data = [
@@ -53,11 +56,14 @@ class Filemanager extends ckvsoft\mvc\BaseController
             'currentPath' => $currentPath,
         ];
 
+        // Load extra JavaScript file inline
+        $extraJs = "<script>" . $this->loadScript("inc/js/filemanager.min.js", ['manager' => $data]) . "</script>";
+
         $this->renderPage([
-            ['view' => '/inc/header', 'data' => ['title' => _('File Manager')]],
-            ['view' => 'gallery/filemanager/index', 'data' => ['manager' => $data]],
-            ['view' => '/inc/footer'],
-        ]);
+            ['view' => '/inc/header', 'data' => ['title' => _('File Manager'), 'manager' => $data]],
+            ['view' => 'gallery/filemanager/index'],
+            ['view' => '/inc/footer']
+                ], $extraCss, $extraJs);
     }
 
     /**
