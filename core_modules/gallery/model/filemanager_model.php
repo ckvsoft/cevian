@@ -108,7 +108,7 @@ class Filemanager_Model extends GalleryManager_Model
 
             foreach ($subAlbums as $album) {
                 $items[] = [
-                    'name' => $album['title'] ?? basename($album['path']),
+                    'name' => basename($album['path']),
                     'type' => 'album',
                     'path' => $album['path'],
                 ];
@@ -151,7 +151,7 @@ class Filemanager_Model extends GalleryManager_Model
                     $albumData = $this->checkAlbumPermissions($topPath);
                     if ($albumData && (string) $albumData['owner_user_id'] === (string) $currentUserId) {
                         $items[] = [
-                            'name' => $albumData['title'] ?? basename($topPath),
+                            'name' => basename($topPath),
                             'type' => 'album',
                             'path' => $topPath,
                         ];
@@ -214,7 +214,7 @@ class Filemanager_Model extends GalleryManager_Model
 
                 if ($subAlbumData && (string) $subAlbumData['owner_user_id'] === (string) $currentUserId) {
                     $items[] = [
-                        'name' => $album['title'] ?? basename($path),
+                        'name' => basename($path),
                         'type' => 'album',
                         'path' => $path,
                     ];
@@ -313,11 +313,10 @@ class Filemanager_Model extends GalleryManager_Model
         $trimmedPath = trim($fullRelativePath, '/');
 
         $folderName = basename($trimmedPath);
-        $generatedTitle = $this->formatMediaName($folderName);
 
         $albumData = [
             'album_path' => $trimmedPath,
-            'title' => $generatedTitle,
+            'title' => $folderName,
             'permissions_level' => 2,
             'owner_user_id' => $ownerId
         ];
@@ -345,51 +344,232 @@ class Filemanager_Model extends GalleryManager_Model
     }
 
     /**
-     * Moves a file or folder. Performs minimal authorization check on target path,
-     * then executes the physical move and the corresponding database update.
-     *
-     * @param string $sourcePath The relative path of the item to move (e.g., 'albumA/item.jpg' or 'albumA/folderB').
-     * @param string $targetPath The relative path of the target directory (e.g., 'albumC').
+     * Moves a file or folder. Handles both simple moves (rename/relocation)
+     * and folder merges/overwrites.
+     * @param string $sourcePath The relative path of the item to move (e.g., 'AlbumA/FolderB').
+     * @param string $targetPath The relative path of the target directory (e.g., 'AlbumC').
      * @return bool True on success.
      */
     public function moveItem(string $sourcePath, string $targetPath): bool
     {
         $targetPath = trim($targetPath, '/');
         $sourcePath = trim($sourcePath, '/');
-        $itemName = basename($sourcePath);
+        $itemName = basename($sourcePath); // e.g., FolderB
+        $isFolder = !pathinfo($itemName, PATHINFO_EXTENSION);
+        $finalNewPath = trim($targetPath . '/' . $itemName, '/'); // e.g., AlbumC/FolderB
+        // NOTE: We assume $this->basePath is the clean, absolute root path for albums.
+        $absoluteFinalDestination = $this->basePath . $finalNewPath;
 
-        $absoluteSourcePath = $this->basePath . $sourcePath;
+        // --- MERGE LOGIC CHECK (FOLDER OVERWRITE) ---
+        if ($isFolder && file_exists($absoluteFinalDestination) && is_dir($absoluteFinalDestination)) {
+            // Case 1: Folder MERGE operation (must be atomic: use transaction)
 
-        $absoluteTargetPath = $this->basePath . $targetPath;
-        $physicalMoveSuccess = $this->movePhysicalItem($absoluteSourcePath, $absoluteTargetPath);
+            $this->db->beginTransaction();
+
+            try {
+                // 1. Get Source and Target Album IDs (pre-check)
+                $oldAlbum = $this->db->selectOne("SELECT album_id FROM gallery_albums WHERE album_path = :path", ['path' => $sourcePath]);
+                $newAlbum = $this->db->selectOne("SELECT album_id FROM gallery_albums WHERE album_path = :path", ['path' => $finalNewPath]);
+
+                if (!$oldAlbum || !$newAlbum) {
+                    throw new \ckvsoft\CkvException("Merge failed: Source or Target album entry not found in DB.");
+                }
+
+                $oldAlbumId = $oldAlbum['album_id']; // ID 10
+                $newAlbumId = $newAlbum['album_id']; // ID 110
+                // 2. Perform Physical Merge recursively. The source folder is DELETED HERE.
+                $mergeSuccess = $this->mergeFolderContents($this->basePath . $sourcePath, $absoluteFinalDestination);
+                if (!$mergeSuccess) {
+                    throw new \ckvsoft\CkvException("Physical merge failed.");
+                }
+
+                // 3. DB Step A: Re-assign media of the SOURCE root folder (ID 10) to the TARGET ID (ID 110).
+                $dbSuccessMedia = $this->updateMediaIdForSingleAlbum($oldAlbumId, $newAlbumId);
+
+                // 4. DB Step B: Update paths of all sub-albums that were MOVED (ID 11, 12 etc.).
+                $dbSuccessSubAlbums = $this->updateSubAlbumPathsAfterMerge($sourcePath, $finalNewPath);
+
+                // 5. DB Step C: Delete the original SOURCE album DB entry (ID 10).
+                $dbSuccessDelete = $this->db->delete('gallery_albums', 'album_id = :id', ['id' => $oldAlbumId]);
+
+                if (!$dbSuccessMedia || !$dbSuccessSubAlbums || $dbSuccessDelete === false) {
+                    throw new \ckvsoft\CkvException("Database merge updates failed.");
+                }
+
+                // *** CRITICAL CHANGE: NO PHYSICAL FOLDER DELETION IS NEEDED HERE. ***
+                // *** The physical folder was already cleaned up by mergeFolderContents. ***
+
+                $this->db->commit();
+                return true;
+            } catch (\Exception $e) {
+                $this->db->rollBack();
+                error_log("Folder MERGE FAILED in transaction: " . $e->getMessage());
+                return false;
+            }
+        }
+        // --- END MERGE LOGIC ---
+        // --- SIMPLE MOVE/RENAME LOGIC (EXECUTED IF NO MERGE WAS REQUIRED) ---
+
+        $physicalMoveSuccess = $this->movePhysicalItem($this->basePath . $sourcePath, $this->basePath . $targetPath);
 
         if (!$physicalMoveSuccess) {
             return false;
         }
 
-        $oldAlbumPath = dirname($sourcePath);
-        $newAlbumPath = $targetPath;
-
-        $isFolder = !pathinfo($itemName, PATHINFO_EXTENSION);
-
+        // DB Update Logic for SIMPLE MOVE/RENAME
         if ($isFolder) {
-            $oldFullPath = $sourcePath;
-            $newFullPath = trim($newAlbumPath . '/' . $itemName, '/');
-
-            $dbSuccess = $this->updateAlbumPath($oldFullPath, $newFullPath);
-
-            if (!$dbSuccess) {
-                error_log("DB update FAILED for album move: {$oldFullPath} to {$newFullPath}");
-            }
-            return $dbSuccess;
+            $dbSuccess = $this->updateAlbumPath($sourcePath, $finalNewPath);
         } else {
-            $dbSuccess = $this->updateMediaAlbumId($itemName, $oldAlbumPath, $newAlbumPath);
-
-            if (!$dbSuccess) {
-                error_log("DB update FAILED for media move: {$itemName} from {$oldAlbumPath} to {$newAlbumPath}");
-            }
-            return $dbSuccess;
+            $dbSuccess = $this->updateMediaAlbumId($itemName, dirname($sourcePath), $targetPath);
         }
+
+        return $dbSuccess;
+    }
+
+    /**
+     * Recursively moves the CONTENTS of the source directory into the existing target directory.
+     * This function handles the physical MERGE operation and ensures clean up of the source.
+     *
+     * @param string $sourceDir Absolute path of the source folder.
+     * @param string $targetDir Absolute path of the target folder (must exist).
+     * @return bool True on success, false if any critical file operation fails.
+     */
+    private function mergeFolderContents(string $sourceDir, string $targetDir): bool
+    {
+        // Safety checks
+        if (!is_dir($targetDir)) {
+            error_log("mergeFolderContents failed: Target directory does not exist: {$targetDir}");
+            return false;
+        }
+
+        $success = true;
+
+        if (!is_dir($sourceDir) || !is_readable($sourceDir)) {
+            error_log("mergeFolderContents failed: Source directory is invalid or unreadable: {$sourceDir}");
+            return false;
+        }
+
+        try {
+            $iterator = new \DirectoryIterator($sourceDir);
+        } catch (\UnexpectedValueException $e) {
+            error_log("mergeFolderContents failed: Cannot open directory {$sourceDir}. Error: " . $e->getMessage());
+            return false;
+        }
+
+        foreach ($iterator as $item) {
+            if ($item->isDot())
+                continue;
+
+            $sourcePath = $item->getPathname();
+            $targetPath = $targetDir . '/' . $item->getFilename();
+            $itemName = $item->getFilename();
+
+            if ($item->isDir()) {
+                // --- RECURSIVE CHECK FOR SUB-FOLDER MERGE ---
+                if (is_dir($targetPath)) {
+                    $success &= $this->mergeFolderContents($sourcePath, $targetPath);
+                } else {
+                    // Simple move of the entire sub-folder.
+                    try {
+                        // Assuming movePhysicalItem is robust and handles directory moves
+                        $success &= $this->movePhysicalItem($sourcePath, $targetDir);
+                    } catch (\Exception $e) {
+                        error_log("Physical move failed during sub-folder simple move of {$itemName}: " . $e->getMessage());
+                        $success = false;
+                    }
+                }
+            } else {
+                // --- FILE HANDLING ---
+                // Skip known thumbnail files to avoid double-processing (leading to "Source file/folder does not exist" error).
+                if (str_contains($itemName, '_thumb')) {
+                    error_log("Skipping known thumbnail file {$itemName} during merge iteration.");
+                    continue;
+                }
+
+                // Primary file move (including associated thumbnails handled internally by movePhysicalItem).
+                try {
+                    // Using overwrite=true for file merge collisions
+                    $success &= $this->movePhysicalItem($sourcePath, $targetDir, true);
+                } catch (\Exception $e) {
+                    error_log("File move failed during merge of {$itemName}: " . $e->getMessage());
+                    $success = false;
+                }
+            }
+        }
+
+        // Clean up the source folder after moving its contents.
+        if ($success) {
+            // *** CLEAN CODE: Check return value of rmdir() instead of using @ ***
+            if (rmdir($sourceDir) === false) {
+                // This indicates the directory might not be empty (due to hidden files or other issues)
+                // or permissions are insufficient. We log a warning but DO NOT set $success = false,
+                // as the merge integrity (files in target, DB updated) is preserved.
+                error_log("Warning: Failed to remove source directory {$sourceDir}. It may not be empty or permissions are lacking.");
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * Updates the album_id of all media items that previously belonged to $oldAlbumId
+     * to the $newAlbumId. Used only for the media directly in the main merged folder
+     * (since the old album entry will be deleted).
+     *
+     * @param int $oldAlbumId The ID of the source album (e.g., ID 10).
+     * @param int $newAlbumId The ID of the target album (e.g., ID 110).
+     * @return bool True on success, false otherwise.
+     */
+    public function updateMediaIdForSingleAlbum(int $oldAlbumId, int $newAlbumId): bool
+    {
+        // Use $this->db->update() with a custom DbExpr to set the new album_id
+        $updatedRows = $this->db->update('gallery_media_stats',
+                ['album_id' => $newAlbumId],
+                'album_id = :oldId',
+                ['oldId' => $oldAlbumId]
+        );
+
+        return $updatedRows !== false;
+    }
+
+    /**
+     * Updates the paths of all sub-albums that were MOVED (not merged) within the hierarchy.
+     * This is crucial because sub-albums that are only moved retain their ID but need a path update.
+     * * @param string $oldPath The original relative path of the source album (e.g., 'AlbumA/FolderB').
+     * @param string $newPath The new relative path of the target album (e.g., 'AlbumC/FolderB').
+     * @return bool True on success, false otherwise.
+     */
+    public function updateSubAlbumPathsAfterMerge(string $oldPath, string $newPath): bool
+    {
+        $trimmedOldPath = trim($oldPath, '/');
+        $trimmedNewPath = trim($newPath, '/');
+
+        $oldPrefix = $trimmedOldPath . '/';
+        $newPrefix = $trimmedNewPath . '/';
+
+        // We use DbExpr for the powerful and atomic REPLACE function in MySQL.
+        $data = [
+            'album_path' => new \ckvsoft\DbExpr(
+                    "REPLACE(album_path, :oldPrefix, :newPrefix)"
+            )
+        ];
+
+        // The condition matches all sub-albums (paths starting with old prefix + slash).
+        $where = "album_path LIKE :prefixWildcard";
+        $bindWhereParams = [
+            'oldPrefix' => $oldPrefix,
+            'newPrefix' => $newPrefix,
+            'prefixWildcard' => $oldPrefix . '%'
+        ];
+
+        // Assuming $this->db->update is implemented to combine parameters from $data (for DbExpr)
+        // and $bindWhereParams (for WHERE clause) before executing the query.
+        $success = $this->db->update('gallery_albums',
+                $data,
+                $where,
+                $bindWhereParams);
+
+        return $success !== false;
     }
 
     /**
