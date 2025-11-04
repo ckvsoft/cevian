@@ -85,34 +85,42 @@ class Auth
      */
     public static function isNotLogged(string $role = ""): void
     {
+        $wasLoggedInBefore = isset($_SESSION['user_id']) || \ckvsoft\MultiLoginManager::isFrameworkLoggedIn();
+
         if (!self::loginStatus()) {
 
-            // Check if the request is an AJAX call using the Request object
+            // AJAX-Request
             if (self::isAjaxRequest()) {
-                // Return 401 Unauthorized instead of redirecting for AJAX calls
-                if (APP_DEBUG) {
-                    error_log("401: Session expired");
+                if ($wasLoggedInBefore) {
+                    // Session war mal aktiv → echte SessionExpired
+                    http_response_code(401);
+                    \ckvsoft\Output::error(_('Session expired'));
+                } else {
+                    // Keine Session vorhanden → einfach "not logged in", ohne Fehlermeldung
+                    http_response_code(401);
+                    \ckvsoft\Output::error(_('Not logged in'));
                 }
-                http_response_code(401);
-                \ckvsoft\Output::error(_('Session expired'));
                 exit;
             }
 
-            // Normal page request: Redirect.
-            self::sendFlashRedirect(
-                    BASE_URI,
-                    'error',
-                    _('Session Expired'),
-                    _('Your session has expired. Please log in again.')
-            );
+            // Normaler Seitenaufruf
+            if ($wasLoggedInBefore) {
+                // Nur in diesem Fall „Session expired“
+                self::sendFlashRedirect(
+                        BASE_URI,
+                        'error',
+                        _('Session Expired'),
+                        _('Your session has expired. Please log in again.')
+                );
+            } else {
+                // User war nie eingeloggt → einfach zur Startseite ohne Fehlermeldung
+                header('Location: ' . BASE_URI);
+                exit;
+            }
         }
 
+        // Rollenprüfung bleibt genau wie bisher:
         if ($role !== "" && !self::hasRole($role)) {
-            // Role check failed: use Flash Redirect to show Access Denied message
-            if (APP_DEBUG) {
-                error_log("Dashboard: " . 'You do not have the required permissions to access this page.');
-            }
-
             self::sendFlashRedirect(
                     BASE_URI . 'dashboard',
                     'error',
