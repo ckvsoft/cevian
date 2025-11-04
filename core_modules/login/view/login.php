@@ -1,4 +1,4 @@
-<div align="center" data-form="loginForm">
+<div align="center">
     <fieldset>
         <form action="login/submit" method="post" id="loginForm" data-title="<?= _('Login') ?>" data-message="<?= _('Login successful') ?>" data-redirect='dashboard'>
             <div class="form-row">
