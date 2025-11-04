@@ -40,7 +40,7 @@ class FlashMessage
      * * @param string $message The message content (e.g., 'Session expired').
      * @param string $type The message type ('success', 'error', 'warning', 'info').
      */
-    public static function set(string $message, string $type = 'info'): void
+    public static function set(string $title, string $message, string $type = 'info', array $details = []): void
     {
         // Start session if not already active to ensure storage.
         if (session_status() === PHP_SESSION_NONE) {
@@ -48,8 +48,10 @@ class FlashMessage
         }
 
         $_SESSION[self::SESSION_KEY] = [
-            'message' => $message,
             'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'details' => $details,
         ];
     }
 
