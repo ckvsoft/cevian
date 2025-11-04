@@ -76,7 +76,7 @@ if ($isRootView) {
     $containerId = $containerIdBase . $sanitizedPath;
 }
 ?>
-<div id="<?= htmlspecialchars($containerId) ?>" class="paginated" data-per-page="9">
+<div id="<?= htmlspecialchars($containerId) ?>" class="paginated">
 
     <?php if (!$isRootView): ?>
         <div class="slideshow-controls" style="margin-bottom: 15px; display: flex; align-items: center;">
@@ -87,7 +87,13 @@ if ($isRootView) {
         </div>
     <?php endif; ?>
 
-    <div class="image-grid">
+    <div class="gallery-meta">
+        📁 <?= $this->albumCountDirect ?> <?= ngettext('direct sub-album', 'direct sub-albums', $this->albumCountDirect) ?> |
+        📁 <?= $this->albumCountRecursive ?> <?= ngettext('total sub-album', 'total sub-albums', $this->albumCountRecursive) ?> |
+        🖼️ <?= $this->mediaCount ?> <?= ngettext('media in this album', 'media in this album', $this->mediaCount) ?>
+    </div>
+
+    <div id="mediaGridContainer" class="image-grid">
         <?= $this->galleryHtml ?>
     </div>
 </div>
@@ -143,7 +149,7 @@ if ($isRootView) {
             localStorage.setItem(STORAGE_KEY, this.checked ? 'true' : 'false');
 
             // Control
-            if ($gallery.isOpened()) {
+            if ($gallery.isOpen) {
                 if (this.checked) {
                     startSlideshow();
                 } else {
