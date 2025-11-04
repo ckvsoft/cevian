@@ -77,8 +77,9 @@ class Gallery extends ckvsoft\mvc\BaseController
         $galleryHelper = $this->loadHelper('gallery/gallery');
 
         // Get instructions (view and data) for rendering the grid of albums/images
-        $itemInstructions = $galleryHelper->getAlbumGridInstructions($galleryModel, $albumName, true);
+        $album_data = $galleryHelper->getAlbumGridInstructions($galleryModel, $albumName, true);
 
+        $itemInstructions = $album_data['instructions'];
         // Render all gallery items into a single HTML string
         $galleryHtml = '';
         foreach ($itemInstructions as $instruction) {
@@ -98,10 +99,12 @@ class Gallery extends ckvsoft\mvc\BaseController
         // 4. Prepare Data for View
         $data = [
             'currentAlbum' => empty($albumName) ? 'ALL_ALBUMS' : $albumName,
-            // Use _() for translation readiness
             'title' => empty($albumName) ? _('All Albums') : $currentAlbumTitle,
             'galleryHtml' => $galleryHtml,
-            'breadcrumbData' => $breadcrumbData, // Pass breadcrumb data to the view
+            'breadcrumbData' => $breadcrumbData,
+            'albumCountDirect' => $album_data['albumCountDirect'],
+            'albumCountRecursive' => $album_data['albumCountRecursive'],
+            'mediaCount' => $album_data['mediaCount'],
         ];
 
         // Render the main gallery view
