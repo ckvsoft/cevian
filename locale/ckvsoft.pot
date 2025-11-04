@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-29 08:48+0100\n"
+"POT-Creation-Date: 2025-10-30 19:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:86
 msgid "Session expired"
@@ -30,7 +31,7 @@ msgid "Your session has expired. Please log in again."
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/library/ckvsoft/auth.php:104
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:759
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:828
 msgid "Access Denied"
 msgstr ""
 
@@ -39,110 +40,143 @@ msgid "You do not have the required permissions to access this page."
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.js:106
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.min.js:5
 msgid "alert"
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.js:107
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.min.js:5
 msgid "Logged Out"
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.js:108
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/cevian.min.js:5
 msgid "You have been logged out in another browser tab."
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:1
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:21
 msgid "Processing..."
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:1
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:35
 msgid "Processing: "
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:36
-msgid "Complete: 100% ✅"
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:1
+msgid "Complete: 100% \\u2705"
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:2
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:4
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:10
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:46
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:188
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:194
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:187
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:195
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:374
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:376
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:378
 msgid "Complete"
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:2
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:57
 msgid "Error!"
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:3
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:150
 msgid "Unknown error"
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:4
 #: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:186
 msgid "Operation successful."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:209
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:5
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:210
 #: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/index.php:61
 #: /home/chris/NetBeansProjects/cevian/core_modules/rbac/view/editpermission.php:91
 msgid "Error"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:209
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:5
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:210
 msgid "Unknown error occurred."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:300
-msgid "Previous"
-msgstr ""
-
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:304
-msgid "Next"
-msgstr ""
-
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:335
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:6
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:336
 msgid "Page"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:335
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:6
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:336
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:611
 msgid "of"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:360
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:384
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:7
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:301
+msgid "Previous"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:8
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:305
+msgid "Next"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:10
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:361
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:386
 msgid "Saving..."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:361
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:362
 msgid "Save Process"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:361
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:362
 msgid "Saving sequence initiated..."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:367
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:368
 msgid "Step"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:368
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:369
 msgid "Data for"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:368
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:369
 msgid "saved successfully."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:372
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:9
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:373
 msgid "All changes saved!"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:381
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:10
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:383
 msgid "Save Failed!"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:381
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.min.js:10
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:383
 msgid "Process aborted:"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/inc/js/ajax-list-pagination.js:36
+msgid "Complete: 100% ✅"
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/backup/view/index.php:12
@@ -806,24 +840,65 @@ msgstr ""
 msgid "User was not found or could not be deleted."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:121
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:132
 msgid "Permission Denied: You must be logged in to access the file manager."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:237
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:264
 msgid "Permission Denied: You do not own this folder."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:273
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:300
 msgid "Directory already exists"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:278
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:306
 msgid "Failed to create directory"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:278
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:306
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:656
 msgid "Check file permissions."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:415
+msgid "Source file/folder does not exist"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:420
+msgid "Destination already contains an item with the same name"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:426
+msgid "Rename failed"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:583
+msgid "Item not found"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:594
+msgid "The associated album/folder could not be found for permission check"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:602
+msgid "Permission Denied: You do not have ownership rights to delete this item"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:637
+msgid "Cannot delete: Item not found at path"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:649
+msgid "Failed to remove directory"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:649
+msgid "Directory might not be empty."
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/model/filemanager_model.php:656
+msgid "Failed to delete file"
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/manager/edit_media.php:35
@@ -1008,177 +1083,199 @@ msgstr ""
 msgid "Edit Details"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:204
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:225
 msgid "Create New Directory"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:205
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:226
 msgid "Delete Selected Items"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:503
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:524
 msgid "Move Canceled"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:503
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:524
 #, php-format
 msgid "Item %s is already in this folder."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:508
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:555
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:917
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:529
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:576
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:988
 msgid "Move Failed"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:508
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:529
 msgid "Cannot move an item into its own subfolder."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:550
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:571
 msgid "Move Complete with Errors"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:550
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:571
 #, php-format
 msgid "Failed to move %s of %s item(s)."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:555
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:576
 msgid "An unexpected error occurred during move processing."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:596
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:603
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:611
+msgid "Processing file"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:638
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:645
 #, php-format
 msgid "Upload Failed: %s"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:603
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:645
 msgid "Network or unexpected error occurred."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:611
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:660
 msgid "Upload Complete"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:611
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:660
 #, php-format
 msgid "%s file(s) uploaded successfully."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:617
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:669
 msgid "Upload Failed"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:617
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:669
 msgid "All uploads failed. Check individual error messages."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:635
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:691
 msgid "No Selection"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:635
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:691
 msgid "Please select at least one item to delete."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:640
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:696
 #, php-format
 msgid "Are you sure you want to delete the following %s item(s) from \"%s\"?%s"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:656
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:712
 msgid "Deletion failed due to server error."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:660
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:716
 msgid "Deletion Complete."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:661
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:717
 msgid "Deletion Complete"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:667
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:723
 msgid "Unknown error object received."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:669
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:725
 msgid "Deletion Failed or Completed with Errors"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:679
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:735
 msgid "Delete Failed"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:679
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:735
 msgid "A network error occurred."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:781
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:852
 msgid "(Parent Folder)"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:875
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:883
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:946
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:954
 msgid "Browsing Error"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:875
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:946
 msgid "Unknown error."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:886
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:891
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:957
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:962
 msgid "Browsing Failed"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:886
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:957
 msgid "Unexpected server response format."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:891
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:962
 msgid "A network error occurred while loading the directory."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:907
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:978
 msgid "Move failed due to server error."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:910
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:981
 #, php-format
 msgid "Move Failed: %s"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:917
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:988
 msgid "A network error occurred while moving an item."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:942
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:1013
 msgid "Enter new directory name:"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:955
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:1026
 msgid "Error creating directory."
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:958
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:1029
 msgid "Directory Created"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:961
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:966
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:1032
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:1037
 msgid "Creation Failed"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:966
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/filemanager/index.php:1037
 msgid "A network error occurred while creating the directory."
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/index.php:85
-msgid "Automatische Diashow (5 Sek.)"
+msgid "Automatic slideshow (5 sec.)"
 msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/index.php:91
+msgid "direct sub-album"
+msgid_plural "direct sub-albums"
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/index.php:92
+msgid "total sub-album"
+msgid_plural "total sub-albums"
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/index.php:93
+msgid "media in this album"
+msgid_plural "media in this album"
+msgstr[0] ""
+msgstr[1] ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/gallery/view/partials/image-item.php:39
 msgid "Image"
@@ -1252,8 +1349,8 @@ msgstr ""
 msgid "Gallery"
 msgstr ""
 
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:91
-#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:102
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:92
+#: /home/chris/NetBeansProjects/cevian/core_modules/gallery/controller/gallery.php:103
 msgid "All Albums"
 msgstr ""
 
@@ -1373,28 +1470,22 @@ msgstr ""
 msgid "Job not running or progress data invalid."
 msgstr ""
 
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:3
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:14
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/controller/login.php:19
+msgid "Login"
+msgstr ""
+
+#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:3
+msgid "Login successful"
+msgstr ""
+
 #: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:5
 msgid "Email:"
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:9
 msgid "Password:"
-msgstr ""
-
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:14
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:74
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:90
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:98
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/controller/login.php:19
-msgid "Login"
-msgstr ""
-
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:74
-msgid "Login successful"
-msgstr ""
-
-#: /home/chris/NetBeansProjects/cevian/core_modules/login/view/login.php:98
-msgid "Server error! Status: "
 msgstr ""
 
 #: /home/chris/NetBeansProjects/cevian/core_modules/login/controller/login.php:60
