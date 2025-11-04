@@ -39,6 +39,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
     private function collectGalleryItemInstructions(array $contentList): array
     {
         $instructions = [];
+        $isAdmin = \ckvsoft\Auth::hasRole('admin');
 
         foreach ($contentList as $item) {
             $partialPath = match ($item['type'] ?? 'media') {
@@ -51,7 +52,7 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             if ($partialPath) {
                 $instructions[] = [
                     'view' => $partialPath,
-                    'data' => ['item' => $item]
+                    'data' => ['item' => $item, 'isAdmin' => $isAdmin]
                 ];
             }
         }
@@ -67,21 +68,24 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
      * @param bool $random
      * @return array The complete list of instructions, ready for the Controller to execute.
      */
-    public function getAlbumGridInstructions(Gallery_Model $model, string $albumPath, bool $includeSubAlbums = true, bool $recursive = false, bool $random = false, string $baseControllerPath = 'gallery/index'): array // 💡 NEUER PARAMETER
+    public function getAlbumGridInstructions(Gallery_Model $model, string $albumPath, bool $includeSubAlbums = true, bool $recursive = false, bool $random = false, string $baseControllerPath = 'gallery/index'): array
     {
         $contentList = [];
 
+        // ---- Load Sub-Albums ----
+        $subAlbums = [];
         if ($includeSubAlbums) {
             $subAlbums = $model->getSubAlbums($albumPath);
-            foreach ($subAlbums as $album) {
 
+            foreach ($subAlbums as $album) {
                 $fullAlbumPath = $album['path'];
                 $albumTitle = $album['title'] ?? $model->formatMediaName($album['name']);
                 $thumb = $model->getRandomThumbnailUrl($fullAlbumPath, true) ?? BASE_URI . 'gallery/media/default/image_thumb.jpg';
 
                 $contentList[] = [
                     'type' => 'album',
-                    'name' => $albumTitle,
+                    'name' => $album['name'],
+                    'title' => $albumTitle,
                     'url' => BASE_URI . $baseControllerPath . '/' . $fullAlbumPath,
                     'path' => $fullAlbumPath,
                     'thumbnailUrl' => $thumb,
@@ -89,9 +93,11 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             }
         }
 
+        // ---- Load Media Items ----
         $mediaItems = $model->getMediaByAlbum($albumPath, $recursive, $random);
         foreach ($mediaItems as $item) {
             $contentList[] = [
+                'id' => $item['id'] ?? null,
                 'type' => $item['type'] ?? 'media',
                 'name' => $item['title'] ?? basename($item['url']),
                 'description' => $item['description'] ?? '',
@@ -100,11 +106,28 @@ class Gallery_Helper extends \ckvsoft\mvc\Helper
             ];
         }
 
+        // ---- Handle empty result ----
         if (empty($contentList)) {
-            return [];
+            return [
+                'instructions' => [],
+                'albumCount' => 0,
+                'mediaCount' => 0,
+                'isAdmin' => false,
+            ];
         }
 
-        return $this->collectGalleryItemInstructions($contentList);
+        // ---- Count albums and media ----
+        $albumCounts = $model->getSubAlbumCounts($albumPath);
+        $mediaCount = count($mediaItems);
+
+        // ---- Return all structured data ----
+        return [
+            'instructions' => $this->collectGalleryItemInstructions($contentList),
+            'albumCountDirect' => $albumCounts['direct'],
+            'albumCountRecursive' => $albumCounts['recursive'],
+            'mediaCount' => $mediaCount,
+            'isAdmin' => \ckvsoft\Auth::hasRole('admin')
+        ];
     }
 
     /**
