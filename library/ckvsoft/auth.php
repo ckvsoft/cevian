@@ -43,11 +43,11 @@ class Auth
      * @param string $message Main message body.
      * @param array $details Optional details array.
      */
-    private static function sendFlashRedirect(string $targetUrl, string $type = 'info', string $title = '', string $message = '', array $details = []): void
+    public static function sendFlashRedirect(string $targetUrl, string $type = 'info', string $title = '', string $message = '', array $details = []): void
     {
         if ($message !== '') {
             // Use the dedicated FlashMessage class to store the message
-            \ckvsoft\FlashMessage::set($message, $type, $title, $details);
+            \ckvsoft\FlashMessage::set($title, $message, $type, $details);
         }
 
         // Force the session data to be written to the server storage immediately
@@ -56,6 +56,9 @@ class Auth
             session_write_close();
         }
 
+        if (APP_DEBUG) {
+            error_log("Location: " . $targetUrl);
+        }
         header("Location: " . $targetUrl);
         exit;
     }
@@ -66,6 +69,11 @@ class Auth
     public static function isLogged(): void
     {
         if (self::loginStatus()) {
+            if (self::isAjaxRequest()) {
+                \ckvsoft\Output::success(['isLogged' => true]);
+                exit;
+            }
+
             header('Location: ' . BASE_URI . 'dashboard');
             exit;
         }
@@ -82,6 +90,9 @@ class Auth
             // Check if the request is an AJAX call using the Request object
             if (self::isAjaxRequest()) {
                 // Return 401 Unauthorized instead of redirecting for AJAX calls
+                if (APP_DEBUG) {
+                    error_log("401: Session expired");
+                }
                 http_response_code(401);
                 \ckvsoft\Output::error(_('Session expired'));
                 exit;
@@ -98,6 +109,10 @@ class Auth
 
         if ($role !== "" && !self::hasRole($role)) {
             // Role check failed: use Flash Redirect to show Access Denied message
+            if (APP_DEBUG) {
+                error_log("Dashboard: " . 'You do not have the required permissions to access this page.');
+            }
+
             self::sendFlashRedirect(
                     BASE_URI . 'dashboard',
                     'error',
