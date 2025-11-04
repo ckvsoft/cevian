@@ -49,8 +49,23 @@ function fetchAndLog(url, options = {}) {
                 }
             })
             .catch(err => {
+                const errorMessage = err.message || '';
+                const errorName = err.name || '';
+
+                // **DIESE PRÜFUNG MUSS VOR DEM ALERT STEHEN**
+                if (errorMessage.includes('NS_BINDING_ABORTED') ||
+                        errorMessage.includes('NetworkError') ||
+                        errorMessage.includes('Failed to fetch') ||
+                        errorName === 'AbortError'
+                        ) {
+                    if (IS_DEBUG_MODE === '1') {
+                        console.warn("Fetch silently aborted by browser navigation/action:", url);
+                    }
+                    return Promise.reject(new Error("Browser Aborted"));
+                }
+
                 if (IS_DEBUG_MODE === '1') {
-                    console.error("Fetch error at", url, ":", err);
+                    console.error("Fatal Fetch error at", url, ":", err);
                 }
                 throw err;
             });
@@ -70,9 +85,7 @@ function sendMessageAndRedirect(type, title, message, details = [], targetUrl, o
     const data = {type, title, message, details, options};
     localStorage.setItem(FLASH_MESSAGE_KEY, JSON.stringify(data));
     if (targetUrl) {
-        setTimeout(() => {
-            window.location.href = targetUrl;
-        }, 10);
+        window.location.href = targetUrl;
     } else {
         console.warn("Target URL missing for redirect.");
 }
