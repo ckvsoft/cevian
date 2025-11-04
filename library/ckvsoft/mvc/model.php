@@ -23,14 +23,15 @@ class Model extends \ckvsoft\mvc\Config
     {
         if (defined('APP_DEBUG') && APP_DEBUG) {
             // Entwicklungsmodus → direkt sichtbar machen
+            error_log("Model Error: Methode {$name} is not defined in Class: " . get_class($this));
             die("<div style='color:red;'>
-                <b>Model Error:</b> Methode <b>{$name}</b> ist nicht definiert<br>
-                In Klasse: <b>" . get_class($this) . "</b>
+                <b>Model Error:</b> Methode <b>{$name}</b> is not defined<br>
+                In Class: <b>" . get_class($this) . "</b>
             </div>");
         } else {
             // Produktionsmodus → Exception werfen und zentral abfangen
             throw new \ckvsoft\CkvException(
-                            "Model Error: Methode {$name} ist nicht definiert in " . get_class($this)
+                            "Model Error: Methode {$name} is not defined in " . get_class($this)
                     );
         }
     }
