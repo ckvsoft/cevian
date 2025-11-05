@@ -152,6 +152,8 @@ class XNotify {
         let container = document.getElementById("x-notify-container");
         let notification = element.getElementsByClassName("x-notification")[0];
 
+        this.clearDuplicates(this.title, this.description);
+        container = document.getElementById("x-notify-container");
         if (this.position === "BottomRight" || this.position === "BottomLeft") {
             container.append(element);
             if (container.scrollHeight > window.innerHeight) {
@@ -208,6 +210,28 @@ class XNotify {
         if (!container)
             return;
         Array.from(container.getElementsByClassName("x-notification")).forEach(el => this.hideNotification(el));
+    }
+
+    clearDuplicates(title, description) {
+        const container = document.getElementById("x-notify-container");
+        if (!container)
+            return;
+
+        const notifications = Array.from(container.querySelectorAll(".x-notification"));
+
+        notifications.forEach(notification => {
+            const spans = notification.querySelectorAll("span");
+
+            if (spans.length >= 2) {
+                const existingTitle = spans[0].innerText.trim();
+                const existingDescription = spans[1].innerText.trim();
+
+                if (existingTitle === title && existingDescription === description) {
+                    const rowElement = notification.parentElement;
+                    this.hideNotification(rowElement);
+                }
+            }
+        });
     }
 
     generateID() {
