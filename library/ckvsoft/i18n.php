@@ -26,6 +26,99 @@
 
 namespace ckvsoft;
 
+use ckvsoft\mvc\Config;
+
+// ------------------------------------------------------------------
+// INTERNATIONALIZATION (i18n) FALLBACK AND HELPER DEFINITIONS
+// Defines the translation functions globally.
+// ------------------------------------------------------------------
+if (!function_exists('_')) {
+
+    /**
+     * Fallback translation function: Returns the original string.
+     * Used when gettext is unavailable.
+     *
+     * @param string $text The original string to be translated (the message ID).
+     * @return string
+     */
+    function _(string $text): string
+    {
+        return trim($text);
+    }
+
+}
+
+if (!function_exists('ngettext')) {
+
+    /**
+     * Fallback plural function: Returns singular if count is 1, otherwise plural.
+     * Used when gettext is unavailable.
+     */
+    function ngettext(string $singular, string $plural, int $count): string
+    {
+        return ($count === 1) ? $singular : $plural;
+    }
+
+}
+
+if (!function_exists('_n')) {
+
+    /**
+     * Abbreviation for the standard plural function (ngettext).
+     * * @param string $singular The singular message ID.
+     * @param string $plural The plural message ID.
+     * @param int $count The number to determine the plural form.
+     * @return string The translated singular or plural string.
+     */
+    function _n(string $singular, string $plural, int $count): string
+    {
+        return ngettext($singular, $plural, $count);
+    }
+
+}
+
+if (!function_exists('__')) {
+
+    /**
+     * Module translation helper. Automatically determines the module domain
+     * by analyzing the call stack and translates the message using dgettext.
+     *
+     * @param string $message The message ID to translate.
+     * @return string The translated string.
+     */
+    function __(string $message): string
+    {
+        if (class_exists('\\ckvsoft\\I18n')) {
+            return \ckvsoft\I18n::getModuleMessage($message);
+        }
+        // Fallback to standard translation if I18n class is not available
+        return _($message);
+    }
+
+}
+
+if (!function_exists('__n')) {
+
+    /**
+     * Module plural translation helper. Automatically determines the module domain
+     * and translates the plural message using dngettext.
+     *
+     * @param string $singular The singular message ID.
+     * @param string $plural The plural message ID.
+     * @param int $count The number to determine the plural form.
+     * @return string The translated singular or plural string.
+     */
+    function __n(string $singular, string $plural, int $count): string
+    {
+        if (class_exists('\\ckvsoft\\I18n')) {
+            return \ckvsoft\I18n::getModulePluralMessage($singular, $plural, $count);
+        }
+        // Fallback to standard plural translation if I18n class is not available
+        return _n($singular, $plural, $count);
+    }
+
+}
+
 class I18n
 {
 
@@ -140,34 +233,30 @@ class I18n
         return ngettext($singular, $plural, $count);
     }
 
-    /**
+    /*
      * Extracts the module name (which serves as the text domain) from the call stack.
+     * This now uses the cached result from the Config class to avoid multiple debug_backtrace() calls.
      *
-     * @return string|null The module name (text domain) or null if not found.
+     * @return string|null The module name (text domain) or the default domain.
      */
+
     private static function _getModuleDomain(): ?string
     {
-        // Get the call stack
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        // Use the cached method from Config
+        $moduleName = Config::getModuleNameFromBacktrace();
 
-        // Path pattern for module files (e.g., /modules/my_module/...)
-        $modulePattern = '#/(modules|core_modules)/([^/]+)/#i';
-
-        // Iterate through the call stack to find a file path belonging to a module
-        foreach ($trace as $step) {
-            if (isset($step['file']) && preg_match($modulePattern, $step['file'], $matches)) {
-                // $matches[2] is the module name (e.g., 'user', 'blog')
-                $moduleName = strtolower($matches[2]);
-
-                // Bind the domain for the discovered module if not already bound
-                if (function_exists('bindtextdomain') && self::$rootPath) {
-                    $localePath = self::$rootPath . 'locale';
-                    // Bind it to the same locale directory as the default domain
-                    bindtextdomain($moduleName, $localePath);
-                    bind_textdomain_codeset($moduleName, 'UTF-8');
-                }
-                return $moduleName;
+        if ($moduleName !== null) {
+            // Bind the domain for the discovered module if not already bound
+            // NOTE: We assume Config::getModuleNameFromBacktrace() runs before this,
+            // but we must check for gettext functions here as it's the i18n class.
+            if (function_exists('bindtextdomain') && self::$rootPath) {
+                $localePath = self::$rootPath . 'locale';
+                // Bind it to the same locale directory as the default domain
+                // If it's already bound, PHP will just confirm the binding.
+                bindtextdomain($moduleName, $localePath);
+                bind_textdomain_codeset($moduleName, 'UTF-8');
             }
+            return $moduleName;
         }
 
         // If no specific module file is found in the stack, return the default domain
