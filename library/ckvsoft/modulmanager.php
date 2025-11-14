@@ -4,15 +4,22 @@ namespace ckvsoft;
 
 use PDO;
 use Exception;
+use ckvsoft\Database;
 
-class ModuleManager extends \ckvsoft\mvc\Config
+// NOTE: We assume CkvException is defined in the ckvsoft namespace.
+
+class ModulManager
 {
 
-    private \ckvsoft\Database $db;
+    private Database $db;
+    private string $coreModulesUri;
+    private string $modulesUri;
 
-    public function __construct()
+    public function __construct(Database $db, string $coreModulesUri, string $modulesUri)
     {
-        parent::__construct();
+        $this->db = $db;
+        $this->coreModulesUri = $coreModulesUri;
+        $this->modulesUri = $modulesUri;
     }
 
     /**
@@ -20,9 +27,10 @@ class ModuleManager extends \ckvsoft\mvc\Config
      */
     public function loadConfig(string $module): ?array
     {
+        // Correction: Use injected properties instead of constants
         $paths = [
-            __DIR__ . "/../../" . CORE_MODULES_URI . "/{$module}/module.json",
-            __DIR__ . "/../../" . MODULES_URI . "/{$module}/module.json",
+            __DIR__ . "/../../" . $this->coreModulesUri . "/{$module}/module.json",
+            __DIR__ . "/../../" . $this->modulesUri . "/{$module}/module.json",
         ];
 
         foreach ($paths as $path) {
@@ -59,8 +67,8 @@ class ModuleManager extends \ckvsoft\mvc\Config
         $config = $this->loadConfig($module);
 
         if (!$config || !isset($config['database'])) {
-            // No own DB → use shared framework DB
-            return $this->db();
+            // No own DB → use shared framework DB instance passed in constructor
+            return $this->db;
         }
 
         $dbConfig = $config['database'];
@@ -122,9 +130,10 @@ class ModuleManager extends \ckvsoft\mvc\Config
      */
     private function applyMigrations(string $module): void
     {
+        // Correction: Use injected properties for paths
         $paths = [
-            __DIR__ . "/../../" . CORE_MODULES_URI . "/{$module}/inc/sql",
-            __DIR__ . "/../../" . MODULES_URI . "/{$module}/inc/sql",
+            __DIR__ . "/../../" . $this->coreModulesUri . "/{$module}/inc/sql",
+            __DIR__ . "/../../" . $this->modulesUri . "/{$module}/inc/sql",
         ];
 
         $migrationPath = null;
