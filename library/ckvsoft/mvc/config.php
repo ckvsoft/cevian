@@ -13,6 +13,7 @@ class Config
 
     /** @var string|null Caches the detected module name for the current request. */
     protected static ?string $cachedModuleName = null;
+    protected static ?array $moduleConfigCache = null;
 
     /** @var \ckvsoft\Database|null The instance-level DB connection (usually the framework connection). */
     protected ?Database $db;
@@ -104,14 +105,32 @@ class Config
                 $coreUri = Config::get('paths.core_modules_uri');
                 $modulesUri = Config::get('paths.modules_uri');
                 $manager = new ModulManager(Config::db(), $coreUri, $modulesUri);
+                $moduleConfig = $manager->loadConfig($moduleName);
                 $db = $manager->getModuleDb($moduleName);
             }
 
+            self::$moduleConfigCache[$moduleName] = $moduleConfig ?? [];
             // Fallback to the shared framework DB if no module-specific DB exists
             self::$moduleDbCache[$moduleName] = $db ?? $sharedDb;
         }
 
         return self::$moduleDbCache[$moduleName];
+    }
+
+    public static function module(string $key, ?string $moduleName = null)
+    {
+        $moduleName ??= self::getModuleNameFromBacktrace();
+        $config = self::$moduleConfigCache[$moduleName] ?? null;
+        if (!$config)
+            return null;
+
+        foreach (explode('.', $key) as $part) {
+            if (!isset($config[$part]))
+                return null;
+            $config = $config[$part];
+        }
+
+        return $config;
     }
 
     /**
