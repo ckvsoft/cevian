@@ -1,3 +1,22 @@
+# [0.18.0](https://github.com/ckvsoft/cevian/compare/v0.17.0...v0.18.0) (2025-12-21)
+
+
+### Bug Fixes
+
+* **gallery:** Stop URL encoding filenames in media and thumbnail URLs ([f847a84](https://github.com/ckvsoft/cevian/commit/f847a846358f602f57206bf1471559c63cce17de))
+
+
+### Features
+
+* add minimal system mailer class ([178bae9](https://github.com/ckvsoft/cevian/commit/178bae9864fea2af528ac41bdc88ff59937a5dd3))
+* **auth:** Refine session expiration handling in isNotLogged() ([6837cae](https://github.com/ckvsoft/cevian/commit/6837cae7fdc6966b92c3d840f544bd957a102d66))
+* **config:** Add caching and retrieval for module configuration ([f6a40e1](https://github.com/ckvsoft/cevian/commit/f6a40e199a3bd7f5d2e2da3a3c96002feccde792))
+* **config:** implement lazy loading for module database connections ([7b3027e](https://github.com/ckvsoft/cevian/commit/7b3027e1b319134c63066a6c28d2b9148a744d8d))
+* **config:** Implement multi-database support for modules and module detection ([0a7c399](https://github.com/ckvsoft/cevian/commit/0a7c399d4ea76a0fbf6de91f0bc4efb33c643804))
+* **notifications:** Add duplicate prevention to x-notify.js ([5cd3e1a](https://github.com/ckvsoft/cevian/commit/5cd3e1a5999293b44d376389cdd1976353cd7908))
+
+
+
 # [0.17.0](https://github.com/ckvsoft/cevian/compare/v0.16.0...v0.17.0) (2025-11-04)
 
 
@@ -107,17 +126,6 @@
 
 * **gallery/helper:** Remove URL encoding for album paths in grid links ([4fbc887](https://github.com/ckvsoft/cevian/commit/4fbc8873beabc3808e1272f3b79dc5c4b50b11ba))
 * **gallery/helper:** Remove URL encoding for album paths in grid links ([2b5ea26](https://github.com/ckvsoft/cevian/commit/2b5ea265f3266414f0eadf0b8f89028159cf1513))
-
-
-
-# [0.13.0](https://github.com/ckvsoft/cevian/compare/v0.12.0...v0.13.0) (2025-10-20)
-
-
-### Features
-
-* **backup/view:** Implement i18n support and enhance image backup robustness ([3b812b3](https://github.com/ckvsoft/cevian/commit/3b812b3d7f0d13306f5e25c14ebd860972e7d6ab))
-* **gallery/helper:** Implement breadcrumb data helper and use DB album titles ([24fbc75](https://github.com/ckvsoft/cevian/commit/24fbc759c69fdee23aafc14baac0f993308e46d5))
-* **gallerymanager/model:** Add initial title generation during sync and enhance recursive updates ([120f5a8](https://github.com/ckvsoft/cevian/commit/120f5a8717c3b54ece263e1ff4b5b862751aeab6))
 
 
 
