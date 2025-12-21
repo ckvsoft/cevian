@@ -132,6 +132,11 @@ class MultiLoginManager extends \ckvsoft\mvc\Config
                 'user_key' => $userKey,
                 'data' => json_encode($data)
             ]);
+
+            $_SESSION['is_logged_in'] = true;
+            if ($module !== 'ckvsoft') {
+                $_SESSION['last_module_name'] = $module;
+            }
         } catch (\PDOException $e) {
             throw new \ckvsoft\CkvException("MultiLoginManager::login failed: " . $e->getMessage(), 0, $e);
         }

@@ -8,49 +8,50 @@ use ckvsoft\ModulManager;
 class Config
 {
 
-    /** @var \ckvsoft\Database|null The shared framework-wide DB instance (accessed via self::db()). */
-    protected static ?\ckvsoft\Database $sharedDb = null;
-
-    /** @var string|null Caches the detected module name for the current request. */
+    // ---------------------------------------------------------------------
+    // Shared Framework DB
+    // ---------------------------------------------------------------------
+    protected static ?Database $sharedDb = null;
+    // ---------------------------------------------------------------------
+    // Module detection/cache
+    // ---------------------------------------------------------------------
     protected static ?string $cachedModuleName = null;
     protected static ?array $moduleConfigCache = null;
-
-    /** @var \ckvsoft\Database|null The instance-level DB connection (usually the framework connection). */
-    protected ?Database $db;
+    // ---------------------------------------------------------------------
+    // Instance-level DB (framework connection)
+    // ---------------------------------------------------------------------
+    protected ?Database $db = null;
+    // ---------------------------------------------------------------------
+    // Module-specific DB
+    // ---------------------------------------------------------------------
+    protected Database $moduleDb;
+    protected static ?Database $moduleSharedDb = null;
+    private static array $moduleDbCache = [];
+    protected static array $moduleSharedDbMap = [];
+    // ---------------------------------------------------------------------
+    // Config caches
+    // ---------------------------------------------------------------------
     protected static ?array $appConfig = null;
     protected static ?array $mergedConfig = null;
 
-    /** @var \ckvsoft\Database The module-specific DB instance (instance access via $this->moduleDb). */
-    protected Database $moduleDb;
-
-    /** @var \ckvsoft\Database|null The module’s shared static DB (used for static access, e.g. self::$moduleSharedDb). */
-    protected static ?Database $moduleSharedDb = null;
-
-    /** @var array Map of module names to their DB instances (e.g., ['pmwh3' => Database]). */
-    private static array $moduleDbCache = [];
-
-    /** @var array Map of module names to shared static DB connections (for concurrent modules). */
-    protected static array $moduleSharedDbMap = [];
-
     public function __construct()
     {
-        // Load merged app configuration
-        $this->initMergedConfig();
+        // Merged app configuration vorbereiten
+        self::initMergedConfig();
 
-        // Initialize the framework-level DB connection
+        // Shared framework DB initialisieren
         if (file_exists(__DIR__ . '/../../../config/config.json')) {
             $this->db = self::db();
         } else {
-            $this->db = null; // Installer mode
+            $this->db = null; // Installer-Modus
         }
 
-        // Initialize module-specific DB connection(s)
-        $this->initializeModuleDbConnections();
+        // Keine Modul-DB initialisieren – Lazy!
     }
 
-    /**
-     * Writes a debug message to the log only if APP_DEBUG is enabled.
-     */
+    // ---------------------------------------------------------------------
+    // Logging
+    // ---------------------------------------------------------------------
     public static function logDebug(string $message): void
     {
         $debug = self::get('app.debug');
@@ -59,19 +60,15 @@ class Config
         }
     }
 
-    /**
-     * Detects the module name by analyzing the call stack for a /modules/<name>/ path.
-     * The expensive backtrace is only performed once per request.
-     * @return string|null The detected module name (e.g. "pmwh3"), or null if not found.
-     */
+    // ---------------------------------------------------------------------
+    // Module name detection via backtrace
+    // ---------------------------------------------------------------------
     public static function getModuleNameFromBacktrace(): ?string
     {
-        // 1. Check cache first
         if (self::$cachedModuleName !== null) {
             return self::$cachedModuleName;
         }
 
-        // 2. Perform expensive operation (only if cache is empty)
         $modulePattern = '#/(modules|core_modules)/([^/]+)/#i';
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $detectedModule = null;
@@ -83,34 +80,32 @@ class Config
             }
         }
 
-        // 3. Cache the result for subsequent calls
         self::$cachedModuleName = $detectedModule;
-
         return $detectedModule;
     }
 
-    /**
-     * Retrieves (or creates) the correct Database instance for the current module.
-     * Falls back to the shared framework DB if none is found.
-     */
+    // ---------------------------------------------------------------------
+    // Module DB (lazy initialization)
+    // ---------------------------------------------------------------------
     protected function getModuleDbInstance(): Database
     {
-        $moduleName = $this->getModuleNameFromBacktrace();
+        $moduleName = self::getModuleNameFromBacktrace();
         $sharedDb = self::db();
 
         if (!isset(self::$moduleDbCache[$moduleName])) {
             $db = null;
+            $moduleConfig = [];
 
             if ($moduleName !== null) {
-                $coreUri = Config::get('paths.core_modules_uri');
-                $modulesUri = Config::get('paths.modules_uri');
-                $manager = new ModulManager(Config::db(), $coreUri, $modulesUri);
+                $coreUri = self::get('paths.core_modules_uri');
+                $modulesUri = self::get('paths.modules_uri');
+
+                $manager = new ModulManager($sharedDb, $coreUri, $modulesUri);
                 $moduleConfig = $manager->loadConfig($moduleName);
                 $db = $manager->getModuleDb($moduleName);
             }
 
             self::$moduleConfigCache[$moduleName] = $moduleConfig ?? [];
-            // Fallback to the shared framework DB if no module-specific DB exists
             self::$moduleDbCache[$moduleName] = $db ?? $sharedDb;
         }
 
@@ -121,6 +116,7 @@ class Config
     {
         $moduleName ??= self::getModuleNameFromBacktrace();
         $config = self::$moduleConfigCache[$moduleName] ?? null;
+
         if (!$config)
             return null;
 
@@ -133,52 +129,47 @@ class Config
         return $config;
     }
 
-    /**
-     * Initializes $this->moduleDb and self::$moduleSharedDb for the active module.
-     * Supports multiple modules concurrently.
-     */
-    protected function initializeModuleDbConnections(): void
+    protected function initializeModuleDbConnections(?string $moduleName = null): void
     {
-        $moduleName = $this->getModuleNameFromBacktrace();
-        $moduleDbInstance = $this->getModuleDbInstance();
-        $this->moduleDb = $moduleDbInstance;
-
+        $moduleName ??= self::getModuleNameFromBacktrace();
         $moduleKey = $moduleName ?? '_default_';
 
-        // Set or reuse module-specific shared DB
-        if (!isset(self::$moduleSharedDbMap[$moduleKey])) {
-            self::$moduleSharedDbMap[$moduleKey] = $moduleDbInstance;
-            self::logDebug("🔄 moduleSharedDbMap[{$moduleKey}] initialized (module-specific).");
+        if (isset(self::$moduleSharedDbMap[$moduleKey])) {
+            $this->moduleDb = self::$moduleSharedDbMap[$moduleKey];
+            self::$moduleSharedDb = self::$moduleSharedDbMap[$moduleKey];
+            return;
         }
 
-        self::$moduleSharedDb = self::$moduleSharedDbMap[$moduleKey];
+        $moduleDbInstance = $this->getModuleDbInstance();
+        $this->moduleDb = $moduleDbInstance;
+        self::$moduleSharedDbMap[$moduleKey] = $moduleDbInstance;
+        self::$moduleSharedDb = $moduleDbInstance;
+
+        self::logDebug("🔄 moduleSharedDbMap[{$moduleKey}] initialized (module-specific).");
     }
 
-    /**
-     * Returns the shared DB instance for a specific module.
-     * Falls back to the framework DB if not initialized.
-     */
     public static function moduleDb(?string $moduleName = null): Database
     {
         $moduleKey = $moduleName ?: self::getModuleNameFromBacktrace();
 
-        if (isset(self::$moduleSharedDbMap[$moduleKey])) {
-            return self::$moduleSharedDbMap[$moduleKey];
+        if (!isset(self::$moduleSharedDbMap[$moduleKey])) {
+            $instance = new self();
+            $instance->initializeModuleDbConnections($moduleKey);
         }
 
-        return self::initModuleDbInternal($moduleKey);
+        return self::$moduleSharedDbMap[$moduleKey];
     }
 
     // ---------------------------------------------------------------------
-    // Existing configuration methods (unchanged, just clean comments)
+    // App config
     // ---------------------------------------------------------------------
-
     public static function getAppConfig(): array
     {
         if (self::$appConfig === null) {
             $configPath = __DIR__ . '/../../../config/app.json';
             self::$appConfig = file_exists($configPath) ? json_decode(file_get_contents($configPath), true) : [];
         }
+
         return self::$appConfig;
     }
 
@@ -200,26 +191,21 @@ class Config
         return self::$mergedConfig;
     }
 
-    /**
-     * Retrieves a nested configuration value using dot notation (e.g. "paths.logs_dir").
-     */
     public static function get(string $key)
     {
         $config = self::getMergedConfig();
-        $keys = explode('.', $key);
-        $value = $config;
-
-        foreach ($keys as $k) {
-            if (!isset($value[$k])) {
+        foreach (explode('.', $key) as $k) {
+            if (!isset($config[$k]))
                 return null;
-            }
-            $value = $value[$k];
+            $config = $config[$k];
         }
-
-        return $value;
+        return $config;
     }
 
-    protected static function initDb()
+    // ---------------------------------------------------------------------
+    // Shared framework DB
+    // ---------------------------------------------------------------------
+    protected static function initDb(): void
     {
         $configPath = __DIR__ . '/../../../config/config.json';
 
@@ -245,9 +231,6 @@ class Config
         ]);
     }
 
-    /**
-     * Retrieves the framework's shared DB instance.
-     */
     public static function db(): ?Database
     {
         if (self::$sharedDb === null) {

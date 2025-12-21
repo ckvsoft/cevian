@@ -1,10 +1,20 @@
+/**
+ * Frontend JavaScript module for session monitoring.
+ * It periodically polls the server and handles the 401 response code
+ * to trigger a client-side redirect based on the 'redirect_path' provided by the server.
+ */
+
 /* --- CONSTANT FOR FLASH MESSAGE STORAGE --- */
 const FLASH_MESSAGE_KEY = "flash_message_data";
 
 /* * Define a global constant for debug mode based on server configuration.
  * Assuming a PHP constant APP_DEBUG exists to control this flag.
+ * Set to '1' or '0' for consistent string comparison in JS.
  */
-const IS_DEBUG_MODE = '<?= APP_DEBUG ? true : false; ?>';
+const IS_DEBUG_MODE = '<?= APP_DEBUG ? "1" : "0"; ?>';
+
+// Placeholder for BASE_URI, which must be set by PHP (e.g., <?= BASE_URI ?> in your main HTML template)
+const BASE_URI = '<?= BASE_URI ?>';
 
 /**
  * Fetches data from a URL, adds logging (if IS_DEBUG_MODE is true), and handles common errors (like 401).
@@ -17,23 +27,42 @@ const IS_DEBUG_MODE = '<?= APP_DEBUG ? true : false; ?>';
 function fetchAndLog(url, options = {}) {
     options.headers = {
         ...(options.headers || {}),
-        "X-Requested-With": "fetch" // Custom header for server-side detection (used by PHP's isAjaxRequest)
+        "X-Requested-With": "fetch"
     };
     return fetch(url, options)
             .then(async resp => {
                 if (resp.status === 401) {
+                    // --- START CRITICAL REDIRECT LOGIC ---
+                    let data = {};
+                    // The server sends the redirect_path in the JSON body, even with 401 status.
+                    // We MUST read the body now to get the path before redirecting.
+                    try {
+                        data = await resp.json();
+                    } catch (e) {
+                        if (IS_DEBUG_MODE === '1') {
+                            console.warn("[Session Monitor] 401 received but failed to parse JSON body for redirect path. Falling back to BASE_URI.");
+                        }
+                    }
+
+                    // Use the path provided by the server, or fallback to BASE_URI
+                    const targetPath = data.redirect_path || BASE_URI;
+
                     localStorage.setItem("logout_reason", "session_expired");
-                    window.location.href = "<?= BASE_URI ?>";
-                    return Promise.reject("Session expired"); // Reject promise to stop further execution
+                    window.location.href = targetPath; // <--- MODIFIED TO USE DYNAMIC PATH
+
+                    // Throw an error to stop further processing
+                    return Promise.reject("Session expired");
+                    // --- END CRITICAL REDIRECT LOGIC ---
                 }
 
+                // Standard logic for 200 OK responses (read text, then try to parse JSON)
                 const text = await resp.text();
-                if (IS_DEBUG_MODE === '1') {
+                if (IS_DEBUG_MODE === '1') { // Use string comparison '1'
                     console.log("Response from", url, ":", text || "<empty>");
                 }
 
                 if (!text) {
-                    if (IS_DEBUG_MODE === '1') {
+                    if (IS_DEBUG_MODE === '1') { // Use string comparison '1'
                         console.warn("Response is empty.");
                     }
                     return null;
@@ -42,9 +71,10 @@ function fetchAndLog(url, options = {}) {
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    if (IS_DEBUG_MODE === '1') {
+                    if (IS_DEBUG_MODE === '1') { // Use string comparison '1'
                         console.warn("Not a valid JSON response:", e.message);
                     }
+                    // Return raw text if parsing failed
                     return text;
                 }
             })
@@ -58,13 +88,13 @@ function fetchAndLog(url, options = {}) {
                         errorMessage.includes('Failed to fetch') ||
                         errorName === 'AbortError'
                         ) {
-                    if (IS_DEBUG_MODE === '1') {
+                    if (IS_DEBUG_MODE === '1') { // Use string comparison '1'
                         console.warn("Fetch silently aborted by browser navigation/action:", url);
                     }
                     return Promise.reject(new Error("Browser Aborted"));
                 }
 
-                if (IS_DEBUG_MODE === '1') {
+                if (IS_DEBUG_MODE === '1') { // Use string comparison '1'
                     console.error("Fatal Fetch error at", url, ":", err);
                 }
                 throw err;
@@ -92,6 +122,49 @@ function sendMessageAndRedirect(type, title, message, details = [], targetUrl, o
 }
 
 /**
+ * Performs the periodic POST check of the Server Session.
+ */
+async function checkServerSessionStatus() {
+    const formData = new URLSearchParams();
+    formData.append('action', 'check_session_status');
+
+    try {
+        // fetchAndLog handles 401 redirection internally
+        const data = await fetchAndLog(BASE_URI, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        });
+
+        // Optional: If the server returns active status, you can log the time remaining
+        // Note: data is only guaranteed to be an object if the server successfully responded (200 OK)
+        if (IS_DEBUG_MODE === '1' && data && data.is_active) { // Use string comparison '1'
+            const remaining = Math.max(0, Math.floor(data.time_remaining_seconds));
+            console.log(`[Session Monitor] Active. Remaining: ${remaining}`);
+        }
+
+    } catch (error) {
+        // Only log if the error wasn't the expected session expiration or browser abort
+        if (error !== "Session expired" && error.message !== "Browser Aborted") {
+            console.error("[Session Monitor] Failed:", error);
+        }
+    }
+}
+
+/**
+ * Starts the periodic session check.
+ */
+function startSessionMonitor() {
+    // Run an immediate check on load
+    checkServerSessionStatus();
+
+    // Start periodic check
+    setInterval(checkServerSessionStatus, 60 * 1000);
+}
+
+/**
  * Check for pending flash messages in localStorage and display them once.
  * Removes the message data after successful retrieval/display attempt.
  */
@@ -116,13 +189,13 @@ function checkFlashMessage() {
 window.addEventListener("storage", event => {
     if (event.key === "logout" && event.newValue !== null) {
         displayMessage(
-                '<?= _("alert") ?>',
+                'alert',
                 '<?= _("Logged Out") ?>',
                 '<?= _("You have been logged out in another browser tab.") ?>',
                 [],
                 {
                     withButton: true,
-                    onConfirm: () => window.location.href = "<?= BASE_URI ?>"
+                    onConfirm: () => window.location.href = BASE_URI
                 }
         );
     }
@@ -143,16 +216,15 @@ function broadcastLogout()
 document.addEventListener("DOMContentLoaded", () => {
     // 1️⃣ Show flash messages from previous JS redirect (e.g., after saving data).
     checkFlashMessage();
-
+    startSessionMonitor();
     // 2️⃣ Show logout/session-expired message if redirected due to a failed AJAX call (401).
     const reason = localStorage.getItem("logout_reason");
     if (reason === "session_expired") {
         // This block executes AFTER an AJAX 401 redirect (session timeout).
         displayMessage(
-                "error",
-                "Session Expired",
-                // Displaying a neutral text for the server-side session timeout.
-                "Your session has expired. Please log in again.",
+                'alert',
+                '<?= _("Session Expired") ?>',
+                '<?= _("Your session has expired. Please log in again.") ?>',
                 [],
                 {withButton: true}
         );

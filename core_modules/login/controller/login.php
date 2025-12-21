@@ -85,7 +85,7 @@ class Login extends \ckvsoft\mvc\BaseController
                     BASE_URI . 'dashboard',
                     'success',
                     _('Login'),
-                    _('Login successful')
+                    _('Welcome Back!')
             );
         } catch (\ckvsoft\CkvException $e) {
             // Handle exceptions, typically input validation errors
