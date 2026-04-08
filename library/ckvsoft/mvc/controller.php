@@ -205,6 +205,10 @@ class Controller extends \stdClass
      */
     public function __call($name, $arg)
     {
-        die("<div>Controller Error: (Method) <b>$name</b> is not defined</div>");
+        if (defined('APP_DEBUG') && APP_DEBUG === true) {
+            exit("<div>Controller Error: (Method) <b>$name</b> is not defined</div>");
+        }
+        error_log("<div>Controller Error: (Method) <b>$name</b> is not defined</div>");
+        exit(1);
     }
 }

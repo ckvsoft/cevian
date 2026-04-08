@@ -359,7 +359,11 @@ class Bootstrap extends \stdClass
                     );
                     error_log($msg, 3, $logDir . 'bootstrap_assets.log');
                 }
-                die(__CLASS__ . ': error (non-existent controller): ' . $this->_uriController);
+                if (defined('APP_DEBUG') && APP_DEBUG === true) {
+                    exit(__CLASS__ . ': error (non-existent controller): ' . $this->_uriController);
+                }
+                error_log(__CLASS__ . ': error (non-existent controller): ' . $this->_uriController);
+                exit(1);
             }
             $isCoreModule = true;
         }
