@@ -21,6 +21,14 @@ class Autoload
             $this->autoloadDirs[] = rtrim($dir, '/') . '/';
         }
 
+        // Composer's vendor/autoload.php optional dazuladen, falls vorhanden.
+        // Ermöglicht 3rd-party Libs (dompdf etc.) ohne dass jedes Modul einen
+        // eigenen require_once braucht. Pfad: library/3rdparty/vendor/autoload.php
+        $composerAutoload = __DIR__ . '/../3rdparty/vendor/autoload.php';
+        if (is_file($composerAutoload)) {
+            require_once $composerAutoload;
+        }
+
         spl_autoload_register([$this, '_load']);
     }
 

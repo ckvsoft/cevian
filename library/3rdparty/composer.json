@@ -1,0 +1,15 @@
+{
+    "name": "ckvsoft/cevian-3rdparty",
+    "description": "Composer-managed 3rd-party libraries shared by Cevian modules (dompdf, hakito EPS, ...)",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0",
+        "dompdf/dompdf": "^2.0",
+        "hakito/php-stuzza-eps-banktransfer": "^3.0"
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}
