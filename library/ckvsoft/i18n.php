@@ -164,6 +164,7 @@ class I18n
             // LC_ALL sets all locale categories (numeric, currency, time, etc.)
             if (setlocale(LC_ALL, $localeString) !== false) {
                 $success = true;
+                error_log('Info: cevian set locale: ' . $localeString);
                 break;
             }
         }
@@ -249,13 +250,18 @@ class I18n
             // Bind the domain for the discovered module if not already bound
             // NOTE: We assume Config::getModuleNameFromBacktrace() runs before this,
             // but we must check for gettext functions here as it's the i18n class.
-            if (function_exists('bindtextdomain') && self::$rootPath) {
-                $localePath = self::$rootPath . 'locale';
-                // Bind it to the same locale directory as the default domain
-                // If it's already bound, PHP will just confirm the binding.
-                bindtextdomain($moduleName, $localePath);
-                bind_textdomain_codeset($moduleName, 'UTF-8');
-            }
+
+            /*
+              if (function_exists('bindtextdomain') && self::$rootPath) {
+              $localePath = bindtextdomain($moduleName);
+
+              $localePath = self::$rootPath . 'locale';
+              // Bind it to the same locale directory as the default domain
+              // If it's already bound, PHP will just confirm the binding.
+              bindtextdomain($moduleName, $localePath);
+              bind_textdomain_codeset($moduleName, 'UTF-8');
+              }
+             */
             return $moduleName;
         }
 

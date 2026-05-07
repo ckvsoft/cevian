@@ -372,7 +372,7 @@ class Bootstrap extends \stdClass
         require $controllerFile;
 
         // --- Optional module autoload ---
-        $moduleAutoloadPath = $controllerFile ? dirname($controllerFile) . '/' : '';
+        $moduleAutoloadPath = $controllerFile ? dirname($controllerFile, 2) . '/' : '';
         $autoloadFile = $moduleAutoloadPath . 'modulautoload.php';
         if (file_exists($autoloadFile)) {
             require_once $autoloadFile;
