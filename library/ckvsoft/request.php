@@ -152,7 +152,58 @@ class Request
     // ---------------- GET ----------------
 
     /**
+     * Cache für aus REQUEST_URI geparste Original-Query-Params.
+     * Befüllt lazy beim ersten Zugriff, falls nötig.
+     */
+    private ?array $originalQueryCache = null;
+
+    /**
+     * Liefert die GET-Parameter aus dem Original-REQUEST_URI Query-String.
+     *
+     * Hintergrund: wenn die .htaccess eine Rewrite-Rule ohne [QSA]-Flag
+     * verwendet (z.B. `RewriteRule ^(.+)$ index.php?uri=$1 [B,L]`),
+     * verwirft Apache den Original-Query-String. PHP sieht dann nur
+     * `?uri=…` in $_GET, aber nicht `?id=…&pm=…` etc.
+     *
+     * Diese Methode parst den Original-Query aus REQUEST_URI heraus
+     * (den hat Apache nicht angefasst) und gibt die echten User-Params
+     * zurück — ohne den künstlich gesetzten 'uri'-Key.
+     *
+     * Ergebnis wird intern gecached. Idempotent.
+     */
+    private function getOriginalQueryParams(): array
+    {
+        if ($this->originalQueryCache !== null) {
+            return $this->originalQueryCache;
+        }
+
+        $uri = (string) $this->getServerVar('REQUEST_URI', '');
+        $qPos = strpos($uri, '?');
+        if ($qPos === false) {
+            $this->originalQueryCache = [];
+            return $this->originalQueryCache;
+        }
+
+        $rawQuery = substr($uri, $qPos + 1);
+        $parsed = [];
+        parse_str($rawQuery, $parsed);
+
+        // 'uri' wird vom .htaccess-Rewrite gesetzt — nicht vom User.
+        // Wenn er trotzdem in der Original-URL stand, wird er hier auch
+        // korrekt rausgefiltert (ist ja eh durch Rewrite überschrieben).
+        unset($parsed['uri']);
+
+        $this->originalQueryCache = is_array($parsed) ? $parsed : [];
+        return $this->originalQueryCache;
+    }
+
+    /**
      * Returns a value from the GET parameters.
+     *
+     * Schaut zuerst in $_GET (wie üblich). Falls der Key dort nicht ist
+     * UND der Original-REQUEST_URI einen Query-String hatte, wird auch
+     * dort gesucht. So werden Params auch dann gefunden wenn die
+     * .htaccess kein [QSA]-Flag verwendet.
      *
      * @param string $key The key of the GET parameter.
      * @param mixed $default The default value to return if the key is not set.
@@ -160,17 +211,27 @@ class Request
      */
     public function getQuery(string $key, mixed $default = null): mixed
     {
-        return $this->get[$key] ?? $default;
+        if (array_key_exists($key, $this->get)) {
+            return $this->get[$key];
+        }
+        $orig = $this->getOriginalQueryParams();
+        return $orig[$key] ?? $default;
     }
 
     /**
      * Returns all GET parameters.
      *
+     * Merged $_GET mit den aus REQUEST_URI geparsten Original-Params,
+     * sodass auch ohne [QSA]-Flag in .htaccess alle User-Params sichtbar
+     * sind. $_GET hat Vorrang bei Duplikaten.
+     *
      * @return array All GET parameters.
      */
     public function allGet(): array
     {
-        return $this->get;
+        $orig = $this->getOriginalQueryParams();
+        // $this->get überschreibt $orig bei gleichen Keys
+        return $orig + $this->get;
     }
 
     // ---------------- POST ----------------
