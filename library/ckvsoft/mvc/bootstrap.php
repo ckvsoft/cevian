@@ -150,6 +150,21 @@ class Bootstrap extends \stdClass
         $urlToBuild = ($overrideUri == true) ? $overrideUri : $this->uri;
         $this->_buildComponents($urlToBuild);
 
+        // After the URL has been parsed, check whether the targeted
+        // module has pending migrations and run them.
+        // Skips when the URL didn't resolve to a real module
+        // (Updater::needsUpdate() returns false if no inc/sql exists).
+        if (!empty($this->_uriModule)) {
+            try {
+                $modUpdater = new \ckvsoft\Update\Updater($this->_uriModule);
+                if ($modUpdater->needsUpdate()) {
+                    $modUpdater->runUpdate();
+                }
+            } catch (\Throwable $e) {
+                error_log("Module update {$this->_uriModule} failed: " . $e->getMessage());
+            }
+        }
+
         /** The order of these is important */
         $this->_initController();
     }
