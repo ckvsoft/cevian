@@ -375,9 +375,16 @@ form label {
     border: none;
     cursor: pointer;
     color: #fff;            /* white text standard */
+    background-color: #444; /* neutral grey default -- modifier classes
+                               (.create / .edit / .delete / ...) override */
     text-align: center;
     float: none;            /* inline side by side (fixes float: left from .button) */
     min-width: 80px;            /* Minimum width set for all small actions (<a> and <button>) */
+}
+.button.small-action:hover {
+    background-color: #555;
+    box-shadow: 2px 2px #666;
+    transform: translateY(2px);
 }
 
 /* Small Action Button Colors & Hover States */

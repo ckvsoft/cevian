@@ -75,12 +75,23 @@ class Updater extends \ckvsoft\mvc\Config
         // fall back to the framework DB, so this is non-breaking
         // for core modules (rbac, user, etc.).
         if ($module !== null && $module !== '_core_') {
-            $coreUri    = self::get('paths.core_modules_uri');
-            $modulesUri = self::get('paths.modules_uri');
-            $manager    = new \ckvsoft\ModulManager(self::db(), $coreUri, $modulesUri);
-            $resolved   = $manager->getModuleDb($module);
-            if ($resolved !== null) {
-                $this->moduleDb = $resolved;
+            error_log("[Updater] scope='{$module}': resolving module DB via ModulManager");
+            try {
+                $coreUri    = self::get('paths.core_modules_uri');
+                $modulesUri = self::get('paths.modules_uri');
+                $manager    = new \ckvsoft\ModulManager(self::db(), $coreUri, $modulesUri);
+                $resolved   = $manager->getModuleDb($module);
+                if ($resolved !== null) {
+                    $this->moduleDb = $resolved;
+                    error_log("[Updater] scope='{$module}': using module-specific DB");
+                } else {
+                    error_log("[Updater] scope='{$module}': no module.json database block, using framework DB");
+                }
+            } catch (\Throwable $e) {
+                error_log("[Updater] scope='{$module}': failed to resolve module DB: " . $e->getMessage());
+                // Don't rethrow -- fall back to framework DB so the
+                // updater can still run for modules that share the
+                // framework DB.
             }
         }
 
@@ -208,9 +219,14 @@ class Updater extends \ckvsoft\mvc\Config
     public function needsUpdate(): bool
     {
         if ($this->sqlDir === '') {
+            error_log("[Updater] scope='{$this->scope}': sqlDir empty, no migrations possible");
             return false;
         }
-        return version_compare($this->getCurrentVersion(), $this->getLastUpdatedVersion(), '>');
+        $current = $this->getCurrentVersion();
+        $last    = $this->getLastUpdatedVersion();
+        $needs   = version_compare($current, $last, '>');
+        error_log("[Updater] scope='{$this->scope}': version current={$current} last={$last} needsUpdate=" . ($needs ? 'true' : 'false'));
+        return $needs;
     }
 
     /**
@@ -228,6 +244,8 @@ class Updater extends \ckvsoft\mvc\Config
         $files = glob($this->sqlDir . '/*.sql') ?: [];
         sort($files);
 
+        error_log("[Updater] scope='{$this->scope}': found " . count($files) . " SQL files in {$this->sqlDir}");
+
         $appliedAny = false;
 
         foreach ($files as $file) {
@@ -243,9 +261,12 @@ class Updater extends \ckvsoft\mvc\Config
                 );
                 $check->execute([':m' => $this->scope, ':mig' => $migration]);
                 if ((int) $check->fetchColumn() > 0) {
+                    error_log("[Updater] scope='{$this->scope}': skip {$migration} (already applied)");
                     continue;
                 }
             }
+
+            error_log("[Updater] scope='{$this->scope}': applying {$migration}");
 
             $sql = (string) file_get_contents($file);
             $statements = $this->splitSql($sql);
@@ -263,6 +284,7 @@ class Updater extends \ckvsoft\mvc\Config
             // framework shared DB -- same as before. Bookkeeping (the
             // migrations table) always lives in the framework DB.
             $migrationDb = isset($this->moduleDb) ? $this->moduleDb : $this->db;
+            error_log("[Updater] scope='{$this->scope}': {$migration} target=" . (isset($this->moduleDb) ? 'module-db' : 'framework-db') . " (" . count($statements) . " statements)");
 
             $stmtIndex = 0;
             try {
@@ -285,6 +307,8 @@ class Updater extends \ckvsoft\mvc\Config
                      VALUES (:m, :mig)"
             );
             $ins->execute([':m' => $this->scope, ':mig' => $migration]);
+
+            error_log("[Updater] scope='{$this->scope}': {$migration} applied successfully");
 
             $appliedAny = true;
         }
