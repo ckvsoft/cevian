@@ -112,6 +112,7 @@ server {
 
 ### Beispiel
 
+
 #### Controller erstellen
 
 `modules/users/controller/users.php`:
@@ -168,6 +169,77 @@ class Users_Model extends \ckvsoft\mvc\Model
     <p>Keine Benutzer gefunden.</p>
 <?php endif; ?>
 ```
+
+---
+
+### Module-System
+
+Module liegen unter `modules/<modul>/` und folgen demselben MVC-Schema wie der Framework-Kern. Ein Modul kann **eine eigene Datenbank** verwenden -- dafür einen `database`-Block in `modules/<modul>/module.json` definieren:
+
+```json
+{
+    "name": "pmwh3",
+    "database": {
+        "type": "mysql",
+        "host": "mariadb",
+        "name": "pmwh3",
+        "user": "chris",
+        "pass": "..."
+    }
+}
+```
+
+Im Modul-Code danach mit `Config::moduleDb()` (ohne Argument) auf die eigene DB zugreifen -- das Framework erkennt den Modul-Kontext automatisch über den Backtrace. Soll explizit eine andere Modul-DB angesprochen werden (z.B. cross-module reads), kann der Modul-Name auch direkt übergeben werden: `Config::moduleDb('pmwh3')`.
+
+Module ohne `database`-Block teilen sich die Framework-DB.
+
+### Updater & Migrationen
+
+Migrationen liegen pro Modul unter `modules/<modul>/inc/sql/<version>.sql`, für das Framework selbst unter `library/ckvsoft/update/sql/<version>.sql`.
+
+Konventionen:
+
+- **Versionsnummer** muss bei jeder neuen Migrationsdatei in der jeweiligen `Version`-Klasse hochgezogen werden (`config/version.php` bei Modulen, `library/ckvsoft/version.php` für das Framework). Sonst läuft die Migration nicht.
+- Bookkeeping (`migrations`-Tabelle) liegt **immer** in der Framework-DB, unabhängig vom Modul.
+- Ausführung der Migration läuft gegen die DB des jeweiligen Moduls (wenn das Modul eine eigene hat) bzw. die Framework-DB.
+- `INSERT IGNORE` / `CREATE TABLE IF NOT EXISTS` empfohlen für Idempotenz.
+- Lexikografische Sortierung der Dateinamen wird verwendet -- bei Versionsnummern wie `3.0.10` ist das nicht intuitiv (sortiert vor `3.0.7`), aber harmlos solange ältere Migrationen bereits angewendet sind.
+
+Debug-Logging des Updaters landet in `var/log/error.log` mit Prefix `[Updater]`. Filtern mit:
+
+```bash
+tail -f var/log/error.log | grep '\[Updater\]'
+```
+
+### MultiLogin: Modul-User-Mapping
+
+Das MultiLogin-Tool im Manager-Menü erlaubt es, Framework-Benutzer mit Modul-spezifischen User-Accounts zu verknüpfen. Das ist nützlich, wenn ein Modul (z.B. pmwh3) eigene User-Tabellen hat und ein Framework-Login auf einen bestimmten Modul-User abgebildet werden soll.
+
+Damit ein Modul in der Mapping-Matrix auftaucht, muss es einen User-Provider bereitstellen:
+
+```
+modules/<modul>/utils/multilogin/userprovider.php
+```
+
+Die Klasse implementiert `\ckvsoft\MultiLogin\UserProviderInterface`:
+
+```php
+namespace meinmodul\Utils\MultiLogin;
+
+use ckvsoft\MultiLogin\UserProviderInterface;
+
+class UserProvider implements UserProviderInterface
+{
+    public static function getModuleKey(): string   { return 'meinmodul'; }
+    public static function getModuleLabel(): string { return 'Mein Modul'; }
+
+    public static function listUsers(): array { /* [{id, label, secondary}, ...] */ }
+    public static function getUser(int $id): ?array { /* einzelner User */ }
+    public static function searchUsers(string $term): array { /* gefilterte Liste */ }
+}
+```
+
+Die Discovery scannt `modules/` und `core_modules/` automatisch -- kein Eintrag in einer Konfigdatei nötig. Module ohne Provider tauchen einfach nicht in der Matrix auf.
 
 ---
 
@@ -344,6 +416,77 @@ class Users_Model extends \ckvsoft\mvc\Model
     <p>No users found.</p>
 <?php endif; ?>
 ```
+
+---
+
+### Module System
+
+Modules live under `modules/<modul>/` and follow the same MVC layout as the framework core. A module **may have its own database** -- declare it via a `database` block in `modules/<modul>/module.json`:
+
+```json
+{
+    "name": "pmwh3",
+    "database": {
+        "type": "mysql",
+        "host": "mariadb",
+        "name": "pmwh3",
+        "user": "chris",
+        "pass": "..."
+    }
+}
+```
+
+Inside module code, use `Config::moduleDb()` (no argument) to reach the module DB. The framework detects module context from the call stack. To reach another module's DB explicitly, pass the module name: `Config::moduleDb('pmwh3')`.
+
+Modules without a `database` block share the framework DB.
+
+### Updater & Migrations
+
+Per-module migrations live under `modules/<modul>/inc/sql/<version>.sql`, framework migrations under `library/ckvsoft/update/sql/<version>.sql`.
+
+Conventions:
+
+- The matching `Version` class (`config/version.php` for modules, `library/ckvsoft/version.php` for the framework) **must be bumped** when a new migration file is added. Otherwise the migration doesn't run.
+- Bookkeeping (the `migrations` table) always lives in the framework DB, regardless of which module is being updated.
+- The migration statements themselves run against the module's own DB when set, otherwise against the framework DB.
+- Use `INSERT IGNORE` / `CREATE TABLE IF NOT EXISTS` for idempotence.
+- File names are sorted lexicographically -- with semver-style names like `3.0.10` this isn't intuitive (sorts before `3.0.7`) but harmless when older migrations are already recorded as applied.
+
+Updater debug output goes to `var/log/error.log` prefixed with `[Updater]`. Filter via:
+
+```bash
+tail -f var/log/error.log | grep '\[Updater\]'
+```
+
+### MultiLogin: Module User Mapping
+
+The MultiLogin tool in the Manager menu lets you map framework users to module-specific user accounts. Useful when a module (e.g. pmwh3) has its own user table and a framework login should be tied to a particular module user.
+
+For a module to appear in the mapping matrix it needs a user provider at:
+
+```
+modules/<modul>/utils/multilogin/userprovider.php
+```
+
+implementing `\ckvsoft\MultiLogin\UserProviderInterface`:
+
+```php
+namespace mymodule\Utils\MultiLogin;
+
+use ckvsoft\MultiLogin\UserProviderInterface;
+
+class UserProvider implements UserProviderInterface
+{
+    public static function getModuleKey(): string   { return 'mymodule'; }
+    public static function getModuleLabel(): string { return 'My Module'; }
+
+    public static function listUsers(): array { /* [{id, label, secondary}, ...] */ }
+    public static function getUser(int $id): ?array { /* single user */ }
+    public static function searchUsers(string $term): array { /* filtered list */ }
+}
+```
+
+Discovery scans `modules/` and `core_modules/` automatically -- no config wiring needed. Modules without a provider simply don't appear in the matrix.
 
 ---
 

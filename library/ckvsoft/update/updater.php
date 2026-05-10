@@ -66,6 +66,24 @@ class Updater extends \ckvsoft\mvc\Config
         parent::__construct();
         $this->configPath = $configPath;
 
+        // Bugfix: Config::__construct() sets $this->db = framework
+        // shared DB but does NOT initialize $this->moduleDb -- that
+        // happens lazily on first moduleDb() call. For module-scoped
+        // updates we want migration statements to land in the
+        // module's own DB (if it has one), not the framework DB.
+        // Modules without their own database block in module.json
+        // fall back to the framework DB, so this is non-breaking
+        // for core modules (rbac, user, etc.).
+        if ($module !== null && $module !== '_core_') {
+            $coreUri    = self::get('paths.core_modules_uri');
+            $modulesUri = self::get('paths.modules_uri');
+            $manager    = new \ckvsoft\ModulManager(self::db(), $coreUri, $modulesUri);
+            $resolved   = $manager->getModuleDb($module);
+            if ($resolved !== null) {
+                $this->moduleDb = $resolved;
+            }
+        }
+
         // Load or initialize state file.
         if (file_exists($configPath)) {
             $raw = file_get_contents($configPath);
@@ -239,11 +257,18 @@ class Updater extends \ckvsoft\mvc\Config
             // table entry is only inserted when the whole file
             // succeeded, so partial failures show up as "not yet applied"
             // on the next run and the admin can fix and rerun.
+            //
+            // Target DB selection: migration statements run against the
+            // module's own DB when set (see constructor), otherwise the
+            // framework shared DB -- same as before. Bookkeeping (the
+            // migrations table) always lives in the framework DB.
+            $migrationDb = isset($this->moduleDb) ? $this->moduleDb : $this->db;
+
             $stmtIndex = 0;
             try {
                 foreach ($statements as $oneStmt) {
                     $stmtIndex++;
-                    $this->db->exec($oneStmt);
+                    $migrationDb->exec($oneStmt);
                 }
             } catch (\Throwable $e) {
                 $msg = sprintf(

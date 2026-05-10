@@ -87,9 +87,13 @@ class Config
     // ---------------------------------------------------------------------
     // Module DB (lazy initialization)
     // ---------------------------------------------------------------------
-    protected function getModuleDbInstance(): Database
+    protected function getModuleDbInstance(?string $moduleName = null): Database
     {
-        $moduleName = self::getModuleNameFromBacktrace();
+        // When called explicitly with a name, honor it. Otherwise fall
+        // back to backtrace detection (the historical behaviour --
+        // critical to preserve so all the existing modules that call
+        // moduleDb() without arguments keep working unchanged).
+        $moduleName ??= self::getModuleNameFromBacktrace();
         $sharedDb = self::db();
 
         if (!isset(self::$moduleDbCache[$moduleName])) {
@@ -140,7 +144,11 @@ class Config
             return;
         }
 
-        $moduleDbInstance = $this->getModuleDbInstance();
+        // Pass the resolved module name through so getModuleDbInstance
+        // doesn't re-detect via backtrace (which gives the wrong answer
+        // when one module's controller calls moduleDb() for a different
+        // module's data, e.g. multilogin asking pmwh3 for its users).
+        $moduleDbInstance = $this->getModuleDbInstance($moduleName);
         $this->moduleDb = $moduleDbInstance;
         self::$moduleSharedDbMap[$moduleKey] = $moduleDbInstance;
         self::$moduleSharedDb = $moduleDbInstance;
