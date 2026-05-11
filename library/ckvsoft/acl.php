@@ -59,10 +59,14 @@ class ACL extends \ckvsoft\mvc\Config
      *
      * @param string $roleName The name of the new role.
      * @param int|null $parentId The ID of the parent role, or null for a root role.
+     * @param string $module Owning module slug. Defaults to '__core__'
+     *                       (framework-core); pass 'pmwh3' / 'qrk' /
+     *                       ... for module-owned roles so the rbac
+     *                       UI can filter them out of the core view.
      * @return int The ID of the inserted role.
      * @throws \ckvsoft\CkvException If parent role is not found or a DB error occurs during transaction.
      */
-    public function addRole(string $roleName, ?int $parentId = null): int
+    public function addRole(string $roleName, ?int $parentId = null, string $module = '__core__'): int
     {
         // If parent specified: insert as last child of parent
         if ($parentId) {
@@ -87,6 +91,7 @@ class ACL extends \ckvsoft\mvc\Config
                 // Insert new node
                 $this->db->insert('roles', [
                     'roleName' => $roleName,
+                    'module'   => $module,
                     'lft' => $insertAt,
                     'rgt' => $insertAt + 1,
                     'depth' => $depth
@@ -106,6 +111,7 @@ class ACL extends \ckvsoft\mvc\Config
         $lft = (($maxR[0]['r'] ?? 0) + 1);
         $this->db->insert('roles', [
             'roleName' => $roleName,
+            'module'   => $module,
             'lft' => $lft,
             'rgt' => $lft + 1,
             'depth' => 0
@@ -262,17 +268,34 @@ class ACL extends \ckvsoft\mvc\Config
     /**
      * Return all roles, ordered by Nested Set (tree traversal).
      * Format 'full' returns id, roleName and depth.
+     * Return all role definitions.
+     *
+     * @param string      $format 'ids' (default) returns a flat list of
+     *                            role ids; 'full' returns associative
+     *                            arrays with id/roleName/depth/module.
+     * @param string|null $module Optional module slug filter. null = all
+     *                            modules (current behaviour). Pass
+     *                            '__core__' for just framework-core
+     *                            roles, or 'pmwh3' for that module's.
      */
-    public function getAllRoles(string $format = 'ids'): array
+    public function getAllRoles(string $format = 'ids', ?string $module = null): array
     {
-        $rows = $this->db->select("SELECT * FROM roles ORDER BY lft ASC");
+        if ($module !== null) {
+            $rows = $this->db->select(
+                    "SELECT * FROM roles WHERE module = :m ORDER BY lft ASC",
+                    ['m' => $module]
+            );
+        } else {
+            $rows = $this->db->select("SELECT * FROM roles ORDER BY lft ASC");
+        }
         $resp = [];
         foreach ($rows as $row) {
             if (strtolower($format) === 'full') {
                 $resp[] = [
                     'id' => (int) $row['id'],
                     'roleName' => $row['roleName'],
-                    'depth' => (int) $row['depth']
+                    'depth' => (int) $row['depth'],
+                    'module' => $row['module'] ?? '__core__'
                 ];
             } else {
                 $resp[] = (int) $row['id'];
@@ -337,7 +360,11 @@ class ACL extends \ckvsoft\mvc\Config
 
     /**
      * Creates a new permission.
-     * @param array $data Contains 'permKey', 'permName', 'permDescription'.
+     *
+     * @param array $data Contains 'permKey', 'permName', 'permDescription',
+     *                    and optionally 'module' (owning module slug,
+     *                    e.g. 'pmwh3' or 'qrk'; defaults to '__core__'
+     *                    if not given).
      * @return int New permission ID.
      * @throws \ckvsoft\CkvException On DB error (e.g., duplicate key).
      */
@@ -383,11 +410,30 @@ class ACL extends \ckvsoft\mvc\Config
     }
 
     /**
-     * Return all permission definitions. 'full' returns associative details keyed by permKey.
+     * Return all permission definitions.
+     *
+     * @param string      $format 'ids' (default) returns a flat list of
+     *                            permission ids; 'full' returns an
+     *                            associative array keyed by permKey
+     *                            with id/permName/permKey/permDescription/module.
+     * @param string|null $module Optional module slug filter. null = all
+     *                            modules (current behaviour). Pass
+     *                            '__core__' to get just framework-core
+     *                            permissions, or a module name like
+     *                            'pmwh3' to get just that module's.
      */
-    public function getAllPerms(string $format = 'ids'): array
+    public function getAllPerms(string $format = 'ids', ?string $module = null): array
     {
-        $rows = $this->db->select("SELECT * FROM permissions ORDER BY permName ASC");
+        if ($module !== null) {
+            $rows = $this->db->select(
+                    "SELECT * FROM permissions
+                      WHERE module = :m
+                      ORDER BY permName ASC",
+                    ['m' => $module]
+            );
+        } else {
+            $rows = $this->db->select("SELECT * FROM permissions ORDER BY permName ASC");
+        }
         $resp = [];
         foreach ($rows as $row) {
             if (strtolower($format) === 'full') {
@@ -395,7 +441,8 @@ class ACL extends \ckvsoft\mvc\Config
                     'id' => (int) $row['id'],
                     'permName' => $row['permName'],
                     'permKey' => $row['permKey'],
-                    'permDescription' => $row['permDescription']
+                    'permDescription' => $row['permDescription'],
+                    'module' => $row['module'] ?? '__core__'
                 ];
             } else {
                 $resp[] = (int) $row['id'];

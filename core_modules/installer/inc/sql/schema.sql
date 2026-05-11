@@ -114,13 +114,15 @@ CREATE TABLE `multi_login_sessions` (
 CREATE TABLE `permissions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `permKey` varchar(100) DEFAULT NULL,
+  `module` varchar(64) NOT NULL DEFAULT '__core__',
   `permName` varchar(100) DEFAULT NULL,
   `permDescription` varchar(255) DEFAULT NULL,
   `is_used` int(1) NOT NULL DEFAULT 0,
   `date_added` timestamp NOT NULL DEFAULT current_timestamp() COMMENT 'Zeitpunkt der Erstellung des Eintrags',
   `date_changed` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Zeitpunkt der letzten Aktualisierung des Eintrags',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `permKey` (`permKey`)
+  UNIQUE KEY `permKey` (`permKey`),
+  KEY `permissions_module` (`module`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -184,12 +186,14 @@ INSERT INTO `progress_bars` (`id`, `name`, `percent`, `modified`) VALUES
 CREATE TABLE `roles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `roleName` varchar(100) NOT NULL,
+  `module` varchar(64) NOT NULL DEFAULT '__core__',
   `lft` int(11) NOT NULL,
   `rgt` int(11) NOT NULL,
   `depth` int(11) NOT NULL DEFAULT 0,
   `date_added` datetime DEFAULT current_timestamp(),
   `date_changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `roles_module` (`module`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --

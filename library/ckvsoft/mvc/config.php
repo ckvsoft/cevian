@@ -119,6 +119,17 @@ class Config
     public static function module(string $key, ?string $moduleName = null)
     {
         $moduleName ??= self::getModuleNameFromBacktrace();
+
+        // Lazy-load: if the named module hasn't been initialized yet
+        // (Config::moduleDb() was never called for it), do that now
+        // so we get its module.json into $moduleConfigCache. Without
+        // this, module() returns null for an entirely uninitialized
+        // module even when the config file exists.
+        if ($moduleName !== null && !isset(self::$moduleConfigCache[$moduleName])) {
+            $instance = new self();
+            $instance->getModuleDbInstance($moduleName);
+        }
+
         $config = self::$moduleConfigCache[$moduleName] ?? null;
 
         if (!$config)
