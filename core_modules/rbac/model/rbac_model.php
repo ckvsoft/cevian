@@ -156,9 +156,9 @@ class Rbac_Model extends \ckvsoft\mvc\Model
      * @param string $format The format (e.g., 'full' for detailed array).
      * @return array
      */
-    public function getAllPermissions(string $format = 'ids'): array
+    public function getAllPermissions(string $format = 'ids', ?string $module = null): array
     {
-        return $this->acl->getAllPerms($format);
+        return $this->acl->getAllPerms($format, $module);
     }
 
     /**
@@ -273,9 +273,9 @@ class Rbac_Model extends \ckvsoft\mvc\Model
      * @param string $format The format (e.g., 'full' for detailed array).
      * @return array
      */
-    public function getAllRoles(string $format = 'ids'): array
+    public function getAllRoles(string $format = 'ids', ?string $module = null): array
     {
-        return $this->acl->getAllRoles($format);
+        return $this->acl->getAllRoles($format, $module);
     }
 
     /**

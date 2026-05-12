@@ -29,8 +29,15 @@
  * Uses AJAX framework for form submissions and list refreshing.
  */
 // BASE_URI is defined and available from the BaseController class.
+$modules      = (array)  ($this->modules      ?? []);
+$activeModule = (string) ($this->activeModule ?? '');
 $listUrl = BASE_URI . 'rbac/permissionList';
 $addUrl = BASE_URI . 'rbac/editPermissionSave'; // A single save endpoint
+// Pre-filter the AJAX list URL with the currently active module
+// so the initial page load already shows the filtered view.
+$listUrlWithFilter = $activeModule !== ''
+        ? $listUrl . '?module=' . urlencode($activeModule)
+        : $listUrl;
 ?>
 <fieldset>
     <legend id="formTitle"><?= _('Add New Permission') ?></legend>
@@ -65,9 +72,56 @@ $addUrl = BASE_URI . 'rbac/editPermissionSave'; // A single save endpoint
 
 <fieldset style="margin-top: 30px;">
     <legend><?= _('Existing Permissions') ?></legend>
+
+    <?php if (!empty($modules)): ?>
+        <div class="rbac-module-filter" style="margin-bottom: 12px;">
+            <label for="moduleFilter"><?= _('Module') ?>:</label>
+            <select id="moduleFilter" class="form-control" style="display:inline-block; width:auto;">
+                <option value=""><?= _('All modules') ?></option>
+                <?php foreach ($modules as $mod): ?>
+                    <option value="<?= htmlspecialchars($mod) ?>"
+                            <?php if ($mod === $activeModule): ?>selected<?php endif; ?>>
+                        <?= htmlspecialchars($mod) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    <?php endif; ?>
+
     <div id="permissionListContainer"
          class="ajax-list"
-         data-list="<?= $listUrl ?>">
+         data-list="<?= htmlspecialchars($listUrlWithFilter) ?>">
         <p><?= _('Loading...') ?></p>
     </div>
 </fieldset>
+
+<script>
+(function () {
+    // Module filter: change the data-list URL on the container and
+    // re-trigger the loadList() flow. The framework's loadList(url, id)
+    // is the canonical reloader; if it isn't exposed globally,
+    // fall back to a full page navigation with ?module= so the
+    // server renders the filtered initial state.
+    var sel = document.getElementById('moduleFilter');
+    var container = document.getElementById('permissionListContainer');
+    if (!sel || !container) return;
+    var baseUrl = '<?= addslashes($listUrl) ?>';
+
+    sel.addEventListener('change', function () {
+        var mod = sel.value;
+        var newUrl = mod === '' ? baseUrl : baseUrl + '?module=' + encodeURIComponent(mod);
+        container.setAttribute('data-list', newUrl);
+        if (typeof window.loadList === 'function') {
+            window.loadList(newUrl, container.id);
+        } else {
+            var nav = new URL(window.location.href);
+            if (mod === '') {
+                nav.searchParams.delete('module');
+            } else {
+                nav.searchParams.set('module', mod);
+            }
+            window.location.href = nav.toString();
+        }
+    });
+})();
+</script>

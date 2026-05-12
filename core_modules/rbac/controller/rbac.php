@@ -48,26 +48,63 @@ class Rbac extends BaseController
 
     /**
      * Index page: Displays the role overview (role tree).
+     * Accepts ?module=<name> query to scope the listing to one
+     * module (e.g. '__core__' or 'pmwh3'). null = all modules.
      */
     public function index(): void
     {
-        $roles = $this->acl->getAllRoles('full');
+        $module = $this->readModuleFilter();
+        $roles = $this->acl->getAllRoles('full', $module);
+        $modules = $this->acl->getDistinctModules('roles');
 
         $this->renderPage([
             ['view' => '/inc/header', 'data' => ['title' => _('Role Management')]],
-            ['view' => 'rbac/index', 'data' => ['roles' => $roles]],
+            ['view' => 'rbac/index', 'data' => [
+                'roles'         => $roles,
+                'modules'       => $modules,
+                'activeModule'  => $module,
+            ]],
             ['view' => '/inc/footer'],
         ]);
     }
 
     /**
      * AJAX: Generates the role list table partial (HTML).
+     * Accepts ?module=<name>.
      */
     public function roleList(): void
     {
+        $module = $this->readModuleFilter();
         $rbac = $this->getRbacModel();
-        $roles = $rbac->getAllRoles('full');
+        $roles = $rbac->getAllRoles('full', $module);
         $this->view->render('rbac/roles_table_snippet', ['roles' => $roles]);
+    }
+
+    /**
+     * Read the optional ?module=<name> query filter. Empty string
+     * or missing means "all modules"; we return null in that case.
+     * Whitelisted to existing module names (resolved from the DB)
+     * so an attacker can't pass arbitrary SQL through the param.
+     */
+    private function readModuleFilter(): ?string
+    {
+        // Filter is GET-only -- it's just a view scope, not a
+        // destructive action, so query-string is the right place.
+        $input = new Input();
+        $input->get('module');
+        $input->submit();
+        $data = $input->fetch();
+        $raw  = trim((string) ($data['module'] ?? ''));
+        if ($raw === '' || strtolower($raw) === 'all') {
+            return null;
+        }
+        // Whitelist against the actual modules in use; an unknown
+        // value falls back to "all" rather than producing an
+        // empty-list page.
+        $known = $this->acl->getDistinctModules('permissions');
+        $knownRoles = $this->acl->getDistinctModules('roles');
+        $known = array_unique(array_merge($known, $knownRoles));
+        return in_array($raw, $known, true) ? $raw : null;
     }
 
     /**
@@ -247,11 +284,16 @@ class Rbac extends BaseController
         // We only render the container. The actual list is
         // loaded subsequently by the JavaScript code via loadList().
 
+        $module  = $this->readModuleFilter();
+        $modules = $this->acl->getDistinctModules('permissions');
+
         $this->renderPage([
             ['view' => '/inc/header', 'data' => ['title' => _('Permissions Definition')]],
             // The main view container, which holds the AJAX list and the Add/Edit form.
             ['view' => 'rbac/permissions_manage', 'data' => [
-                    'roleId' => $roleId // Can be used for the back link
+                    'roleId'        => $roleId, // Can be used for the back link
+                    'modules'       => $modules,
+                    'activeModule'  => $module,
                 ]],
             ['view' => '/inc/footer'],
         ]);
@@ -260,11 +302,13 @@ class Rbac extends BaseController
     /**
      * AJAX: Generates the Permission list table partial (HTML).
      * This is the endpoint called by JS loadList() for permissionListContainer.
+     * Accepts ?module=<name>.
      */
     public function permissionList(): void
     {
+        $module = $this->readModuleFilter();
         $rbac = $this->getRbacModel();
-        $permissions = $rbac->getAllPermissions('full');
+        $permissions = $rbac->getAllPermissions('full', $module);
         $this->view->render('rbac/permissions_table_snippet', ['permissions' => $permissions]);
     }
 

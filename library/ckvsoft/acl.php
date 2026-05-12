@@ -469,6 +469,29 @@ class ACL extends \ckvsoft\mvc\Config
         return $res[0]['permName'] ?? null;
     }
 
+    /**
+     * Distinct module values currently used in `permissions` and
+     * `roles`. Useful for module-filter dropdowns in the RBAC admin
+     * UI. Always contains '__core__' (framework own perms) plus
+     * whatever module names the installed modules registered.
+     *
+     * @param string $table  'permissions' or 'roles'
+     * @return string[]      module names, ascending, no duplicates.
+     */
+    public function getDistinctModules(string $table = 'permissions'): array
+    {
+        // Whitelist: don't let an attacker push a random table name
+        // through. Only the two tables in this model have a module
+        // column.
+        if (!in_array($table, ['permissions', 'roles'], true)) {
+            return [];
+        }
+        $rows = $this->db->select(
+                "SELECT DISTINCT module FROM `{$table}` WHERE module <> '' ORDER BY module ASC"
+        );
+        return array_map(fn($r) => (string) $r['module'], $rows);
+    }
+
     // =================================================================
     // 5. PERMISSION ASSIGNMENT & RESOLUTION (ROLE/USER PERMS)
     // =================================================================
