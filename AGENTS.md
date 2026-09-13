@@ -104,6 +104,19 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
 7. Tools: backup (PHP-Dump, Shadow-Dir), news (Tabelle+Settings
    existieren, Controller/View fehlen), applications (Tabelle fehlt);
    errorlog -> Redirect + ErrorHandler-Runtime (Schema-Keys existieren).
+   **DONE lokal (3.0.18.sql applications-DDL, Tools-Model, controller/
+   tools.php actions backup/do_backup/download_backup/delete_backup +
+   news CRUD (incl. save→int-ids) + applications CRUD (APPS_PER_ROW
+   anbindet), tools/errorlog → Redirect auf options/errorlog, Views
+   backup/news/edit_news/applications/edit_application, Settings
+   BACKUP_DIR (Shadow-Dir, default /srv/docker/pmwh3-backup);
+   BackupUtil PHP-Dump über cevian-Database + 3-Phasen-Restore
+   (DROPs→CREATEs→INSERTs); Tests ALL PASS (test_tools.php):
+   news/application roundtrip + dump→restore-Survivor erzeugt.]**
+   REST (Runtime-Verifikation am Server): Backup-Dir writable für
+   php84_fpm (create dir testweis), Tools-Menü-Links mit Errorlog
+   redirect sichtbar; ErrorHandler-Runtime bleibt als separater
+   Punkt offen (errorlog-Viewer + Handlers — in Options).**
 8. Domain-Reste: Subdomain-CRUD (`apache_subdomains`), Bulk-Import.
 9. Kleinzeug: onsavehooks-TODOs (DNS-Rewrite-Daemon, Vhost-
    Regeneration), Reseller-Hierarchie, SA-userprefs-Kompatibilität
