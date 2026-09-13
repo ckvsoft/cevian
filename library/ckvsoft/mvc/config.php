@@ -87,6 +87,32 @@ class Config
     // ---------------------------------------------------------------------
     // Module DB (lazy initialization)
     // ---------------------------------------------------------------------
+
+    /**
+     * Build a Database from a named module.json node (dotted path,
+     * e.g. 'dns.database', 'mail.database'). Returns the shared
+     * framework DB when the node is missing/incomplete (same
+     * fallback semantics as getModuleDbInstance()). Does NOT touch
+     * the per-module caches of getModuleDbInstance -- named paths
+     * have their own cache keys in moduleSharedDbMap.
+     */
+    private static function buildModuleDbForNode(?string $moduleName, string $configPath): Database
+    {
+        $sharedDb = self::db();
+
+        if ($moduleName === null) {
+            return $sharedDb;
+        }
+
+        $coreUri = self::get('paths.core_modules_uri');
+        $modulesUri = self::get('paths.modules_uri');
+
+        $manager = new ModulManager($sharedDb, $coreUri, $modulesUri);
+        $db = $manager->getModuleDb($moduleName, $configPath);
+
+        return $db ?? $sharedDb;
+    }
+
     protected function getModuleDbInstance(?string $moduleName = null): Database
     {
         // When called explicitly with a name, honor it. Otherwise fall
@@ -167,8 +193,34 @@ class Config
         self::logDebug("🔄 moduleSharedDbMap[{$moduleKey}] initialized (module-specific).");
     }
 
-    public static function moduleDb(?string $moduleName = null): Database
+    /**
+     * Module DB access.
+     *
+     * Historical shapes (unchanged semantics):
+     *   moduleDb()                    → backtrace module, top-level 'database' node
+     *   moduleDb('pmwh3')             → named module, top-level 'database' node
+     *
+     * New shape (Etappe 1):
+     *   moduleDb('pmwh3', 'dns.database')  → named module + dotted
+     *     config node from module.json. Cached separately per
+     *     (module, configPath) in moduleSharedDbMap.
+     *
+     * @param string|null $moduleName Module name; null = backtrace detection.
+     * @param string|null $configPath Optional dotted path to a database
+     *        node inside module.json. Omitted for the historical behaviour.
+     */
+    public static function moduleDb(?string $moduleName = null, ?string $configPath = null): Database
     {
+        $moduleName ??= self::getModuleNameFromBacktrace();
+
+        if ($configPath !== null) {
+            $key = ($moduleName ?? '_default_') . ':' . $configPath;
+            if (!isset(self::$moduleSharedDbMap[$key])) {
+                self::$moduleSharedDbMap[$key] = self::buildModuleDbForNode($moduleName, $configPath);
+            }
+            return self::$moduleSharedDbMap[$key];
+        }
+
         $moduleKey = $moduleName ?: self::getModuleNameFromBacktrace();
 
         if (!isset(self::$moduleSharedDbMap[$moduleKey])) {
@@ -177,6 +229,38 @@ class Config
         }
 
         return self::$moduleSharedDbMap[$moduleKey];
+    }
+
+    /**
+     * Create (and cache) a Database from explicit runtime
+     * credentials -- for connections that can't be expressed in
+     * module.json (e.g. DB-admin connections whose credentials come
+     * from editable settings). Module code must use THIS instead of
+     * `new PDO` or self-built `new Database` instances.
+     *
+     * Cache key is a stable hash of the credentials, so repeated
+     * calls with the same creds return the same connection.
+     *
+     * @param array $creds ['type','host','name','user','pass','port'] --
+     *        'name' optional (admin connections without dbname), 'port' optional.
+     */
+    public static function cachedDatabase(array $creds): Database
+    {
+        ksort($creds);
+        $key = 'cred:' . md5(json_encode($creds));
+
+        if (!isset(self::$moduleSharedDbMap[$key])) {
+            self::$moduleSharedDbMap[$key] = new Database([
+                'type' => $creds['type'] ?? 'mysql',
+                'host' => $creds['host'] ?? 'localhost',
+                'name' => $creds['name'] ?? null,
+                'user' => $creds['user'] ?? '',
+                'pass' => $creds['pass'] ?? '',
+                'port' => $creds['port'] ?? null,
+            ]);
+        }
+
+        return self::$moduleSharedDbMap[$key];
     }
 
     // ---------------------------------------------------------------------

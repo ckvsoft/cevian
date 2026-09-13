@@ -1,3 +1,24 @@
+# [0.18.3](https://github.com/ckvsoft/cevian/compare/v0.18.2...v0.18.3) (2026-09-13)
+
+### Features
+
+* **db:** `Config::moduleDb($module, $configPath)` — dotted config-node access (e.g. `dns.database`) with per-(module,path) caching
+* **db:** `Config::cachedDatabase(array $creds)` — cached connections from runtime credentials (DB-admin etc.)
+* **db:** `Database::execDdl($sql, ?array $params)` — centralised DDL/admin entry point (CREATE/DROP/GRANT/FLUSH/ALTER USER)
+* **db:** `Database::__construct` — optional `dbname` (admin connections) and `port` support in DSN
+* **docs:** `AGENTS.md` (Arbeits-/Deployregeln) und `DB_ACCESS.md` (DB-Zugriff-Mechanik) als Session-Handoff
+
+### Refactoring
+
+* **pmwh3:** alle DB-Zugriffe auf die Framework-DB-API umgestellt — `new PDO` und eigen-gebaute `new Database` entfernt (mysqldbadapter, learn_all.php, DNS-/Mail-Adapter, traffic_model, menu_helper, pmwh3i18n); Prüferenz: `moduleDb()`/`cachedDatabase()`
+* **pmwh3:** `learn_all.php` liest Gruppennamen jetzt aus den RBAC `roles` (pmwh3_groups ist post-Etappe 4d weg)
+
+---
+
+# [0.18.2](https://github.com/ckvsoft/cevian/compare/v0.18.1...v0.18.2) (2026-05-09)
+
+Deploy-Zwischenstand (kein CHANGELOG-Eintrag zum Zeitpunkt des Deploys). Siehe Repository-Historie.
+
 # [0.18.0](https://github.com/ckvsoft/cevian/compare/v0.17.0...v0.18.0) (2025-12-21)
 
 

@@ -44,12 +44,12 @@ class Database extends \PDO
      * @param array $db An associative array containing the connection settings,
      * @param string $type Optional if using arugments to connect
      * @param string $host Optional if using arugments to connect
-     * @param string $name Optional if using arugments to connect
+     * @param string $name Optional: database name (omit for no dbname, e.g. admin connections)
      * @param string $user Optional if using arugments to connect
      * @param string $pass Optional if using arugments to connect
      * @param boolean $persistent Optional: whether to use a persistent connection
      */
-    public function __construct($db, $type = null, $host = null, $name = null, $user = null, $pass = null, $persistent = false)
+    public function __construct($db, $type = null, $host = null, $name = null, $user = null, $pass = null, $port = null, $persistent = false)
     {
         // Add ATTR_ERRMODE => ERRMODE_EXCEPTION explicitly, even if it's the default in PHP 8+,
         // to ensure consistent behavior across different environments.
@@ -61,12 +61,28 @@ class Database extends \PDO
         try {
             /** Connect with arguments */
             if ($db == false || $db == null) {
-                parent::__construct("{$type}:host={$host};dbname={$name};charset=utf8mb4", $user, $pass, $options);
+                $dsn = "{$type}:host={$host}";
+                if ($port) {
+                    $dsn .= ";port={$port}";
+                }
+                if ($name) {
+                    $dsn .= ";dbname={$name}";
+                }
+                $dsn .= ";charset=utf8mb4";
+                parent::__construct($dsn, $user, $pass, $options);
             }
             /** Connect with assoc array */ else {
                 $persistent = isset($db['persistent']) ? $db['persistent'] : false;
                 $options[\PDO::ATTR_PERSISTENT] = $persistent; // Override persistent if set in array
-                parent::__construct("{$db['type']}:host={$db['host']};dbname={$db['name']};charset=utf8mb4", $db['user'], $db['pass'], $options);
+                $dsn = "{$db['type']}:host={$db['host']}";
+                if (!empty($db['port'])) {
+                    $dsn .= ";port={$db['port']}";
+                }
+                if (!empty($db['name'])) {
+                    $dsn .= ";dbname={$db['name']}";
+                }
+                $dsn .= ";charset=utf8mb4";
+                parent::__construct($dsn, $db['user'], $db['pass'], $options);
             }
         } catch (\PDOException $e) {
             // Note: In a library, it's often better to throw a custom exception here as well,
@@ -347,6 +363,37 @@ class Database extends \PDO
     public function id()
     {
         return $this->lastInsertId();
+    }
+
+    /**
+     * execDdl / execAdmin - Run a DDL/admin statement
+     * (CREATE/DROP/GRANT/FLUSH/ALTER USER/...).
+     *
+     * Centralised DDL entry point: module code that has to run DDL
+     * (e.g. DB-administration adapters which CREATE DATABASE / GRANT)
+     * goes through this instead of the raw inherited ->exec().
+     *
+     * Identifiers can NOT be bound as SQL placeholders in DDL, so
+     * identifiers must be whitelisted/validated by the caller before
+     * reaching this. Values (like passwords) CAN be bound via the
+     * optional :named params.
+     *
+     * @return int|false rows affected (PDO semantics) or false on failure
+     */
+    public function execDdl(string $sql, array $params = []): int|false
+    {
+        $this->_sql = $sql;
+        if (empty($params)) {
+            return $this->exec($sql);
+        }
+        $sth = $this->_prepareAndBind($params);
+        try {
+            $sth->execute();
+            return $sth->rowCount();
+        } catch (\PDOException $e) {
+            $this->_handleError(null, 'execDdl', $e);
+            return false;
+        }
     }
 
     /**

@@ -61,23 +61,49 @@ class ModulManager
 
     /**
      * Get the correct DB connection for a module
+     *
+     * @param string $module Module name.
+     * @param string|null $configPath Optional dotted path to a database
+     *        node inside module.json (e.g. 'dns.database', 'mail.database').
+     *        Default/null = the top-level 'database' node (historical
+     *        behaviour). Falls back to the shared framework DB when
+     *        the resolved node is missing or incomplete.
      */
-    public function getModuleDb(string $module): ?\ckvsoft\Database
+    public function getModuleDb(string $module, ?string $configPath = null): ?\ckvsoft\Database
     {
         $config = $this->loadConfig($module);
 
-        if (!$config || !isset($config['database'])) {
+        $dbConfig = [];
+        if ($config) {
+            if ($configPath !== null) {
+                // Dotted-path lookup keeps the same semantics as
+                // Config::module() (defaults to 'database' when null).
+                $node = $config;
+                foreach (explode('.', $configPath) as $part) {
+                    if (!is_array($node) || !isset($node[$part])) {
+                        $node = null;
+                        break;
+                    }
+                    $node = $node[$part];
+                }
+                $dbConfig = is_array($node) ? $node : [];
+            } else {
+                $dbConfig = $config['database'] ?? [];
+            }
+        }
+
+        if (empty($dbConfig['type']) || empty($dbConfig['host']) || empty($dbConfig['name'])) {
             // No own DB → use shared framework DB instance passed in constructor
             return $this->db;
         }
 
-        $dbConfig = $config['database'];
         return new \ckvsoft\Database([
             'type' => $dbConfig['type'],
             'host' => $dbConfig['host'],
             'name' => $dbConfig['name'],
-            'user' => $dbConfig['user'],
-            'pass' => $dbConfig['pass']
+            'user' => $dbConfig['user'] ?? '',
+            'pass' => $dbConfig['pass'] ?? '',
+            'port' => $dbConfig['port'] ?? null,
         ]);
     }
 
