@@ -434,7 +434,7 @@ class Database extends \PDO
      * rollback - Overloading default method
      */
     #[\Override]
-    public function rollback()
+    public function rollback(): bool
     {
         // MySQL will automatically commit transactions when tables are altered or
         // created (DDL transactions are not supported). Prevent triggering an
@@ -451,7 +451,7 @@ class Database extends \PDO
                 // throw new DatabaseTransactionNoActiveException();
             }
             trigger_error('Rollback attempted when there is no active transaction. This can cause data integrity issues.', E_USER_WARNING);
-            return;
+            return true;
         }
 
         try {
@@ -578,7 +578,7 @@ class Database extends \PDO
      * @param \PDOException $e Optional: The PDOException object, if thrown
      * @throws \ckvsoft\CkvException
      */
-    private function _handleError($result, $method, \PDOException $e = null)
+    private function _handleError($result, $method, ?\PDOException $e = null)
     {
         // *** PRIMARY LOGIC FOR EXCEPTION MODE ***
         if ($e !== null) {
