@@ -68,27 +68,49 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
 - Pro Etappe: `php -l` Grep-Gates + Logiktests lokal; Verify am
   Test-Stack; Deliverable + (optional) Commits-Hinweis pro Etappe.
 
-## Offene Roadmap (Kurzfassung, Stand 2026-09-12)
+## Offene Roadmap (Kurzfassung, Stand 2026-09-13)
 
 1. Framework: `moduleDb($module, $configPath)` + `cachedDatabase()`
-   + `Database::__construct` dbname-optional & port-support.
+   + `Database::__construct` dbname-optional & port-support.  **DONE
+   (0.18.3-260913, pushed 66f8f8d/36e0ecb)**
 2. DNS.1: Adapter-Capability-API, Registry-Auflösung in DnsManager,
-   Result-Shape-Verein Banner (`content` statt `data`), README-Kapitel
-   "Neuer DNS-Adapter".
+   Result-Shape (`content` statt `data`), README-Kapitel
+   "Neuer DNS-Adapter".  **DONE (lokal, im pmwh3-3.0.9-Hotfix-ZIP)**
 3. DNS.2: MyDNS-Adapter vollständig (Reads + Writes + Serial; kein
-   DNSSEC → via Capability-API ausblenden). Grund: MyDNS läuft bei
-   Kunden.
+   DNSSEC -> Capability-API blendt aus). **DONE — BOTH adapter
+   lifecycle tests ALL PASS (22/22 je) gegen dev-mysql80 Test-Stack**
 4. DNS.3/DB-Cleanup: Creds aus module.json in externe
    Server-Mirror-Config (nur Examples im Repo); Adapter auf
-   moduleDb-Node-API; mysqldbadapter → cachedDatabase;
-   learn_all.php → moduleDb + `roles`-Fix.
-5. Filtering (Rspamd): `pmwh3_filtering` + Tab + settings-Export.
-6. WBList: `pmwh3_wblist` + Tab + multimap-Maps.
-7. Tools: backup (PHP-Dump, Shadow-Dir), news, applications;
-   errorlog → Redirect auf options/errorlog.
+   moduleDb-Node-API (done for DNS-/Mail-Adapter); mysqldbadapter ->
+   cachedDatabase (done); learn_all.php -> moduleDb + `roles`-Fix
+   (done). **Rest: Creds-Migration am Server (DNS.3)**
+5. Filtering (Rspamd): `pmwh3_filtering` (wide: tag/kill thresholds
+   je scope, greylist+subject global) + Tab + HTTP external_map /
+   multimap-Maps ( specs final, siehe Session-Recherche).
+6. WBList: `pmwh3_wblist` + Tab + multimap (W/B prefilter).
+7. Tools: backup (PHP-Dump, Shadow-Dir), news (Tabelle+Settings
+   existieren, Controller/View fehlen), applications (Tabelle fehlt);
+   errorlog -> Redirect + ErrorHandler-Runtime (Schema-Keys existieren).
 8. Domain-Reste: Subdomain-CRUD (`apache_subdomains`), Bulk-Import.
-9. Kleinzeug: learn_all.php PMWH2-Split-Reste, onsavehooks-TODOs
-   (DNS-Rewrite-Daemon, Vhost-Regeneration), Reseller-Hierarchie.
+9. Kleinzeug: onsavehooks-TODOs (DNS-Rewrite-Daemon, Vhost-
+   Regeneration), Reseller-Hierarchie, SA-userprefs-Kompatibilität
+   später (SA-Adapter liest pmwh3-DB direkt).
+
+## Test-Infrastruktur (Stand 2026-09-13)
+
+- **developer.ckvsoft.at** (chris, -p 19022): `mysql80`-Container
+  (MySQL 8.0.46, Port 3306) mit Test-DBs `mydns_test`, `pdns_test`,
+  `pmwh3_test` (User pmtst).php Code Staging: `/tmp/pmwhtest/` (scp
+  aus ~/tmp/pmwhtest-staging, kein Prod-Kontakt).
+- Testlauf (beide DNS-Adapter, im php:8.4-cli-Wegwerf-Container):
+  `run <adapter>` = `test_schema.php <adapter>` (Seed DNS_TYPE) +
+  `test_dns_adapters.php <adapter>`; Achtung: module.json
+  `dns.database`-name muss zum Testfauxname synchron sein (mydns_test
+  ↔ pdns_test), sonst resolved der Registry-Adapter zu null.
+- `pdns-test` (ns1) / `pdns`-DB bleibt REAL-Daten-Kopie (11 echte
+  Zonen) — nur read-only oder klar benannte Testzonen.
+- ns1 mysql-test-Container ist entfernt (wurde durch den dev-Server
+  mysql80 ersetzt); lokal existiert kein MySQL/Docker.
 
 ## PMWH2-Feature-Referenz für Stubs
 
