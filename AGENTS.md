@@ -86,8 +86,21 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
    (done). **Rest: Creds-Migration am Server (DNS.3)**
 5. Filtering (Rspamd): `pmwh3_filtering` (wide: tag/kill thresholds
    je scope, greylist+subject global) + Tab + HTTP external_map /
-   multimap-Maps ( specs final, siehe Session-Recherche).
+   multimap-Maps (specs final, siehe Session-Recherche).
+   **DONE lokal (3.0.17.sql DDL, FilteringManager + inheritance,
+   controller/filtering.php CRUD + Endpoints map_wblist/settings_ucl/
+   settings_query, Views details/edit, RBAC-Keys in bootstrap_rbac,
+   Settings FILTER_POLICY_TYPE/RSPAMD_MAP_TOKEN); Tests ALL PASS
+   (test_filteringmanager.php gegen pmwh3_test). REST: rspamd-lokale
+   Glue-Config am Server (multimap.conf + settings.conf external_map,
+   ein Deploy-Schritt mit Freigabe).** `RspamdManager` (utils/) als
+   HTTP-API-Client (Controller /ping /stat /mapping /learn*,
+   Worker /checkv2) analog der Dovecot-Rspamd-Learning-Integration;
+   Verify läuft über die API (rspamc nur im rspamd-Container, nicht im
+   php84_fpm). API-Pfade von php84_fpm live geprüft (pong / score).
 6. WBList: `pmwh3_wblist` + Tab + multimap (W/B prefilter).
+   **DONE im selben 3.0.9er-Hotfix wie Item 5 (gleiche DB-Welle,
+   gleicher Controller). REST: Server-Glue wie Item 5.**
 7. Tools: backup (PHP-Dump, Shadow-Dir), news (Tabelle+Settings
    existieren, Controller/View fehlen), applications (Tabelle fehlt);
    errorlog -> Redirect + ErrorHandler-Runtime (Schema-Keys existieren).
