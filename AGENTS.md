@@ -75,7 +75,7 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
    (0.18.3-260913, pushed 66f8f8d/36e0ecb)**
 2. DNS.1: Adapter-Capability-API, Registry-Auflösung in DnsManager,
    Result-Shape (`content` statt `data`), README-Kapitel
-   "Neuer DNS-Adapter".  **DONE (lokal, im pmwh3-3.0.9-Hotfix-ZIP)**
+   "Neuer DNS-Adapter".  **DONE (lokal, im pmwh3-3.0.78-260913-Hotfix-ZIP)**
 3. DNS.2: MyDNS-Adapter vollständig (Reads + Writes + Serial; kein
    DNSSEC -> Capability-API blendt aus). **DONE — BOTH adapter
    lifecycle tests ALL PASS (22/22 je) gegen dev-mysql80 Test-Stack**
@@ -99,7 +99,7 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
    Verify läuft über die API (rspamc nur im rspamd-Container, nicht im
    php84_fpm). API-Pfade von php84_fpm live geprüft (pong / score).
 6. WBList: `pmwh3_wblist` + Tab + multimap (W/B prefilter).
-   **DONE im selben 3.0.9er-Hotfix wie Item 5 (gleiche DB-Welle,
+   **DONE im selben 3.0.78er-Hotfix wie Item 5 (gleiche DB-Welle,
    gleicher Controller). REST: Server-Glue wie Item 5.**
 7. Tools: backup (PHP-Dump, Shadow-Dir), news (Tabelle+Settings
    existieren, Controller/View fehlen), applications (Tabelle fehlt);
