@@ -1,15 +1,16 @@
-/.htaccess
-/library/ckvsoft/update/update.json
-/config/app.json
-/config/config.json
-/var/backup/*.json
-/var/log/*.log
-/modules/*
 
 # Aber direkt im modules/ die Ausnahmen behalten
+AGENTS.md
+/config/app.json
+/config/config.json
+/favicon.ico
+/.htaccess
+/library/ckvsoft/update/update.json
+/modules/*
 !/modules/.htaccess
 !/modules/index.php
 /public/*
 /var/backup/*
+/var/backup/*.json
 /var/log/*
-/favicon.ico
+/var/log/*.log
