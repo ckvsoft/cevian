@@ -366,6 +366,131 @@ class Database extends \PDO
     }
 
     /**
+     * tableExists - Check whether a table exists in the CURRENT
+     * database. Replaces the hand-rolled information_schema selects
+     * in adapters/utils.
+     */
+    public function tableExists(string $tableName): bool
+    {
+        $r = $this->selectOne(
+                "SELECT 1 FROM information_schema.tables
+                  WHERE table_schema = DATABASE()
+                    AND table_name = :t LIMIT 1",
+                ['t' => $tableName]
+        );
+        return !empty($r);
+    }
+
+    /**
+     * databaseName - Name of the database this connection uses
+     * (SELECT DATABASE()).
+     */
+    public function databaseName(): string
+    {
+        $row = $this->selectOne("SELECT DATABASE() AS db", []);
+        return (string) ($row['db'] ?? '');
+    }
+
+    /**
+     * showCreateTable - Clean text of SHOW CREATE TABLE.
+     *
+     * @param string $tableName strict identifier (letters/digits/underscore)
+     */
+    public function showCreateTable(string $tableName): ?string
+    {
+        $tableName = $this->safeIdent($tableName);
+        foreach ($this->select("SHOW CREATE TABLE `{$tableName}`", []) as $row) {
+            foreach (['Create Table', 'CREATE TABLE', 'Create View', 'CREATE VIEW'] as $k) {
+                if (!empty($row[$k])) {
+                    return (string) $row[$k];
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * dropTable - DROP TABLE IF EXISTS with a validated identifier.
+     */
+    public function dropTable(string $tableName): void
+    {
+        $tableName = $this->safeIdent($tableName);
+        $this->execDdl("DROP TABLE IF EXISTS `{$tableName}`");
+    }
+
+    /**
+     * truncateTable - TRUNCATE TABLE with a validated identifier.
+     */
+    public function truncateTable(string $tableName): void
+    {
+        $tableName = $this->safeIdent($tableName);
+        $this->execDdl("TRUNCATE TABLE `{$tableName}`");
+    }
+
+    /**
+     * Identifier guard for DDL/string-interpolated statements:
+     * MySQL identifiers are limited to 64 chars; we restrict to
+     * letters/digits/underscore (no quoting traps).
+     */
+    private function safeIdent(string $name): string
+    {
+        if ($name === '' || strlen($name) > 64
+                || !preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+            throw new \ckvsoft\CkvException("Unsafe identifier '{$name}'");
+        }
+        return $name;
+    }
+
+    /**
+     * executeSqlFile - Replay a plain SQL dump file (e.g. a pmwh3 PHP
+     * backup) in three phases: all DROPs, then all CREATEs, then all
+     * INSERTs. This makes the restore honours ordering and duplicate
+     * constraints reliably and keeps statement parsing in ONE place.
+     *
+     * Statements that are neither DROP/CREATE/INSERT (SET/LOCK/...)
+     * are ignored.
+     *
+     * @return int number of executed statements
+     */
+    public function executeSqlFile(string $path): int
+    {
+        $sql = (string) file_get_contents($path);
+        $phases = ['drop' => [], 'create' => [], 'insert' => []];
+
+        foreach (array_filter(array_map('trim', preg_split('/;\s*[\r\n]/', $sql))) as $stmtRaw) {
+            $stmt = '';
+            foreach (preg_split('/\R/', $stmtRaw) as $line) {
+                if (trim($line) === '' || str_starts_with(ltrim($line), '--')) {
+                    continue;
+                }
+                $stmt .= $line . "\n";
+            }
+            $stmt = trim($stmt);
+            if ($stmt === '') {
+                continue;
+            }
+            $up = strtoupper($stmt);
+            if (str_starts_with($up, 'DROP')) {
+                $phases['drop'][] = $stmt;
+            } elseif (str_starts_with($up, 'CREATE')) {
+                $phases['create'][] = $stmt;
+            } elseif (str_starts_with($up, 'INSERT')) {
+                $phases['insert'][] = $stmt;
+            }
+        }
+
+        $executed = 0;
+        foreach ($phases as $list) {
+            foreach ($list as $stmt) {
+                $this->exec($stmt); // DDL/INTO replay: framework-internal, exceptions surface
+                $executed++;
+            }
+        }
+        return $executed;
+    }
+
+
+    /**
      * execDdl / execAdmin - Run a DDL/admin statement
      * (CREATE/DROP/GRANT/FLUSH/ALTER USER/...).
      *
