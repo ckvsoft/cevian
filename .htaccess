@@ -4,8 +4,23 @@ RewriteEngine On
 
 RewriteBase /cevian/
 
+# Emergency hatch for the QRK (Qt) update flow: legacy clients fetch
+# the update endpoints over PLAIN http and do NOT follow 301
+# redirects -- they render the redirect body instead, so the update
+# dialog shows "301 Moved Permanently" instead of the release notes.
+# Two shapes must stay exempt from the https-enforcement below:
+#   - /cevian/qrkupdates/(feed|relnotes|download|version|mobile...)
+#   - index.php?uri=qrkupdates/...   (legacy client syntax)
+#   - the /qrk/updates/* tree (qrk updates/.htaccess rewrites them
+#     into this tree)
+# Exempt them from the https-enforcement below, otherwise the update dialog shows
+RewriteCond %{REQUEST_URI} qrkupdates/(feed|relnotes|download|version|mobile|mobileuiversion) [OR]
+RewriteCond %{QUERY_STRING} uri=(/cevian/)?qrkupdates/(feed|relnotes|download|version|mobile|mobileuiversion) [OR]
+RewriteCond %{REQUEST_URI} ^/qrk/updates/
 RewriteCond %{HTTPS} off
-# First rewrite to HTTPS:
+# First rewrite to HTTPS (skipped for the QRK endpoints above):
+RewriteRule .* - [S=1]
+RewriteCond %{HTTPS} off
 # Don't put www. here. If it is already there it will be included, if not
 # the subsequent rule will catch it.
 RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -15,7 +30,6 @@ RewriteRule .* https://service.%{HTTP_HOST}%{REQUEST_URI} [QSA,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-
 
 # QSA is CRITICAL here: without it the original query string is
 # dropped by this rewrite (e.g. ?key=<token> of the rspamd map
