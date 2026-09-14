@@ -98,6 +98,22 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
    Worker /checkv2) analog der Dovecot-Rspamd-Learning-Integration;
    Verify läuft über die API (rspamc nur im rspamd-Container, nicht im
    php84_fpm). API-Pfade von php84_fpm live geprüft (pong / score).
+   **Server-Glue live (ns1)**: multimap.conf W/B-Blöcke + settings.conf
+   `pmwh3_thresholds` external_map (method=body, selector
+   `id('rcpt');rcpts:addr.lower`) eingetragen und via Container-Restart
+   aktiviert; Token in pmwh3-Options + beiden Enpoints `?key=` --
+   Verify via checkv2: WHITELIST/BLACKLIST (multimap prefilter)
+   **ALL PASS** (From: probe-Adresse → Action accept/no-action bzw.
+   reject). Schwellen-Kette (pmwh3_filtering via external_map) wird
+   von rspamd bezogen (Log 'apply settings from external map') und
+   pmwh3 liefert die kohärente Schwellen-Paarung
+   `{"actions":{"add header":t,"reject":k}}` (tag<kill garantiert,
+   rspamd wählt die Action mit der höchsten überschrittenen
+   Schwelle — deshalb MUSS "add header" unter reject bleiben).
+   Detail-Verify der Action-Auflösung am checkv2-API-Prüfweg
+   unvollständig (milter-Pfad abweichend) — **finale Verifikation:
+   echte Mail过 via milter + Log settings_id, siehe Geplant.**
+   REST: ns2 (mailbackup) gleiche 2 Blöcke einkopieren.**
 6. WBList: `pmwh3_wblist` + Tab + multimap (W/B prefilter).
    **DONE im selben 3.0.78er-Hotfix wie Item 5 (gleiche DB-Welle,
    gleicher Controller). REST: Server-Glue wie Item 5.**
