@@ -183,6 +183,7 @@ class Mailer
             'user'       => \ckvsoft\mvc\Config::get('mail.smtp.user'),
             'pass'       => \ckvsoft\mvc\Config::get('mail.smtp.pass'),
             'timeout'    => (int) (\ckvsoft\mvc\Config::get('mail.smtp.timeout') ?: 10),
+            'ssl'        => \ckvsoft\mvc\Config::get('mail.smtp.ssl'),
         ];
     }
 
@@ -295,12 +296,25 @@ class Mailer
 
         $encryption = $cfg['encryption'] ? strtolower($cfg['encryption']) : null;
         $hostUri    = ($encryption === 'ssl' ? 'ssl://' : '') . $cfg['host'];
+
+        // Build a stream context from the optional ssl-options block
+        // (mail.smtp.ssl in app.json). Useful for self-signed certs or
+        // hostname-mismatches against internal docker service names:
+        //   "ssl": { "verify_peer": false, "verify_peer_name": false,
+        //            "allow_self_signed": true }
+        // If absent, defaults apply (full verification).
+        $sslOptions = isset($cfg['ssl']) && is_array($cfg['ssl']) ? $cfg['ssl'] : [];
+        $context = !empty($sslOptions)
+                ? stream_context_create(['ssl' => $sslOptions])
+                : stream_context_create();
+
         $errno = 0; $errstr = '';
         $sock = @stream_socket_client(
             "{$hostUri}:{$cfg['port']}",
             $errno, $errstr,
             $cfg['timeout'],
-            STREAM_CLIENT_CONNECT
+            STREAM_CLIENT_CONNECT,
+            $context
         );
         if (!$sock) {
             $this->lastError = "SMTP connect failed: $errstr ($errno)";
@@ -335,6 +349,14 @@ class Mailer
             if ($encryption === 'tls') {
                 $say('STARTTLS');
                 $expect(220);
+                // Apply the same ssl-options to the STARTTLS upgrade. PHP's
+                // stream_socket_enable_crypto picks them up from the
+                // context that's already attached to the socket.
+                if (!empty($sslOptions)) {
+                    foreach ($sslOptions as $k => $v) {
+                        stream_context_set_option($sock, 'ssl', $k, $v);
+                    }
+                }
                 if (!stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
                     throw new \RuntimeException('STARTTLS negotiation failed');
                 }

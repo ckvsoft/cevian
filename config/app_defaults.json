@@ -33,5 +33,20 @@
             "/inc/js/x-notify.min.js",
             "/inc/js/theme-js-vanilla.min.js"
         ]
+    },
+    "mail": {
+        "smtp": {
+            "host":       "",
+            "port":       587,
+            "encryption": "tls",
+            "user":       "user_name",
+            "pass":       "_Passw0rd!_",
+            "timeout":    10,
+            "ssl": {
+                "verify_peer":        false,
+                "verify_peer_name":   false,
+                "allow_self_signed":  true
+            }
+        }
     }
 }
