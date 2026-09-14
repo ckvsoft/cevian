@@ -77,7 +77,10 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
 
 1. Framework: `moduleDb($module, $configPath)` + `cachedDatabase()`
    + `Database::__construct` dbname-optional & port-support.  **DONE
-   (0.18.3-260913, pushed 66f8f8d/36e0ecb)**
+   (0.18.3-260913, pushed 66f8f8d/36e0ecb)** + Schema-/Dump-Helfer:
+   `tableExists/databaseName/showCreateTable/dropTable/truncateTable/
+   executeSqlFile` + safeIdent (**0.18.3 epilogue, pushed 27499de;
+   verify: dev-mysql80 test_tools/dns_lifecycles ALL PASS**).
 2. DNS.1: Adapter-Capability-API, Registry-Auflösung in DnsManager,
    Result-Shape (`content` statt `data`), README-Kapitel
    "Neuer DNS-Adapter".  **DONE (lokal, im pmwh3-3.0.78-260913-Hotfix-ZIP)**
