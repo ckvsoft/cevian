@@ -145,6 +145,16 @@ Referenz für weitere Vorhaben: `DB_ACCESS.md` (Code-Mechanik DB-Zugriff),
 9. Kleinzeug: onsavehooks-TODOs (DNS-Rewrite-Daemon, Vhost-
    Regeneration), Reseller-Hierarchie, SA-userprefs-Kompatibilität
    später (SA-Adapter liest pmwh3-DB direkt).
+10. Exec-Cleanup Legacy-Module (**SEPARATE SESSION**): follow-up
+   `modules/qrkdemo/model/schema_model.php`+`session_model.php`,
+   `modules/qrkupdates/model/{news,schema,versioncheck}_model.php`,
+   `modules/qrkstatistic/model/versioncheck_model.php`,
+   `core_modules/installer/model/installer_model.php` — raw exec →
+   Helper/`execDdl` umstellen (Framework-Helfer siehe 27499de:
+   `tableExists/showCreateTable/dropTable/truncateTable/
+   executeSqlFile`); Gate: grep '\->exec(' leer machen außer
+   database.php/modulmanager/updater/admin-Adapter. Tests analog
+   test_tools/* gegen dev-mysql80.
 
 ## Test-Infrastruktur (Stand 2026-09-13)
 
