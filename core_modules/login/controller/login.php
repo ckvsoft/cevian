@@ -45,9 +45,27 @@ class Login extends \ckvsoft\mvc\BaseController
                     ->format('hash', ['sha256', HASH_KEY]);
             $input->submit();
 
-            // Check for validation errors
+            // Check for validation errors -> flash redirect back to
+            // the login form (the red status box). Raw JSON would
+            // only make sense for AJAX captions; this form posts
+            // server-side.
             if ($input->fetchErrors()) {
-                \ckvsoft\Output::error($input->fetchErrors());
+                $errs = (array) $input->fetchErrors();
+                $lines = [];
+                foreach ($errs as $eField => $eMsgs) {
+                    if (!is_array($eMsgs)) {
+                        $eMsgs = [$eMsgs];
+                    }
+                    foreach ($eMsgs as $oneMsg) {
+                        $lines[] = htmlspecialchars((string) $oneMsg);
+                    }
+                }
+                \ckvsoft\Auth::sendFlashRedirect(
+                        BASE_URI . 'login',
+                        'error',
+                        _('Login Failed'),
+                        implode('<br />', $lines)
+                );
                 return;
             }
 

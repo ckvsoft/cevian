@@ -27,8 +27,8 @@ msgstr "Die ausgewählte übergeordnete Rolle wurde nicht gefunden."
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:102
 msgid "An unexpected error occurred during role save: "
-msgstr ""
-"Während des Speicherns der Rolle ist ein unerwarteter Fehler aufgetreten: "
+msgstr "Beim Speichern der Rolle ist ein unerwarteter Fehler aufgetreten: "
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:105
 msgid "An unexpected system error occurred."
@@ -40,8 +40,8 @@ msgstr "Eine Rolle kann nicht in ihren eigenen Unterbaum verschoben werden."
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:145
 msgid "An unexpected error occurred while updating the role."
-msgstr ""
-"Während der Aktualisierung der Rolle ist ein unerwarteter Fehler aufgetreten."
+msgstr "Beim Aktualisieren der Rolle ist ein unerwarteter Fehler aufgetreten."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:207
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/rbac/model/rbac_model.php:230
@@ -418,9 +418,8 @@ msgstr "Drehen fehlgeschlagen."
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:132
 msgid "Permission Denied: You must be logged in to access the file manager."
-msgstr ""
-"Zugriff verweigert: Sie müssen angemeldet sein, um auf den Dateimanager "
-"zuzugreifen."
+msgstr "Zugriff verweigert: Sie müssen angemeldet sein, um auf den Dateimanager zuzugreifen."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:264
 msgid "Permission Denied: You do not own this folder."
@@ -457,14 +456,13 @@ msgstr "Element nicht gefunden"
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:774
 msgid "The associated album/folder could not be found for permission check"
-msgstr ""
-"Der zugehörige Album-Ordner konnte für die Berechtigungsprüfung nicht "
-"gefunden werden."
+msgstr "Das zugehörige Album/der Ordner konnte für die Berechtigungsprüfung nicht gefunden werden"
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:782
 msgid "Permission Denied: You do not have ownership rights to delete this item"
-msgstr ""
-"Zugriff verweigert: Sie besitzen nicht die Rechte, dieses Element zu löschen"
+msgstr "Zugriff verweigert: Sie besitzen keine Eigentumsrechte, um dieses Element zu löschen"
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/model/filemanager_model.php:817
 msgid "Cannot delete: Item not found at path"
@@ -555,8 +553,8 @@ msgstr "Verschieben fehlgeschlagen"
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.min.js:9
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.js:288
 msgid "Cannot move an item into its own subfolder."
-msgstr ""
-"Ein Element kann nicht in seinen eigenen Unterordner verschoben werden."
+msgstr "Ein Element kann nicht in seinen eigenen Unterordner verschoben werden."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.min.js:10
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.js:330
@@ -572,8 +570,8 @@ msgstr "Fehler beim Verschieben von %d von %d Element(en)."
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.min.js:10
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.js:335
 msgid "An unexpected error occurred during move processing."
-msgstr ""
-"Während des Verschiebevorgangs ist ein unerwarteter Fehler aufgetreten."
+msgstr "Beim Verarbeiten der Verschiebung ist ein unerwarteter Fehler aufgetreten."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.min.js:11
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.js:370
@@ -618,9 +616,8 @@ msgstr "Upload fehlgeschlagen"
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.min.js:13
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.js:428
 msgid "All uploads failed. Check individual error messages."
-msgstr ""
-"Alle Uploads sind fehlgeschlagen. Überprüfen Sie die einzelnen "
-"Fehlermeldungen."
+msgstr "Alle Uploads sind fehlgeschlagen. Prüfen Sie die einzelnen Fehlermeldungen."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.min.js:14
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/inc/js/filemanager.js:455
@@ -793,9 +790,8 @@ msgstr "[Album-Ordner neu scannen]"
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:60
 msgid "Are you sure? This will synchronize the Albums DB with the filesystem."
-msgstr ""
-"Sind Sie sicher? Dadurch wird die Album-DB mit dem Dateisystem "
-"synchronisiert."
+msgstr "Sind Sie sicher? Dies synchronisiert die Album-Datenbank mit dem Dateisystem."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:78
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:83
@@ -857,9 +853,8 @@ msgstr "Medien"
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:153
 #, php-format
 msgid "Are you sure you want to reset the View Counter for Album ID %s to 0?"
-msgstr ""
-"Sind Sie sicher, dass Sie den Aufrufzähler für Album-ID %s auf 0 "
-"zurücksetzen möchten?"
+msgstr "Möchten Sie die Aufrufzähler für Album-ID %s wirklich auf 0 zurücksetzen?"
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/view/manager/index.php:154
 msgid "Reset Views"
@@ -1013,8 +1008,8 @@ msgstr "Verzeichnis erfolgreich erstellt."
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:155
 msgid "Failed to create directory due to a database error."
-msgstr ""
-"Fehler beim Erstellen des Verzeichnisses aufgrund eines Datenbankfehlers."
+msgstr "Erstellen des Verzeichnisses fehlgeschlagen wegen eines Datenbankfehlers."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:171
 msgid "Missing or invalid path list for deletion."
@@ -1038,9 +1033,8 @@ msgstr "Datei erfolgreich hochgeladen."
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:223
 msgid "File upload failed for unknown reason or file not registered in DB."
-msgstr ""
-"Datei-Upload aus unbekanntem Grund fehlgeschlagen oder Datei nicht in der DB "
-"registriert."
+msgstr "Datei-Upload fehlgeschlagen aus unbekanntem Grund oder Datei nicht in der Datenbank registriert."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/filemanager.php:226
 msgid "Upload Error: "
@@ -1168,9 +1162,8 @@ msgstr "%d verwaiste Miniaturansichten gelöscht."
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:411
 #, php-format
 msgid "View counter for Album ID %d reset successfully. %d items affected."
-msgstr ""
-"Aufrufzähler für Album-ID %d erfolgreich zurückgesetzt. %d Elemente "
-"betroffen."
+msgstr "Aufrufzähler für Album-ID %d erfolgreich zurückgesetzt. %d Elemente betroffen."
+
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/core_modules/gallery/controller/manager.php:414
 #, php-format
@@ -1698,9 +1691,8 @@ msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
 
 #: /vhome/ckvsoft/ckvsoft.at/service/cevian/library/ckvsoft/auth.php:120
 msgid "You do not have the required permissions to access this page."
-msgstr ""
-"Sie haben nicht die erforderlichen Berechtigungen, um auf diese Seite "
-"zuzugreifen."
+msgstr "Sie haben nicht die erforderlichen Berechtigungen, um auf diese Seite zuzugreifen."
+
 
 #~ msgid "Role updated successfully!"
 #~ msgstr "Rolle erfolgreich aktualisiert!"

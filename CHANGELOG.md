@@ -150,3 +150,20 @@ Deploy-Zwischenstand (kein CHANGELOG-Eintrag zum Zeitpunkt des Deploys). Siehe R
 
 
 
+# [0.18.4](https://github.com/ckvsoft/cevian/compare/v0.18.3...v0.18.4) (2026-09-16)
+
+### Features
+
+* **update:** fresh installs now replay ONLY the module baseline (`0.0.0_baseline.sql`, current schema state) and stamp the whole legacy chain as applied — broken legacy ACL migrations can no longer abort a first-install pass; `var/<module>_freshly_installed.flag` business unchanged
+* **update:** migration files sorted with `SORT_NATURAL` (3.0.x files no longer order lexicographically behind later files)
+
+### Refactoring
+
+* **update:** `runMigrationFile()` / `recordMigration()` helpers extracted from the update loop
+
+### Bug Fixes
+
+* **login (core):** input-validation errors now flash-redirect to the login form (red status box) instead of responding raw JSON; email/password fields are `required` client-side (matches pmwh3 behavior)
+
+---
+

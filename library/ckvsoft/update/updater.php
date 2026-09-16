@@ -242,7 +242,34 @@ class Updater extends \ckvsoft\mvc\Config
         $this->isFreshInstall = ($this->getLastUpdatedVersion() === '0.0.0');
 
         $files = glob($this->sqlDir . '/*.sql') ?: [];
-        sort($files);
+        sort($files, SORT_NATURAL);
+
+        // FRESH INSTALL: play ONLY the baseline (which represents the
+        // current schema state) and stamp everything as done. The
+        // legacy incremental files were needed to upgrade OLD
+        // installs; a fresh install must not replay them (they
+        // reference objects the baseline deliberately no longer
+        // creates and would abort the whole update pass).
+        if ($this->isFreshInstall && $this->scope !== '_core_') {
+            $baseline = array_values(array_filter($files, fn($f) =>
+                    basename($f) === '0.0.0_baseline.sql'));
+            if ($baseline !== []) {
+                $this->runMigrationFile($baseline[0]);
+                foreach ($files as $f) {
+                    $mark = basename($f, '.sql');
+                    $this->recordMigration($mark);
+                }
+                $this->setLastUpdatedVersion($this->getCurrentVersion());
+                $varDir = __DIR__ . '/../../../var';
+                if (is_dir($varDir) && is_writable($varDir)) {
+                    @file_put_contents(
+                            $varDir . '/' . $this->scope . '_freshly_installed.flag',
+                            (string) time());
+                }
+                error_log("[Updater] scope='{$this->scope}': FRESH INSTALL -- baseline only, chain marked applied");
+                return true;
+            }
+        }
 
         error_log("[Updater] scope='{$this->scope}': found " . count($files) . " SQL files in {$this->sqlDir}");
 
@@ -266,50 +293,8 @@ class Updater extends \ckvsoft\mvc\Config
                 }
             }
 
-            error_log("[Updater] scope='{$this->scope}': applying {$migration}");
-
-            $sql = (string) file_get_contents($file);
-            $statements = $this->splitSql($sql);
-
-            // We deliberately don't wrap in beginTransaction() because
-            // DDL (CREATE/ALTER/DROP TABLE) implicitly commits in MySQL/
-            // MariaDB anyway. Wrapping would only give a false sense of
-            // atomicity. Each statement runs on its own; the migrations-
-            // table entry is only inserted when the whole file
-            // succeeded, so partial failures show up as "not yet applied"
-            // on the next run and the admin can fix and rerun.
-            //
-            // Target DB selection: migration statements run against the
-            // module's own DB when set (see constructor), otherwise the
-            // framework shared DB -- same as before. Bookkeeping (the
-            // migrations table) always lives in the framework DB.
-            $migrationDb = isset($this->moduleDb) ? $this->moduleDb : $this->db;
-            error_log("[Updater] scope='{$this->scope}': {$migration} target=" . (isset($this->moduleDb) ? 'module-db' : 'framework-db') . " (" . count($statements) . " statements)");
-
-            $stmtIndex = 0;
-            try {
-                foreach ($statements as $oneStmt) {
-                    $stmtIndex++;
-                    $migrationDb->exec($oneStmt);
-                }
-            } catch (\Throwable $e) {
-                $msg = sprintf(
-                        "Migration %s/%s failed at statement #%d: %s\n--- statement ---\n%s",
-                        $this->scope, $migration, $stmtIndex, $e->getMessage(),
-                        $statements[$stmtIndex - 1] ?? '<unknown>'
-                );
-                error_log($msg);
-                throw new \RuntimeException($msg, 0, $e);
-            }
-
-            $ins = $this->db->prepare(
-                    "INSERT INTO migrations (module_name, migration)
-                     VALUES (:m, :mig)"
-            );
-            $ins->execute([':m' => $this->scope, ':mig' => $migration]);
-
-            error_log("[Updater] scope='{$this->scope}': {$migration} applied successfully");
-
+            $this->runMigrationFile($file);
+            $this->recordMigration($migration);
             $appliedAny = true;
         }
 
@@ -330,6 +315,68 @@ class Updater extends \ckvsoft\mvc\Config
         }
 
         return $appliedAny;
+    }
+
+    /**
+     * Bookkeeping for a played migration: insert the (module,
+     * migration) row in the framework-side migrations table.
+     */
+    private function recordMigration(string $migration): void
+    {
+        $ins = $this->db->prepare(
+                "INSERT INTO migrations (module_name, migration)
+                 VALUES (:m, :mig)");
+        $ins->execute([':m' => $this->scope, ':mig' => $migration]);
+
+        error_log("[Updater] scope='{$this->scope}': {$migration} applied successfully");
+    }
+
+    /**
+     * Execute one migration file on the migration DB (module DB when
+     * set, framework DB otherwise). Throws on failure -- the caller
+     * aborts the pass (see runUpdate() docs: partial failures stay
+     * "not yet applied" and can be fixed + rerun).
+     */
+    private function runMigrationFile(string $file): void
+    {
+        $info = pathinfo($file);
+        $migration = basename($file, '.' . ($info['extension'] ?? 'sql'));
+
+        error_log("[Updater] scope='{$this->scope}': applying {$migration}");
+
+        $sql = (string) file_get_contents($file);
+        $statements = $this->splitSql($sql);
+
+        // We deliberately don't wrap in beginTransaction() because
+        // DDL (CREATE/ALTER/DROP TABLE) implicitly commits in MySQL/
+        // MariaDB anyway. Wrapping would only give a false sense of
+        // atomicity. Each statement runs on its own; the migrations-
+        // table entry is only inserted when the whole file
+        // succeeded, so partial failures show up as "not yet applied"
+        // on the next run and the admin can fix and rerun.
+        //
+        // Target DB selection: migration statements run against the
+        // module's own DB when set (see constructor), otherwise the
+        // framework shared DB -- same as before. Bookkeeping (the
+        // migrations table) always lives in the framework DB.
+        $migrationDb = isset($this->moduleDb) ? $this->moduleDb : $this->db;
+        error_log("[Updater] scope='{$this->scope}': {$migration} target=" . (isset($this->moduleDb) ? 'module-db' : 'framework-db') . " (" . count($statements) . " statements)");
+
+        $stmtIndex = 0;
+        try {
+            foreach ($statements as $oneStmt) {
+                $stmtIndex++;
+                $migrationDb->exec($oneStmt);
+            }
+        } catch (\Throwable $e) {
+            $msg = sprintf(
+                    "Migration %s/%s failed at statement #%d: %s\n--- statement ---\n%s",
+                    $this->scope, $migration, $stmtIndex, $e->getMessage(),
+                    $statements[$stmtIndex - 1] ?? '<unknown>'
+            );
+            error_log($msg);
+            throw new \RuntimeException($msg, 0, $e);
+        }
     }
 
     /**
