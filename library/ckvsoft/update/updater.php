@@ -320,12 +320,20 @@ class Updater extends \ckvsoft\mvc\Config
     /**
      * Bookkeeping for a played migration: insert the (module,
      * migration) row in the framework-side migrations table.
+     * Idempotent: the fresh-install path stamps the WHOLE chain
+     * without the normal loop's per-file skip check, and a module
+     * reinstall (module DB dropped, var/update.json reset) hits
+     * rows that still exist from the earlier install -- a bare
+     * INSERT then died on the unique key ('duplicate ... migration')
+     * and aborted the whole bootstrap. ON DUPLICATE KEY UPDATE makes
+     * both paths converge instead.
      */
     private function recordMigration(string $migration): void
     {
         $ins = $this->db->prepare(
                 "INSERT INTO migrations (module_name, migration)
-                 VALUES (:m, :mig)");
+                 VALUES (:m, :mig)
+                 ON DUPLICATE KEY UPDATE migration = VALUES(migration)");
         $ins->execute([':m' => $this->scope, ':mig' => $migration]);
 
         error_log("[Updater] scope='{$this->scope}': {$migration} applied successfully");
