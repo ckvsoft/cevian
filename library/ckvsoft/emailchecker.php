@@ -3,44 +3,46 @@
 namespace ckvsoft;
 
 /**
- * EmailChecker — Mail-Adressverifikation fuer das cevian Framework und alle Module.
+ * EmailChecker — Email address verification for the cevian framework
+ * and all of its modules.
  *
- * PROVENIENZ: Neufassung auf Basis der ns1-Service-Implementierung
- * (module emailcheck + Emailcheck_Model, ckvsoft 2026-09) und des Forks
- * aus hbattat/VerifyEmail (MIT, https://github.com/hbattat/VerifyEmail —
- * Reachstand 2016, am ns1 damals eingebaut). Kern-Idee der RCPT-TO-Probe
- * geht auf hbattat zurueck (MIT-Lizenz, hiermit zugeordnet). Eigene
- * Bestaende: 3-state-Semantik (passed/unknown/failed) inkl.
- * Greylist-/Timeout-Erkennung, HELO- und Timeout-Handling, XML-SFS-Check,
- * TLD-Blocklist und Status-TTL-Cache. Kein Drop-in-Update gegen den
- * hbattat-Upstream moeglich — Klasse leistet vieles andere als der
- * Upstream (Webkontext tauglicher), startet im cevian-Repo.
+ * PROVENANCE: Rebuilt on top of the ns1 service implementation (module
+ * emailcheck + Emailcheck_Model, ckvsoft 2026-09), which itself was a
+ * fork of hbattat/VerifyEmail (MIT, https://github.com/hbattat/VerifyEmail
+ * — 2016 vintage, as deployed on ns1). The core idea of the RCPT-TO probe
+ * goes back to hbattat (MIT license, attribution noted here). The
+ * following are cevian additions: 3-state semantics (passed/unknown/
+ * failed) incl. greylist/timeout detection, HELO and timeout handling,
+ * XML stopforumspam check, TLD blocklist and status-TTL cache. NO
+ * drop-in update against the hbattat upstream is possible — this class
+ * intentionally diverges (web-context safe timeouts, fail-open policy)
+ * and lives in the cevian repo.
  *
  * Pipeline:
  *   1. Syntax (FILTER_VALIDATE_EMAIL)
- *   2. TLD-Blocklist (instant-fail, keine SMTP-Probe)
- *   3. SMTP-RCPT-TO-Probe am MX/Host der Domain (3-state!)
- *   4. StopForumSpam (fail-open, simple XML-API)
- *   5. File-Cache (var/cache/emailcheck uebersteuerbar) mit Status-TTLs
+ *   2. TLD blocklist (instant fail, no SMTP probe)
+ *   3. SMTP RCPT-TO probe against the domain's MX/host (3-state!)
+ *   4. StopForumSpam (fail-open, simple XML API)
+ *   5. File cache (var/cache/emailcheck, overridable) with status TTLs
  *
- * Statussemantik:
- *   'passed'  Mailbox existiert am Server und nimmt Mail an, nicht gelistet
- *   'unknown' Probe unbestimmt: Greylist/4xx, Connect-Fail, Read-Timeout —
- *             vom Aufrufer als fail-open zu behandeln (passen lassen!)
- *   'failed'  harte Ablehnung: kein MX, RSET-Token 5xx (Mailbox nicht da),
- *             blockierte TLD, gelistet in StopForumSpam
+ * Status semantics:
+ *   'passed'  mailbox exists on the server, accepts mail, not listed
+ *   'unknown' probe inconclusive: greylist/4xx, connect fail, read
+ *             timeout — caller MUST treat this as fail-open (accept)
+ *   'failed'  hard rejection: no MX, RCPT 5xx (mailbox gone),
+ *             blocked TLD, listed in stopforumspam
  *
- * Verwendung im Framework (beliebig einbindbar — z. B. Login/Registrierung):
+ * Usage in the framework (pluggable anywhere — e.g. login/registration):
  *     $checker = new \ckvsoft\EmailChecker(['verifier_email' => 'www-data@ckvsoft.at']);
  *     $status  = $checker->verify( $email );   // passed | unknown | failed
  *
- * Als Input-Filter: `Input\Validate::emailcheck($value)` — 'unknown' = kein
- * Fehler (fail-open), 'failed' -> Fehlermeldung.
+ * As an input filter: `Input\Validate::emailcheck($value)` — 'unknown'
+ * means no error (fail-open), 'failed' -> error message.
  *
- * Damit die SMTP-Probe im Webkontext nicht blockiert:
- *   fsockopen und fgets laufen mit eigenen, kurzen Timeouts (default 5 s).
- * Eigener Code — bewusst KEIN Portable-Fremdpaket (hbattat fork ist
- * ein Schwenker; hier kein need for upstream-Updates).
+ * So the SMTP probe works in a web context without hanging:
+ *   fsockopen and fgets use their own short timeouts (default 5 s).
+ * Self-authored implementation — deliberately NOT a portable external
+ * package (the hbattat fork was transitional; no upstream updates needed).
  */
 class EmailChecker {
 
@@ -48,28 +50,28 @@ class EmailChecker {
 	const STATUS_UNKNOWN = 'unknown';
 	const STATUS_FAILED  = 'failed';
 
-	const CACHE_TTL_OK      = 7 * 86400; // 7 Tage (bots landen spaeter in SFS)
-	const CACHE_TTL_FAIL    = 86400;     // 1 Tag
-	const CACHE_TTL_UNKNOWN = 900;       // 15 Minuten — kurz, spaeter neu pruefen
+	const CACHE_TTL_OK      = 7 * 86400; // 7 days (bots may land in SFS later)
+	const CACHE_TTL_FAIL    = 86400;     // 1 day
+	const CACHE_TTL_UNKNOWN = 900;       // 15 minutes — short, re-check later
 
 	const SMTP_PORT      = 25;
 	const SMTP_TIMEOUT   = 5;
 	const SMTP_HELO      = 'mail.ckvsoft.at';
-	const SFS_API       = 'https://api.stopforumspam.org/api'; // .org — mit &xml XML-Antwort
-	const SFS_TIMEOUT   = 3;                                  // Sekunden
-	/** @var array TLD-Blacklist (instant-fail, keine SMTP-Probe) */
+	const SFS_API       = 'https://api.stopforumspam.org/api'; // .org — &xml for XML response
+	const SFS_TIMEOUT   = 3;                                  // seconds
+	/** @var array TLD blacklist (instant fail, no SMTP probe) */
 	private array $blockedTlds;
 
-	/** @var string MAIL FROM fuer die SMTP-Probe */
+	/** @var string MAIL FROM used for the SMTP probe */
 	private string $verifierEmail;
 
-	/** @var string HELO-Name der SMTP-Probe */
+	/** @var string HELO name used for the SMTP probe */
 	private string $helo;
 
-	/** @var string Cache-Verzeichnis */
+	/** @var string cache directory */
 	private string $cacheDir;
 
-	/** @var array Debug-Spur der letzten Probe */
+	/** @var array debug trail of the last probe */
 	private array $lastProbe = [];
 
 	/**
@@ -102,9 +104,9 @@ class EmailChecker {
 	}
 
 	/**
-	 * Vollst. Pipeline auf einer Mail-Adresse.
+	 * Full pipeline for one email address.
 	 *
-	 * @param string $email Die zu pruefende Adresse
+	 * @param string $email The address to check
 	 * @return string self::STATUS_* — passed | unknown | failed
 	 */
 	public function verify( string $email ): string {
@@ -114,7 +116,7 @@ class EmailChecker {
 			'email'    => $email,
 			'status'   => self::STATUS_FAILED,
 			'reason'   => '',
-			'smtp_new' => '',
+			'smtp_rcpt' => '',
 		];
 
 		if ( '' === $email || false === filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
@@ -122,7 +124,7 @@ class EmailChecker {
 			return self::STATUS_FAILED;
 		}
 
-		// ---- Cache pruefen ----
+		// ---- cache check ----
 		$cached = $this->cacheRead( $email );
 		if ( $cached !== false ) {
 			$this->lastProbe['status'] = $cached;
@@ -134,18 +136,18 @@ class EmailChecker {
 		$tld    = $this->getTld( $domain );
 		$this->lastProbe['domain'] = $domain;
 
-		// ---- TLD-Blocklist: instant-fail, keine SMTP-Probe ----
+		// ---- TLD blocklist: instant fail, no SMTP probe ----
 		if ( in_array( $tld, $this->blockedTlds, true ) ) {
 			$this->lastProbe['reason'] = 'tld_blocked';
 			$this->cacheWrite( $email, self::STATUS_FAILED );
 			return self::STATUS_FAILED;
 		}
 
-		// ---- SMTP-RCPT-TO-Probe ----
+		// ---- SMTP RCPT-TO probe ----
 		$answer = $this->smtpVerify( $email );
 
 		if ( $answer === self::STATUS_PASSED ) {
-			// SMTP ok — jetzt StopForumSpam
+			// SMTP ok — now check stopforumspam
 			$sfs = $this->checkStopForumSpam( $email );
 			$this->lastProbe['reason'] = 'smtp_verified';
 
@@ -156,7 +158,7 @@ class EmailChecker {
 				$this->lastProbe['status'] = self::STATUS_PASSED; // passed / fail-open
 			}
 		} elseif ( $answer === self::STATUS_UNKNOWN ) {
-			// Greylist/Timeout/4xx/Connect-Fail — unbestimmt, NICHT failed
+			// greylist/timeout/4xx/connect-fail — inconclusive, NOT failed
 			$this->lastProbe['status'] = self::STATUS_UNKNOWN;
 			$this->lastProbe['reason'] .= ( $this->lastProbe['reason'] !== '' ? ',' : '' ) . 'smtp_inconclusive';
 		} else {
@@ -169,24 +171,24 @@ class EmailChecker {
 	}
 
 	/**
-	 * Details der letzen Probe (fuer Debug tomorrow / Tools).
+	 * Details of the last probe (for debug tooling).
 	 */
 	public function get_last_probe(): array {
 		return $this->lastProbe;
 	}
 
 	// ================================================
-	// SMTP-Probe (eigene Implementierung)
+	// SMTP probe (own implementation)
 	// ================================================
 
 	/**
-	 * SMTP-verified probe. return STATUS_* (passed/unknown/failed).
+	 * SMTP probe, returns STATUS_* (passed/unknown/failed).
 	 */
 	private function smtpVerify( string $email ): string {
 		$mx = $this->resolveMailHost( $this->getDomain( $email ) );
 
 		if ( $mx === false ) {
-			// Domain ohne MX/A — Mail-Zustellung unmöglich → hard fail
+			// domain without MX/A — no mail delivery possible -> hard fail
 			$this->lastProbe['reason'] = 'no_mx';
 			return self::STATUS_FAILED;
 		}
@@ -196,7 +198,7 @@ class EmailChecker {
 		$sock   = @fsockopen( $mx, self::SMTP_PORT, $errno, $errstr, self::SMTP_TIMEOUT );
 
 		if ( $sock === false ) {
-			// Connect nicht moeglich = Greylist/Temporaries moeglich → unknown
+			// connect failed = greylist/temporary overall possible -> unknown
 			$this->lastProbe['reason'] = 'connect_failed';
 			return self::STATUS_UNKNOWN;
 		}
@@ -210,7 +212,7 @@ class EmailChecker {
 			return self::STATUS_UNKNOWN;
 		}
 
-		// HELO/MAIL FROM/RCPT TO — Antworten lesen
+		// HELO / MAIL FROM / RCPT TO — read responses
 		fputs( $sock, 'HELO ' . $this->helo . "\r\n" );
 		$heloRes = $this->smtpRead( $sock );
 
@@ -221,12 +223,12 @@ class EmailChecker {
 		$rcptRes = $this->smtpRead( $sock );
 		$this->lastProbe['smtp_rcpt'] = (string) $rcptRes;
 
-		// QUIT + schliessen — egal was kommt
+		// QUIT + close — ignore result
 		@fputs( $sock, "QUIT\r\n" );
 		fclose( $sock );
 
 		if ( $fromRes === null || $rcptRes === null || $heloRes === null ) {
-			// Timeouts — unbestimplt
+			// timeouts — inconclusive
 			return self::STATUS_UNKNOWN;
 		}
 
@@ -238,7 +240,7 @@ class EmailChecker {
 		}
 
 		if ( strncmp( $fromRes, '4', 1 ) === 0 || strncmp( $rcptRes, '4', 1 ) === 0 ) {
-			// Greylist/defer — beim naechsten Versuch vielleicht ok
+			// greylist/defer — may succeed on a later try
 			$this->lastProbe['reason'] = $this->lastProbe['reason'] ?? '';
 			$this->lastProbe['reason'] .= ( $this->lastProbe['reason'] !== '' ? ',' : '' ) . 'smtp_4xx';
 			return self::STATUS_UNKNOWN;
@@ -249,7 +251,7 @@ class EmailChecker {
 	}
 
 	/**
-	 * Liest eine SMTP-Antwortzeile; null bei Timeout/Verbindungsabriss.
+	 * Reads one SMTP response line; null on timeout / dropped connection.
 	 */
 	private function smtpRead( $sock ) {
 		$line = fgets( $sock, 1024 );
@@ -263,8 +265,8 @@ class EmailChecker {
 	}
 
 	/**
-	 * MX-Host (oder A/AAAA-Fallback) der Domain.
-	 * false = keine Route zum Mailempfang.
+	 * Mail host (via MX or A/AAAA fallback) of the domain.
+	 * false = no route for mail delivery.
 	 */
 	private function resolveMailHost( string $domain ) {
 		$domain = ltrim( $domain, '[' );
@@ -300,8 +302,8 @@ class EmailChecker {
 	// ============================================
 
 	/**
-	 * StopForumSpam-XML-API.
-	 * Antwort: 'passed' | 'failed' | null (API nicht erreichbar / ungueltig → fail-open)
+	 * StopForumSpam XML API.
+	 * Response: 'passed' | 'failed' | null (API unreachable/invalid -> fail-open)
 	 */
 	private function checkStopForumSpam( string $email ) {
 		$ctx = stream_context_create( [
@@ -372,7 +374,7 @@ class EmailChecker {
 
 		$age = time() - (int) @filemtime( $file );
 
-		// TTL je Status (unknown = 15 min)
+		// TTL per status (unknown = 15 min)
 		if ( strpos( $payload, '"passed"' ) !== false ) {
 			$ttl = self::CACHE_TTL_OK;
 		} elseif ( strpos( $payload, '"unknown"' ) !== false ) {

@@ -224,19 +224,19 @@ class Validate
     }
 
     /**
-     * emailcheck - Regel: Email-Adresse muss den Mail-Existenzcheck
-     * (EmailChecker: SMTP-RCPT-Probe + StopForumSpam + Cache) bestehen.
+     * emailcheck - Validation rule: the email address must pass the mail
+     * existence check (EmailChecker: SMTP RCPT probe + stopforumspam + cache).
      *
-     * Fail-open: ist die Probe 'unknown' (Greylisting/Timeout), gilt die
-     * Adresse als OK — es wird nur bei hartem 'failed' ein Fehler gemeldet.
-     * Reset-UI: als 'param' ein Fehlermeldungstext (default unten).
+     * Fail-open: if the probe is 'unknown' (greylisting/timeout), the
+     * address counts as OK — an error is reported only on a hard 'failed'.
+     * Custom message can be passed via $param (default message below).
      *
-     * ACHTUNG: macht Netugal-Traffic (SMTP + SFS-API) und kann 5–10 s dauern
-     * (Erst-Check ohne Cache). Deshalb nur fuer Login-/Registrierungs-Inputs
-     * einsetzen, NICHT fuer jedes Formular-Field.
+     * NOTE: performs network traffic (SMTP + SFS API) and may take 5-10 s
+     * (first check without cache). Therefore only for login/registration
+     * inputs, NOT for every form field.
      *
-     * @param string $value Email-Adresse des Inputs
-     * @param string|null $param (Optional) Ergaenzende Fehlermeldung
+     * @param string $value Email address from the input
+     * @param string|null $param (Optional) Custom error message
      *
      * @return string For an error
      */
