@@ -45,7 +45,7 @@ class EmailChecker {
 	const SMTP_PORT    = 25;
 	const SMTP_TIMEOUT = 5;             // Greylisting braucht laenger als 2s
 	const HTTP_TIMEOUT = 3;
-	const SFS_URL      = 'https://api.stopforumspam.org/api?email=%s&confidence';
+	const SFS_URL      = 'https://api.stopforumspam.com/api?email=';
 
 	/** @var string */
 	private $cacheDir;
@@ -120,10 +120,10 @@ class EmailChecker {
 			// SMTP ok — jetzt blocklist-Check (StopForumSpam)
 			$sfs = $this->checkStopForumSpam( $email );
 
-			if ( $sfs === false || $sfs === self::STATUS_PASSED || $sfs === '' ) {
-				$status = self::STATUS_PASSED;
-			} else {
+			if ( $sfs === self::STATUS_FAILED ) {
 				$status = self::STATUS_FAILED;
+			} else {
+				$status = self::STATUS_PASSED; // 'passed'/null/fail-open
 			}
 		} elseif ( $ve->isInconclusive() ) {
 			// Greylist/Timeout/4xx — unbestimmt, NICHT failed
@@ -154,27 +154,26 @@ class EmailChecker {
 			],
 		] );
 
-		$json = @file_get_contents( self::SFS_URL . '=' . rawurlencode( $email ), false, $ctx );
+		$json = @file_get_contents( self::SFS_URL . rawurlencode( $email ) . '&xml', false, $ctx );
 
-		if ( $json === false ) {
+		if ( $json === false || $json === '' ) {
 			return null; // API nicht erreichbar: fail-open
 		}
 
-		$data = @json_decode( $json, true );
+		$spam = @simplexml_load_string( $json );
 
-		if ( ! is_array( $data ) ) {
+		if ( $spam === false ) {
 			return null;
 		}
 
-		if ( ! empty( $data['email']['appears'] ) ) {
-			$confidence = (int) ( $data['email']['confidence'] ?? 0 );
-			// Nur zuverlaessige Listungen blockieren (Schwellwert 95%)
-			if ( $confidence >= 95 ) {
-				return self::STATUS_FAILED;
+		if ( (string) $spam['success'] === 'true' ) {
+			if ( (string) $spam->appears === 'no' ) {
+				return self::STATUS_PASSED;
 			}
+			return self::STATUS_FAILED;
 		}
 
-		return self::STATUS_PASSED;
+		return null;
 	}
 
 	private function getDomain( string $email ): string {
