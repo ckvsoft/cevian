@@ -2,8 +2,8 @@
 
 ### Features
 
-* **core:** `ckvsoft\EmailChecker` (`library/ckvsoft/emailchecker.php`) — generisch nutzbare Email-Adressverifikation für Framework + alle Module: TLD-Blocklist, SMTP-RCPT-Probe (3-state), StopForumSpam (fail-open, Confidenz-Schwelle 95%), File-Cache in `var/cache/emailcheck` je Status-TTL
-* **core:** `ckvsoft\VerifyEmail` (`library/ckvsoft/verifyemail.php`) — SMTP-RCPT-Probe-Engine, FORK des hbattat-VerifyEmail (MIT): Namespace ckvsoft, HELO konfigurierbar, neu `isInconclusive()`/`getLastRcptResponse()` (Greylist/Read-Timeout/4xx = unbestimmt statt 'ungültig')
+* **core:** `ckvsoft\EmailChecker` (`library/ckvsoft/emailchecker.php`) — KOMPLETT neu geschrieben (kein hbattat-Fork mehr): TLD-Blocklist, eigene SMTP-RCPT-Probe (HELO/MAIL FROM/RCPT mit Listen-Timeouts, 3-state), StopForumSpam (XML-API, fail-open), File-Cache var/cache/emailcheck je Status-TTL; API: `verify($email)` → passed|unknown|failed + `get_last_probe()`
+* **input:** `Input\Validate::emailcheck($value, $msg)` — optionaler Validierungs-Filter auf Basis des EmailChecker; fail-open bei 'unknown', Fehler nur bei hartem 'failed' (Nur für Login-/Registrierungs-Inputs einsetzen — macht Netzwerk-Traffic)
 * **modules/emailcheck (ns1):** Endpoint (WP-Gegenstelle) schlankgestellt — Model delegiert nur mehr an `ckvsoft\EmailChecker`; `library/verifyEmail/` wandert ins Core und gehört dem Modul nicht mehr
 * **emailcheck:** Service-Modul am ns1: SMTP-Timeout 2s→5s, `unknown`-Status (TTL 15 min) statt hartes `failed` bei Greylisting/Timeout — Ursache war, dass legitime Mailboxen (GMX/MS-Greylist) ihre Bestätigungs-Mails nie bekamen (fail-closed im `is_email`-Filter)
 * **wp:** Plugin `qrk-email-checker`: `is_email`-Filter ENTFERNT (blockierte ALLE ausgehenden Mails, deren Empfänger-Check `failed` war); Adresspruefung greift NUR noch bei Registrierung (`user_register`-Backstop) + Gravity-Forms

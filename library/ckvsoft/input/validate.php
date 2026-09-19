@@ -224,6 +224,35 @@ class Validate
     }
 
     /**
+     * emailcheck - Regel: Email-Adresse muss den Mail-Existenzcheck
+     * (EmailChecker: SMTP-RCPT-Probe + StopForumSpam + Cache) bestehen.
+     *
+     * Fail-open: ist die Probe 'unknown' (Greylisting/Timeout), gilt die
+     * Adresse als OK — es wird nur bei hartem 'failed' ein Fehler gemeldet.
+     * Reset-UI: als 'param' ein Fehlermeldungstext (default unten).
+     *
+     * ACHTUNG: macht Netugal-Traffic (SMTP + SFS-API) und kann 5–10 s dauern
+     * (Erst-Check ohne Cache). Deshalb nur fuer Login-/Registrierungs-Inputs
+     * einsetzen, NICHT fuer jedes Formular-Field.
+     *
+     * @param string $value Email-Adresse des Inputs
+     * @param string|null $param (Optional) Ergaenzende Fehlermeldung
+     *
+     * @return string For an error
+     */
+    public function emailcheck($value, $param = null)
+    {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL))
+            return 'invalid email format.';
+
+        $checker = new \ckvsoft\EmailChecker();
+        $status = $checker->verify($value);
+
+        if ($status === \ckvsoft\EmailChecker::STATUS_FAILED)
+            return is_string($param) && $param !== '' ? $param : 'e-mail address does not accept mail (vercheck failed).';
+    }
+
+    /**
      * age - Checks to see if a person is old enough
      *
      * @param string $dob Use MySQL Format YYYY-MM-DD
