@@ -3,8 +3,18 @@
 namespace ckvsoft;
 
 /**
- * EmailChecker — Eigen-Implementierung (kein Fremdcode): Mail-Adressverifikation
- * fuer das cevian Framework und alle Module.
+ * EmailChecker — Mail-Adressverifikation fuer das cevian Framework und alle Module.
+ *
+ * PROVENIENZ: Neufassung auf Basis der ns1-Service-Implementierung
+ * (module emailcheck + Emailcheck_Model, ckvsoft 2026-09) und des Forks
+ * aus hbattat/VerifyEmail (MIT, https://github.com/hbattat/VerifyEmail —
+ * Reachstand 2016, am ns1 damals eingebaut). Kern-Idee der RCPT-TO-Probe
+ * geht auf hbattat zurueck (MIT-Lizenz, hiermit zugeordnet). Eigene
+ * Bestaende: 3-state-Semantik (passed/unknown/failed) inkl.
+ * Greylist-/Timeout-Erkennung, HELO- und Timeout-Handling, XML-SFS-Check,
+ * TLD-Blocklist und Status-TTL-Cache. Kein Drop-in-Update gegen den
+ * hbattat-Upstream moeglich — Klasse leistet vieles andere als der
+ * Upstream (Webkontext tauglicher), startet im cevian-Repo.
  *
  * Pipeline:
  *   1. Syntax (FILTER_VALIDATE_EMAIL)
