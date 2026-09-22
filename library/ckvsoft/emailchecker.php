@@ -341,7 +341,18 @@ class EmailChecker {
 		$mxweight = [];
 		$hasMx    = getmxrr( $domain, $mxhosts, $mxweight );
 
-		if ( $hasMx && empty( $mxhosts ) ) {
+		// getmxrr() treats the null-MX "0 ." as a single empty host entry
+		// (hosts == [""] / ["."]); sometimes it even reports true with an
+		// empty list. Either way every host is empty/dot-only -> null-MX.
+		$real = [];
+		foreach ( $mxhosts as $i => $h ) {
+			$h = trim( $h, " \t." );
+			if ( $h !== '' ) {
+				$real[ $i ] = $h;
+			}
+		}
+
+		if ( $hasMx && empty( $real ) ) {
 			// null-MX (RFC 7505): MX record with empty host, e.g. "0 ." —
 			// domain explicitly declares it does not accept mail. Postfix
 			// rejects such domains ("does not accept mail (nullMX)").
@@ -350,7 +361,7 @@ class EmailChecker {
 		}
 
 		if ( $hasMx ) {
-			return $mxhosts[ array_search( min( $mxweight ), $mxweight ) ];
+			return $real[ array_search( min( $mxweight ), $mxweight ) ];
 		}
 
 		$recordA = @dns_get_record( $domain, DNS_A );
