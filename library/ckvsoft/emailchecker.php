@@ -21,16 +21,21 @@ namespace ckvsoft;
  * Pipeline:
  *   1. Syntax (FILTER_VALIDATE_EMAIL)
  *   2. TLD blocklist (instant fail, no SMTP probe)
- *   3. SMTP RCPT-TO probe against the domain's MX/host (3-state!)
- *   4. StopForumSpam (fail-open, simple XML API)
- *   5. File cache (var/cache/emailcheck, overridable) with status TTLs
+ *   3. Domain blocklist (instant fail, no SMTP probe)
+ *   4. SMTP RCPT-TO probe against the domain's MX/host (3-state, plus
+ *      catch-all detection via a second RCPT-TO probe)
+ *   5. StopForumSpam (fail-open, simple XML API)
+ *   6. File cache (var/cache/emailcheck, overridable) with status TTLs
  *
  * Status semantics:
  *   'passed'  mailbox exists on the server, accepts mail, not listed
  *   'unknown' probe inconclusive: greylist/4xx, connect fail, read
  *             timeout — caller MUST treat this as fail-open (accept)
- *   'failed'  hard rejection: no MX, RCPT 5xx (mailbox gone),
- *             blocked TLD, listed in stopforumspam
+ *   'unknown_catchall'  domain accepts RCPT-TO for ANY local part
+ *             (accept-all): the address may or may not exist. Caller
+ *             MAY apply stricter rules (e.g. moderated registration).
+ *   'failed'  hard rejection: null-MX/no MX, RCPT 5xx (mailbox gone),
+ *             blocked TLD, blocked domain, listed in stopforumspam
  *
  * Usage in the framework (pluggable anywhere — e.g. login/registration):
  *     $checker = new \ckvsoft\EmailChecker(['verifier_email' => 'www-data@ckvsoft.at']);
@@ -49,10 +54,14 @@ class EmailChecker {
 	const STATUS_PASSED  = 'passed';
 	const STATUS_UNKNOWN = 'unknown';
 	const STATUS_FAILED  = 'failed';
+	const STATUS_CATCHALL = 'unknown_catchall';
 
 	const CACHE_TTL_OK      = 7 * 86400; // 7 days (bots may land in SFS later)
 	const CACHE_TTL_FAIL    = 86400;     // 1 day
 	const CACHE_TTL_UNKNOWN = 900;       // 15 minutes — short, re-check later
+	const CACHE_TTL_CATCHALL = 900;      // 15 minutes — accept-all may change
+
+	const CATCHALL_PROBE_CHARS = 8;      // length of the random local part probe
 
 	const SMTP_PORT      = 25;
 	const SMTP_TIMEOUT   = 5;
@@ -61,6 +70,9 @@ class EmailChecker {
 	const SFS_TIMEOUT   = 3;                                  // seconds
 	/** @var array TLD blacklist (instant fail, no SMTP probe) */
 	private array $blockedTlds;
+
+	/** @var array exact-domain blacklist (instant fail, no SMTP probe) */
+	private array $blockedDomains;
 
 	/** @var string MAIL FROM used for the SMTP probe */
 	private string $verifierEmail;
@@ -75,7 +87,7 @@ class EmailChecker {
 	private array $lastProbe = [];
 
 	/**
-	 * @param array|null $opts verifier_email, helo, cache_dir, blocked_tlds (optional)
+	 * @param array|null $opts verifier_email, helo, cache_dir, blocked_tlds, blocked_domains (optional)
 	 */
 	public function __construct( ?array $opts = null ) {
 		$this->blockedTlds = [
@@ -83,6 +95,7 @@ class EmailChecker {
 			'ml', 'loan', 'work', 'icu', 'cam', 'rest',
 			'cyou', 'sbs', 'monster',
 		];
+		$this->blockedDomains = [];
 		$this->verifierEmail = 'www-data@ckvsoft.at';
 		$this->helo          = self::SMTP_HELO;
 		$this->cacheDir      = __DIR__ . '/../../var/cache/emailcheck';
@@ -99,6 +112,16 @@ class EmailChecker {
 			}
 			if ( isset( $opts['blocked_tlds'] ) && is_array( $opts['blocked_tlds'] ) ) {
 				$this->blockedTlds = $opts['blocked_tlds'];
+			}
+			if ( isset( $opts['blocked_domains'] ) && is_array( $opts['blocked_domains'] ) ) {
+				$normalized = [];
+				foreach ( $opts['blocked_domains'] as $d ) {
+					$d = strtolower( trim( (string) $d ) );
+					if ( $d !== '' ) {
+						$normalized[] = $d;
+					}
+				}
+				$this->blockedDomains = $normalized;
 			}
 		}
 	}
@@ -143,6 +166,13 @@ class EmailChecker {
 			return self::STATUS_FAILED;
 		}
 
+		// ---- domain blocklist: instant fail, no SMTP probe ----
+		if ( $this->isBlockedDomain( $domain ) ) {
+			$this->lastProbe['reason'] = 'domain_blocked';
+			$this->cacheWrite( $email, self::STATUS_FAILED );
+			return self::STATUS_FAILED;
+		}
+
 		// ---- SMTP RCPT-TO probe ----
 		$answer = $this->smtpVerify( $email );
 
@@ -161,6 +191,10 @@ class EmailChecker {
 			// greylist/timeout/4xx/connect-fail — inconclusive, NOT failed
 			$this->lastProbe['status'] = self::STATUS_UNKNOWN;
 			$this->lastProbe['reason'] .= ( $this->lastProbe['reason'] !== '' ? ',' : '' ) . 'smtp_inconclusive';
+		} elseif ( $answer === self::STATUS_CATCHALL ) {
+			// accept-all server — address may be fake; caller may moderate
+			$this->lastProbe['status'] = self::STATUS_CATCHALL;
+			$this->lastProbe['reason'] = ( $this->lastProbe['reason'] !== '' ? $this->lastProbe['reason'] . ',' : '' ) . 'catchall';
 		} else {
 			$this->lastProbe['status'] = self::STATUS_FAILED;
 		}
@@ -223,6 +257,21 @@ class EmailChecker {
 		$rcptRes = $this->smtpRead( $sock );
 		$this->lastProbe['smtp_rcpt'] = (string) $rcptRes;
 
+		$toOk = ( $rcptRes !== null && strncmp( $rcptRes, '250', 3 ) === 0 );
+
+		// Catch-all detection: if the real address is accepted, probe a
+		// random non-existent local part on the same domain. An accept-all
+		// server answers 250 for it too — then the mailbox "exists" signal
+		// is meaningless and the address may be a fake/spam one.
+		if ( $toOk ) {
+			$probe = $this->randomLocal() . '@' . $this->getDomain( $email );
+			fputs( $sock, 'RCPT TO:<' . $probe . ">\r\n" );
+			$probeRes = $this->smtpRead( $sock );
+			$this->lastProbe['smtp_catchall_probe'] = (string) $probeRes;
+		} else {
+			$probeRes = null;
+		}
+
 		// QUIT + close — ignore result
 		@fputs( $sock, "QUIT\r\n" );
 		fclose( $sock );
@@ -232,10 +281,18 @@ class EmailChecker {
 			return self::STATUS_UNKNOWN;
 		}
 
-		$fromOk = ( strncmp( $fromRes, '250', 3 ) === 0 );
-		$toOk   = ( strncmp( $rcptRes, '250', 3 ) === 0 );
-
 		if ( $toOk ) {
+			// Real address accepted; how did the random probe behave?
+			if ( $probeRes !== null && strncmp( $probeRes, '250', 3 ) === 0 ) {
+				// accept-all server — mailbox existence not verifiable
+				$this->lastProbe['reason'] = 'catchall';
+				return self::STATUS_CATCHALL;
+			}
+			if ( $probeRes !== null && strncmp( $probeRes, '5', 1 ) === 0 ) {
+				// random local part rejected -> real mailbox check works
+				return self::STATUS_PASSED;
+			}
+			// probe inconclusive (4xx/timeout) — fail-open
 			return self::STATUS_PASSED;
 		}
 
@@ -282,7 +339,17 @@ class EmailChecker {
 
 		$mxhosts  = [];
 		$mxweight = [];
-		if ( getmxrr( $domain, $mxhosts, $mxweight ) && ! empty( $mxhosts ) ) {
+		$hasMx    = getmxrr( $domain, $mxhosts, $mxweight );
+
+		if ( $hasMx && empty( $mxhosts ) ) {
+			// null-MX (RFC 7505): MX record with empty host, e.g. "0 ." —
+			// domain explicitly declares it does not accept mail. Postfix
+			// rejects such domains ("does not accept mail (nullMX)").
+			$this->lastProbe['reason'] = 'null_mx';
+			return false;
+		}
+
+		if ( $hasMx ) {
 			return $mxhosts[ array_search( min( $mxweight ), $mxweight ) ];
 		}
 
@@ -353,6 +420,24 @@ class EmailChecker {
 		return strtolower( (string) end( $parts ) );
 	}
 
+	private function isBlockedDomain( string $domain ): bool {
+		return in_array( strtolower( $domain ), $this->blockedDomains, true );
+	}
+
+	/**
+	 * Random local part for the catch-all probe (no dots/plus — just
+	 * lowercase alphanumerics, so hosts can't pattern-match it away).
+	 */
+	private function randomLocal(): string {
+		$chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+		$out   = '';
+		$max   = strlen( $chars ) - 1;
+		for ( $i = 0; $i < self::CATCHALL_PROBE_CHARS; $i++ ) {
+			$out .= $chars[ random_int( 0, $max ) ];
+		}
+		return $out;
+	}
+
 	private function cacheDirPath(): string {
 		return rtrim( $this->cacheDir, '/' );
 	}
@@ -374,8 +459,11 @@ class EmailChecker {
 
 		$age = time() - (int) @filemtime( $file );
 
-		// TTL per status (unknown = 15 min)
-		if ( strpos( $payload, '"passed"' ) !== false ) {
+		// TTL per status (unknown/catchall = 15 min; catchall checked first
+		// because it contains the substring "unknown" in its quoted form)
+		if ( strpos( $payload, '"unknown_catchall"' ) !== false ) {
+			$ttl = self::CACHE_TTL_CATCHALL;
+		} elseif ( strpos( $payload, '"passed"' ) !== false ) {
 			$ttl = self::CACHE_TTL_OK;
 		} elseif ( strpos( $payload, '"unknown"' ) !== false ) {
 			$ttl = self::CACHE_TTL_UNKNOWN;
