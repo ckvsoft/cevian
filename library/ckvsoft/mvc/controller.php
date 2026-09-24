@@ -47,8 +47,8 @@ class Controller extends \stdClass
 
         // 1. Versuche, Model im Standard-Modulpfad zu finden
         if (!file_exists($modelFile)) {
-            // 2. Wenn nicht gefunden, versuche Fallback in CORE_MODULES
-            $coreModelFile = str_replace(MODULES_URI, CORE_MODULES_URI, $modelFile);
+            // 2. Wenn nicht gefunden, versuche Fallback in CORE_MODULES (geteilter Baum)
+            $coreModelFile = \ckvsoft\Paths::coreModulesDir() . $module . '/model/' . $model . '_model.php';
 
             if (!file_exists($coreModelFile)) {
                 // Wenn es weder im Modul- noch im Core-Pfad existiert, werfe eine Exception
@@ -89,8 +89,8 @@ class Controller extends \stdClass
                 // Look first in module folder
                 $helperFile = $this->pathHelper . $moduleName . '/helper/' . $helperName . '_helper.php';
                 if (!file_exists($helperFile)) {
-                    // fallback to core_modules
-                    $helperFile = str_replace(MODULES_URI, CORE_MODULES_URI, $helperFile);
+                    // fallback to core_modules (geteilter Baum)
+                    $helperFile = \ckvsoft\Paths::coreModulesDir() . $moduleName . '/helper/' . $helperName . '_helper.php';
                     if (!file_exists($helperFile)) {
                         throw new \Exception("Helper file not found in module or core_modules: $helper");
                     }
@@ -155,9 +155,8 @@ class Controller extends \stdClass
      */
     public function loadScript(string $script, array $data = [])
     {
-        // absoluter Basis-Pfad = Arbeitsverzeichnis + BASE_URI
-        // $baseFs = rtrim(getcwd(), '/') . '/' . ltrim(BASE_URI, '/');
-        $baseFs = rtrim(getcwd(), '/') . '/';
+        // absoluter Basis-Pfad = Docroot der Site
+        $baseFs = \ckvsoft\Paths::siteRoot();
 
         $paths = [];
 
@@ -166,7 +165,7 @@ class Controller extends \stdClass
             $scriptRel = ltrim($script, '/');
             $paths = [
                 $baseFs . trim(MODULES_URI, '/') . '/' . $scriptRel,
-                $baseFs . trim(CORE_MODULES_URI, '/') . '/' . $scriptRel,
+                \ckvsoft\Paths::coreModulesDir() . $scriptRel,
             ];
         } else {
             // Relativer Pfad → Modulname ermitteln
@@ -176,7 +175,7 @@ class Controller extends \stdClass
 
             $paths = [
                 $baseFs . trim(MODULES_URI, '/') . '/' . $module . '/view/' . $script,
-                $baseFs . trim(CORE_MODULES_URI, '/') . '/' . $module . '/view/' . $script,
+                \ckvsoft\Paths::coreModulesDir() . $module . '/view/' . $script,
             ];
         }
 

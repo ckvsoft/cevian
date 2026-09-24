@@ -27,10 +27,10 @@ class ModulManager
      */
     public function loadConfig(string $module): ?array
     {
-        // Correction: Use injected properties instead of constants
+        // Core = geteilter Framework-Baum, Modules = Site-Docroot
         $paths = [
-            __DIR__ . "/../../" . $this->coreModulesUri . "/{$module}/module.json",
-            __DIR__ . "/../../" . $this->modulesUri . "/{$module}/module.json",
+            \ckvsoft\Paths::coreModulesDir() . $module . '/module.json',
+            \ckvsoft\Paths::siteRoot() . trim($this->modulesUri, '/') . '/' . $module . '/module.json',
         ];
 
         foreach ($paths as $path) {
@@ -156,10 +156,10 @@ class ModulManager
      */
     private function applyMigrations(string $module): void
     {
-        // Correction: Use injected properties for paths
+        // Core = geteilter Framework-Baum, Modules = Site-Docroot
         $paths = [
-            __DIR__ . "/../../" . $this->coreModulesUri . "/{$module}/inc/sql",
-            __DIR__ . "/../../" . $this->modulesUri . "/{$module}/inc/sql",
+            \ckvsoft\Paths::coreModulesDir() . $module . '/inc/sql',
+            \ckvsoft\Paths::siteRoot() . trim($this->modulesUri, '/') . '/' . $module . '/inc/sql',
         ];
 
         $migrationPath = null;

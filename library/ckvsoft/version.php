@@ -33,7 +33,7 @@ class Version
      * Base version of the application (without Git info)
      * @var string
      */
-    private static $baseVersion = "0.18.5-260924";
+    private static $baseVersion = "0.19.0-260924";
 
     /**
      * Returns the application name

@@ -33,8 +33,8 @@ class ProviderRegistry
         $found = [];
 
         $rootCandidates = [
-            __DIR__ . '/../../../' . trim(\MODULES_URI, '/'),
-            __DIR__ . '/../../../' . trim(\CORE_MODULES_URI, '/'),
+            \ckvsoft\Paths::siteRoot() . trim(\MODULES_URI, '/'),
+            \ckvsoft\Paths::coreRoot() . trim(\CORE_MODULES_URI, '/'),
         ];
 
         foreach ($rootCandidates as $root) {

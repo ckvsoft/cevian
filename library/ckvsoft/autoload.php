@@ -2,6 +2,7 @@
 
 namespace ckvsoft;
 
+require_once __DIR__ . '/paths.php';
 require_once __DIR__ . '/helper/i18n_helper.php';
 
 class Autoload
@@ -76,7 +77,7 @@ class Autoload
         $message = $file ? "[$timestamp] [Autoloader] $class => $file" : "[$timestamp] [Autoloader] Klasse $class nicht gefunden";
 
         // 1️⃣ In eigenes Logfile schreiben
-        $logDir = __DIR__ . '/../../var/log/'; // relativ zum Autoloader
+        $logDir = \ckvsoft\Paths::siteRoot() . 'var/log/'; // Site-Docroot (shared-split: var bleibt pro Site)
         if (!is_dir($logDir)) {
             mkdir($logDir, 0755, true);
         }

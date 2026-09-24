@@ -29,15 +29,15 @@ class Css_Helper extends \ckvsoft\mvc\Helper
         if (strpos($css, '/') === 0) {
             // Suche direkt in MODULES oder CORE_MODULES (Unabhängig vom aktuellen Modul)
             $pathsToCheck = [
-                getcwd() . '/' . MODULES_URI . ltrim($css, '/'),
-                getcwd() . '/' . CORE_MODULES_URI . ltrim($css, '/'),
+                \ckvsoft\Paths::siteRoot() . trim(MODULES_URI, '/') . '/' . ltrim($css, '/'),
+                \ckvsoft\Paths::coreModulesDir() . ltrim($css, '/'),
             ];
         } else {
             // Standard-Suche im angegebenen/aktuellen Modul/view-Ordner
             // Hier wird $moduleName verwendet
             $pathsToCheck = [
-                getcwd() . '/' . MODULES_URI . $moduleName . '/view/' . $css,
-                getcwd() . '/' . CORE_MODULES_URI . $moduleName . '/view/' . $css,
+                \ckvsoft\Paths::siteRoot() . trim(MODULES_URI, '/') . '/' . $moduleName . '/view/' . $css,
+                \ckvsoft\Paths::coreModulesDir() . $moduleName . '/view/' . $css,
             ];
         }
 

@@ -27,17 +27,16 @@
 // cli.php
 // Script for executing command-line tools like i18n extraction and compilation.
 // --- 1. Setup Environment ---
-// Determine the root path. Assuming this script is at the root or a known offset.
-// Adjust the realpath part if this file is not directly in the root directory.
-// Example uses realpath(__DIR__ . '/../../../') to simulate finding the root from a deep directory.
-// If cli.php is directly in the root, use: $rootPath = __DIR__ . '/';
-$rootPath = rtrim(realpath(__DIR__ . '/../../../'), '/') . '/';
+// Der CLI läuft immer gegen den Framework-Baum (shared-split: _cevian,
+// standalone: der lokale Baum). Der Autoloader wird direkt aus der library/
+// geladen; Paths::coreRoot() liefert die Framework-Wurzel (locale/, etc.).
+require_once __DIR__ . '/../autoload.php';
 
-require_once $rootPath . 'library/ckvsoft/autoload.php';
+$rootPath = \ckvsoft\Paths::coreRoot();
 
 // Autoload setup (assuming Autoload class exists and is necessary for ckvsoft\tools\CliTool)
 $autoload = new \ckvsoft\Autoload([
-    $rootPath . '/library',
+    $rootPath . 'library',
         ]);
 
 use ckvsoft\tools\CliTool;

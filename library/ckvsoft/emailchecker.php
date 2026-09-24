@@ -98,7 +98,7 @@ class EmailChecker {
 		$this->blockedDomains = [];
 		$this->verifierEmail = 'www-data@ckvsoft.at';
 		$this->helo          = self::SMTP_HELO;
-		$this->cacheDir      = __DIR__ . '/../../var/cache/emailcheck';
+		$this->cacheDir      = \ckvsoft\Paths::siteRoot() . 'var/cache/emailcheck';
 
 		if ( is_array( $opts ) ) {
 			if ( isset( $opts['verifier_email'] ) && $opts['verifier_email'] !== '' ) {

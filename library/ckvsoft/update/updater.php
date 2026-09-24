@@ -59,12 +59,13 @@ class Updater extends \ckvsoft\mvc\Config
 
     /**
      * @param string|null $module     Module name (e.g. 'pmwh3'). Null = framework.
-     * @param string      $configPath Path to update.json. Default lives in var/.
+     * @param string|null $configPath Path to update.json. Default lives in
+     *                                <site-root>/var/update.json (pro Site).
      */
-    public function __construct(?string $module = null, string $configPath = __DIR__ . '/../../../var/update.json')
+    public function __construct(?string $module = null, ?string $configPath = null)
     {
         parent::__construct();
-        $this->configPath = $configPath;
+        $this->configPath = $configPath ?? \ckvsoft\Paths::siteRoot() . 'var/update.json';
 
         // Bugfix: Config::__construct() sets $this->db = framework
         // shared DB but does NOT initialize $this->moduleDb -- that
@@ -133,8 +134,8 @@ class Updater extends \ckvsoft\mvc\Config
     protected function resolveModuleSqlDir(string $module): string
     {
         $candidates = [
-            __DIR__ . '/../../../' . trim(\MODULES_URI, '/')      . '/' . $module . '/inc/sql',
-            __DIR__ . '/../../../' . trim(\CORE_MODULES_URI, '/') . '/' . $module . '/inc/sql',
+            \ckvsoft\Paths::siteRoot() . trim(\MODULES_URI, '/')      . '/' . $module . '/inc/sql',
+            \ckvsoft\Paths::coreModulesDir() . $module . '/inc/sql',
         ];
         foreach ($candidates as $c) {
             if (is_dir($c)) {
@@ -169,8 +170,8 @@ class Updater extends \ckvsoft\mvc\Config
         // Try config/version.php constant first.
         $module = $this->scope;
         $candidates = [
-            __DIR__ . '/../../../' . trim(\MODULES_URI, '/')      . '/' . $module . '/config/version.php',
-            __DIR__ . '/../../../' . trim(\CORE_MODULES_URI, '/') . '/' . $module . '/config/version.php',
+            \ckvsoft\Paths::siteRoot() . trim(\MODULES_URI, '/')      . '/' . $module . '/config/version.php',
+            \ckvsoft\Paths::coreModulesDir() . $module . '/config/version.php',
         ];
         foreach ($candidates as $c) {
             if (is_file($c)) {
@@ -184,8 +185,8 @@ class Updater extends \ckvsoft\mvc\Config
 
         // Fall back to module.json's "version".
         foreach ([
-            __DIR__ . '/../../../' . trim(\MODULES_URI, '/')      . '/' . $module . '/module.json',
-            __DIR__ . '/../../../' . trim(\CORE_MODULES_URI, '/') . '/' . $module . '/module.json',
+            \ckvsoft\Paths::siteRoot() . trim(\MODULES_URI, '/')      . '/' . $module . '/module.json',
+            \ckvsoft\Paths::coreModulesDir() . $module . '/module.json',
         ] as $jsonPath) {
             if (is_file($jsonPath)) {
                 $data = json_decode((string) file_get_contents($jsonPath), true);
@@ -260,7 +261,7 @@ class Updater extends \ckvsoft\mvc\Config
                     $this->recordMigration($mark);
                 }
                 $this->setLastUpdatedVersion($this->getCurrentVersion());
-                $varDir = __DIR__ . '/../../../var';
+                $varDir = \ckvsoft\Paths::siteRoot() . 'var';
                 if (is_dir($varDir) && is_writable($varDir)) {
                     @file_put_contents(
                             $varDir . '/' . $this->scope . '_freshly_installed.flag',
@@ -304,7 +305,7 @@ class Updater extends \ckvsoft\mvc\Config
             // Drop fresh-install marker so the module can react on its
             // next page load.
             if ($this->isFreshInstall && $this->scope !== '_core_') {
-                $varDir = __DIR__ . '/../../../var';
+                $varDir = \ckvsoft\Paths::siteRoot() . 'var';
                 if (is_dir($varDir) && is_writable($varDir)) {
                     @file_put_contents(
                             $varDir . '/' . $this->scope . '_freshly_installed.flag',

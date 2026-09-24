@@ -1,3 +1,16 @@
+### [0.19.0-260924] — Shared-Split (cevian als Einmal-Installation)
+
+### Features / Refactoring
+
+* **shared-split:** cevian kann als EINMALIGE Framework-Installation betrieben werden — geteilt leben `library/`, `core_modules/`, `locale/`, `index.php` und `config/app_defaults.json` (z. B. `/vhome/vhtml/_cevian`); jede Site behält ihren eigenen Docroot mit `config/config.json` + `config/app.json`, `modules/`, `var/`, `public/`, `.htaccess`
+* **paths:** neues `library/ckvsoft/paths.php` (`ckvsoft\Paths`) — `siteRoot()` (Site-Docroot), `coreRoot()` (Framework-Baum), `coreModulesDir()`, `siteModulesDir()`; CEVIAN_ROOT/CEVIAN_SITE_ROOT mit Standalone-Fallback (byte-gleiches Verhalten ohne Stub — Tests/Install-Bäume unberührt)
+* **index.php:** gemeinsamer Bootstrap — setzt CEVIAN_ROOT/CEVIAN_SITE_ROOT-Fallbacks, lädt Site-Module via `Paths::siteRoot()`, Error-Log-Pfad + setPathRoot site-root-basiert
+* **config:** `app_defaults.json` wird aus `Paths::coreRoot()/config/` gelesen (Framework-Defaults = single source), `app.json`/`config.json` aus dem Site-Docroot; Merge-Priorität `app.json` über `app_defaults.json` unverändert
+* **bootstrap/controller/helper:** Core-Modul-/Model-/Helper-/View-/Script-/CSS-Auflösung über `Paths::coreModulesDir()` (geteilter Baum) statt str_replace über MODULES_URI/CORE_MODULES_URI; I18n/locale aus `Paths::coreRoot()`
+* **modulmanager/updater/providerregistry/emailchecker:** module.json / inc/sql / version.php / update.json / var-cache-Auflösung auf Site-Docroot + geteilten Core-Baum umgestellt (Updater: `update.json` liegt pro Site in `<site>/var/`)
+* **cli.php:** lädt den Autoloader direkt aus der library/ und arbeitet gegen `Paths::coreRoot()`
+* **contrib/shared-split:** 5-Zeilen-Site-Stub (`site-index.php`, Klartext-Pfad, kein Symlink) + README mit Migrations-/Deploy-Rezept
+
 ### [0.18.5-260924]
 
 ### Fixes

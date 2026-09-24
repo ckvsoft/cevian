@@ -133,7 +133,9 @@ class Bootstrap extends \stdClass
 
         // --- I18n INITIALIZATION (MUST be called after setPathRoot) ---
         if (class_exists('\\ckvsoft\\I18n')) {
-            \ckvsoft\I18n::init($this->_pathRoot);
+            // Locale/ lebt im Framework-Baum (shared-split); standalone ist
+            // coreRoot == siteRoot -> identisches Verhalten.
+            \ckvsoft\I18n::init(\ckvsoft\Paths::coreRoot());
         }
         // ---------------------------------------------------------------
 
@@ -191,7 +193,7 @@ class Bootstrap extends \stdClass
         $subcontrollerFileModules = $this->_pathController . $module . "/controller/" . $subcontroller . ".php";
 
         // Check if Subcontroller exists in core_modules
-        $subcontrollerFileCore = str_replace(MODULES_URI, CORE_MODULES_URI, $subcontrollerFileModules);
+        $subcontrollerFileCore = \ckvsoft\Paths::coreModulesDir() . $module . "/controller/" . $subcontroller . ".php";
 
         if ($subcontroller && file_exists($subcontrollerFileModules)) {
             // Subcontroller found in modules
@@ -343,13 +345,13 @@ class Bootstrap extends \stdClass
         $isCoreModule = false;
 
         if (!file_exists($controllerFile)) {
-            // fallback to core_modules
-            $controllerFile = str_replace(MODULES_URI, CORE_MODULES_URI, $controllerFile);
+            // fallback zu core_modules (geteilter Framework-Baum)
+            $controllerFile = \ckvsoft\Paths::coreModulesDir() . $module . "controller/" . strtolower($this->_uriController) . '.php';
 
             if (!file_exists($controllerFile)) {
                 // --- Asset Request Logging (CSS, JS, images, fonts, etc.) ---
                 if ($lastSegment && preg_match('/\.(css|js|png|jpg|gif|cur|svg|ico|woff2?|ttf|eot|json|mp4|webm|webp)$/i', $lastSegment)) {
-                    $logDir = dirname(__DIR__, 3) . '/var/log/';
+                    $logDir = \ckvsoft\Paths::siteRoot() . 'var/log/';
                     $timestamp = date('Y-m-d H:i:s');
 
                     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
@@ -397,19 +399,21 @@ class Bootstrap extends \stdClass
         $this->controller = new $controllerClass();
 
         // --- Set controller paths ---
-        $this->controller->pathModel = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathModel) : $this->_pathModel;
+        // Core-Module (shared): Pfade zeigen in den geteilten Framework-Baum.
+        $coreModulesDir = \ckvsoft\Paths::coreModulesDir();
+        $this->controller->pathModel = $isCoreModule ? $coreModulesDir : $this->_pathModel;
 
-        $this->controller->pathHelper = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathHelper) : $this->_pathHelper;
+        $this->controller->pathHelper = $isCoreModule ? $coreModulesDir : $this->_pathHelper;
 
-        $this->controller->pathClass = $isCoreModule ? str_replace(MODULES_URI, CORE_MODULES_URI, $this->_pathController) . $module : $this->_pathController . $module;
+        $this->controller->pathClass = $isCoreModule ? $coreModulesDir . $module : $this->_pathController . $module;
 
         $this->controller->baseControllerName = strtolower($baseController);
-        $this->controller->coreModulePath = $this->_pathRoot . CORE_MODULES_URI;
+        $this->controller->coreModulePath = $coreModulesDir;
 
         // --- Initialize the view object ---
         $this->controller->view = new View(defined('CSS_JS_DEBUG') && CSS_JS_DEBUG === true);
         $this->controller->view->setPath($this->_pathView); // Module path
-        $this->controller->view->setCoreModulePath($this->_pathRoot . CORE_MODULES_URI); // Core-Fallback
+        $this->controller->view->setCoreModulePath(\ckvsoft\Paths::coreModulesDir()); // Core-Fallback (shared)
         // --- Call the requested method with parameters ---
         if (isset($this->_uriMethod)) {
             $method = $this->_uriMethod;

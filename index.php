@@ -24,13 +24,26 @@
  * THE SOFTWARE.
  */
 
-require_once 'library/ckvsoft/autoload.php';
+// ---------------------------------------------------------------------
+// Shared-Split-Instanz (siehe contrib/shared-split/site-index.php):
+// - Der Site-Stub setzt CEVIAN_SITE_ROOT VOR dem require dieses Files.
+// - Standalone (kein Stub, Tests, alte Bäume): beide Konstanten fallen
+//   auf diesen Baum zurück -> byte-gleiches Verhalten wie bisher.
+// ---------------------------------------------------------------------
+if (!defined('CEVIAN_ROOT')) {
+    define('CEVIAN_ROOT', __DIR__ . '/');
+}
+if (!defined('CEVIAN_SITE_ROOT')) {
+    define('CEVIAN_SITE_ROOT', CEVIAN_ROOT);
+}
 
-// Autoload
+require_once __DIR__ . '/library/ckvsoft/autoload.php';
+
+// Autoload: geteiltes Framework + Site-Module
 $autoload = new \ckvsoft\Autoload([
     __DIR__ . '/library',
-    __DIR__ . '/modules',
-        ]);
+    \ckvsoft\Paths::siteRoot() . 'modules',
+]);
 
 $config = new \ckvsoft\mvc\Config();
 $configData = $config->getMergedConfig();
@@ -40,7 +53,7 @@ $phpSettings = $configData['php_settings'];
 ini_set('display_errors', $phpSettings['display_errors']);
 ini_set('display_startup_errors', $phpSettings['display_startup_errors']);
 ini_set('log_errors', $phpSettings['log_errors']);
-ini_set('error_log', __DIR__ . $phpSettings['error_log_path']);
+ini_set('error_log', \ckvsoft\Paths::siteRoot() . ltrim($phpSettings['error_log_path'], '/'));
 
 // Error Reporting
 $errorReportingLevel = match ($phpSettings['error_reporting']) {
@@ -68,7 +81,7 @@ define('HASH_KEY', $app['hash_key']);
 // --- Critical Checks ---
 if (empty($app['hash_key'])) {
     $bootstrap = new ckvsoft\mvc\Bootstrap();
-    $bootstrap->setPathRoot(getcwd() . '/');
+    $bootstrap->setPathRoot(\ckvsoft\Paths::siteRoot());
     $bootstrap->setControllerDefault('installer');
     $bootstrap->init();
     exit;
@@ -153,6 +166,6 @@ $_SESSION['LAST_ACTIVITY'] = time();
 
 // --- Bootstrap ---
 $bootstrap = new ckvsoft\mvc\Bootstrap();
-$bootstrap->setPathRoot(getcwd() . '/');
+$bootstrap->setPathRoot(\ckvsoft\Paths::siteRoot());
 $bootstrap->setControllerDefault($app['controller_default']);
 $bootstrap->init();
