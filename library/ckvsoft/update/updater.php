@@ -97,8 +97,8 @@ class Updater extends \ckvsoft\mvc\Config
         }
 
         // Load or initialize state file.
-        if (file_exists($configPath)) {
-            $raw = file_get_contents($configPath);
+        if (file_exists($this->configPath)) {
+            $raw = file_get_contents($this->configPath);
             $decoded = json_decode($raw, true);
             $this->config = (json_last_error() === JSON_ERROR_NONE && is_array($decoded))
                     ? $decoded
@@ -300,8 +300,6 @@ class Updater extends \ckvsoft\mvc\Config
         }
 
         if ($appliedAny) {
-            $this->setLastUpdatedVersion($this->getCurrentVersion());
-
             // Drop fresh-install marker so the module can react on its
             // next page load.
             if ($this->isFreshInstall && $this->scope !== '_core_') {
@@ -314,6 +312,14 @@ class Updater extends \ckvsoft\mvc\Config
                 }
             }
         }
+
+        // Stamp the version whenever needsUpdate() was true, even if
+        // nothing new was applied this run. Otherwise an already fully
+        // migrated scope with a stale/lost update.json (e.g. the old
+        // file_exists(null) loading bug) keeps needsUpdate()==true and
+        // re-runs the skip-loop (plus the fresh-install flag rewrite)
+        // on every single page load.
+        $this->setLastUpdatedVersion($this->getCurrentVersion());
 
         return $appliedAny;
     }
