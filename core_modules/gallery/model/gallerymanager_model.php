@@ -758,7 +758,16 @@ class GalleryManager_Model extends Gallery_Model
             return null;
         }
 
-        $item['url'] = BASE_URI . 'gallery/media/' . $item['album_path'] . '/' . urlencode($item['file']);
+        // Encode each URL segment (RFC 3986) — same scheme as Gallery_Model: the
+        // media controller urldecodes them again, so umlauts, spaces, '#' and '?'
+        // in album/file names survive instead of breaking the link.
+        $rawAlbumPath = trim((string) ($item['album_path'] ?? ''), '/');
+        $albumSegments = $rawAlbumPath === '' ? [] : explode('/', $rawAlbumPath);
+        $encodedAlbumPath = implode('/', array_map('rawurlencode', $albumSegments));
+        $mediaBase = BASE_URI . 'gallery/media/'
+                . ($encodedAlbumPath !== '' ? $encodedAlbumPath . '/' : '');
+
+        $item['url'] = $mediaBase . rawurlencode($item['file']);
 
         $pathInfo = pathinfo($item['file']);
         $nameNoExt = $pathInfo['filename'];
@@ -772,7 +781,7 @@ class GalleryManager_Model extends Gallery_Model
         }
 
         if ($thumbFile) {
-            $item['thumburl'] = BASE_URI . 'gallery/media/' . $item['album_path'] . '/' . urlencode($thumbFile);
+            $item['thumburl'] = $mediaBase . rawurlencode($thumbFile);
         } else {
             $item['thumburl'] = $item['url'];
         }
