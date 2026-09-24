@@ -19,6 +19,8 @@
 * **registration/diag (shared-split):** 3rd-party-Vendor-Autoload-Probe per Dirname-Kette auf Site-Root — zeigte im Shared-Modus fälschlich MISSING; jetzt `\ckvsoft\Paths::coreRoot()`
 * **pmwh3 installer (shared-split):** Framework-API-Probe (Fallback bei update.json 0.0.0) suchte `library/` am Site-Root; jetzt `\ckvsoft\Paths::coreRoot()` — funktioniert in beiden Modi
 * **qrkupdates:** bewusst NICHT angefasst — `dirname(__DIR__, 4)`-Datenpfad-Fallback löst im Shared-Split identisch auf wie vorher (modules bleiben im Site-Root), vorbestehendes Verhalten unverändert
+* **.htaccess (Wurzel):** aus dem Track genommen (`git rm --cached`) — die Form ist site-spezifisch (QRK-Hatches, BASE_URI; der Installer erzeugt sie NICHT, nur Hinweis). Vorlage: `contrib/htaccess.example` (Stand der QRK-Form). Die Schutz-.htaccess (`config/`, `library/`, `core_modules/`, `modules/`, `var/`) bleiben getrackt — frische Installs/der `_cevian`-Klon brauchen den `Require all denied`/`Deny from all`-Schutz
+* **site-index.php (Stub):** Root-Auflösung flexibel — env `CEVIAN_ROOT` (z. B. FPM/VHost-SetEnv) hat Vorrang, sonst Klartext-Pfad im Stub; klarer 500-Fehlertext statt PHP-Fatal, wenn der geteilte Baum fehlt (Servers mit anderer Struktur = eine Zeile/env statt Umbau)
 
 ### [0.18.5-260924]
 

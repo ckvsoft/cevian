@@ -1,3 +1,26 @@
+# ============================================================================
+# cevian — Wurzel-.htaccess VORLAGE (Beispiel)
+# ----------------------------------------------------------------------------
+# Diese Datei wird NICHT versioniert (git-ignored: /.htaccess) und der
+# Framework-Installer legt sie auch nicht an (er zeigt nur einen Hinweis,
+# die RewriteBase auf den BASE_URI der Site zu setzen).
+#
+# Vorgehen pro SITE: diese Vorlage nach <site-docroot>/.htaccess kopieren
+# und an die Site anpassen:
+#
+#   - RewriteBase:     auf den BASE_URI der Site (z. B. /cevian/ oder /)
+#   - QRK-Hatches:     NUR übernehmen, wenn die Site die qrkupdates-
+#                      Endpoints über dieses URL-Schema bedient
+#                      (z. B. service.ckvsoft.at/cevian/qrkupdates/...)
+#   - https-/Domain-Umleitung: an die Gegebenheiten der Site anpassen
+#
+# Hinweis: Die QRK-(Qt)-Update-Clients rufen die Endpoints über PLAIN http
+# auf und folgen KEINEN 301-Redirects — die Hatches unten halten genau
+# diese Pfade vom https-Zwang ausgenommen. QSA am $1-Rewrite ist zwingend
+# (rspamd-map-Endpoints brauchen ?key= durch bis zu $_GET).
+#
+# Stand: 2026-09-18 QRK-Form (frühere Commits 183a96d / 8891b34).
+# ============================================================================
 AddDefaultCharset UTF-8
 
 RewriteEngine On
