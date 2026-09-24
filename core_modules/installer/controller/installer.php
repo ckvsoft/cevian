@@ -11,14 +11,14 @@ class Installer extends ckvsoft\mvc\Controller
     {
         parent::__construct();
 
-        $configPath = __DIR__ . '/../../../config/config.json';
-        $appPath = __DIR__ . '/../../../config/app.json';
+        $configPath = \ckvsoft\Paths::siteRoot() . 'config/config.json';
+        $appPath = \ckvsoft\Paths::siteRoot() . 'config/app.json';
         if (file_exists($configPath) && file_exists($appPath)) {
             error_log("Installer is locked. Application already installed.");
             $this->location(BASE_URI);
         }
 
-        $this->stateFile = __DIR__ . '/../../../var/installer_state.json';
+        $this->stateFile = \ckvsoft\Paths::siteRoot() . 'var/installer_state.json';
         if (!file_exists(dirname($this->stateFile))) {
             mkdir(dirname($this->stateFile), 0775, true);
         }
@@ -71,7 +71,7 @@ class Installer extends ckvsoft\mvc\Controller
 
     public function checkSecurity()
     {
-        $fullPath = __DIR__ . '/../../../' . $this->securityFile;
+        $fullPath = \ckvsoft\Paths::siteRoot() . $this->securityFile;
         $ok = file_exists($fullPath);
 
         // Erst prüfen, dann State setzen
@@ -203,7 +203,7 @@ class Installer extends ckvsoft\mvc\Controller
             }
         }
 
-        $fullSecurityPath = __DIR__ . '/../../../' . $this->securityFile;
+        $fullSecurityPath = \ckvsoft\Paths::siteRoot() . $this->securityFile;
         if (file_exists($fullSecurityPath)) {
             if (@unlink($fullSecurityPath)) {
                 $deletedFiles[] = $fullSecurityPath;

@@ -61,7 +61,7 @@ class Gallery_Model extends Model
     {
         parent::__construct();
         $relativePath = trim(Config::get('paths.albums_relative_path') ?? 'public/albums/', '/');
-        $this->basePath = __DIR__ . '/../../../' . $relativePath . '/';
+        $this->basePath = \ckvsoft\Paths::siteRoot() . $relativePath . '/';
 
         $this->albumsBaseUrl = BASE_URI . $relativePath . '/';
     }

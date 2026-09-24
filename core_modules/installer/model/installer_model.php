@@ -36,7 +36,7 @@ class Installer_model extends ckvsoft\mvc\Model
             }
 
             // App-Hash-Key und Base-URI prüfen / setzen
-            $appFile = __DIR__ . '/../../../config/app.json';
+            $appFile = \ckvsoft\Paths::siteRoot() . 'config/app.json';
 
             if (file_exists($appFile)) {
                 $app = json_decode(file_get_contents($appFile), true);
@@ -78,7 +78,7 @@ class Installer_model extends ckvsoft\mvc\Model
                 ]
             ];
 
-            file_put_contents(__DIR__ . '/../../../config/config.json', json_encode($config, JSON_PRETTY_PRINT));
+            file_put_contents(\ckvsoft\Paths::siteRoot() . 'config/config.json', json_encode($config, JSON_PRETTY_PRINT));
             file_put_contents($appFile, json_encode($app, JSON_PRETTY_PRINT));
 
             return ['success' => true];

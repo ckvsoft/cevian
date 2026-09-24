@@ -132,7 +132,7 @@ class Backup extends ckvsoft\mvc\BaseController
 
     public function listImageDirs()
     {
-        $baseDir = realpath(__DIR__ . '/../../../');
+        $baseDir = realpath(\ckvsoft\Paths::siteRoot());
         $exclude = ['core_modules', 'library', 'var/backup'];
 
         $foundDirs = [];

@@ -11,6 +11,15 @@
 * **cli.php:** lädt den Autoloader direkt aus der library/ und arbeitet gegen `Paths::coreRoot()`
 * **contrib/shared-split:** 5-Zeilen-Site-Stub (`site-index.php`, Klartext-Pfad, kein Symlink) + README mit Migrations-/Deploy-Rezept
 
+### Fixes
+
+* **installer (shared-split):** Framework-Installer (`core_modules/installer`) schrieb config.json/app.json/Lock-Check/State/Tokendatei über `__DIR__`-Aufstiege in den Framework-Baum — im Shared-Modus landete das im geteilten `_cevian` statt im Site-Docroot (Cross-Site-Lock: Site-A-Installation blockierte Site-B, Site selbst fand ihre config.json nie). Alle Ziele auf `\ckvsoft\Paths::siteRoot()` umgestellt; Standalone bleibt byte-gleich (siteRoot == Wurzel)
+* **gallery (shared-split):** `Gallery_Model::basePath` (Albums-Verzeichnis) per `__DIR__`-Aufstieg auf den Framework-Baum — im Shared-Modus zeigte es auf `_cevian/public/albums/` statt Site-`public/albums/` (kvasny-relevant); jetzt `\ckvsoft\Paths::siteRoot()`
+* **backup (shared-split):** `listImageDirs` scannte per `realpath(__DIR__.'/../../../')` den Framework-Baum statt des Sites (würde `_cevian` durchsuchen); jetzt `\ckvsoft\Paths::siteRoot()`
+* **registration/diag (shared-split):** 3rd-party-Vendor-Autoload-Probe per Dirname-Kette auf Site-Root — zeigte im Shared-Modus fälschlich MISSING; jetzt `\ckvsoft\Paths::coreRoot()`
+* **pmwh3 installer (shared-split):** Framework-API-Probe (Fallback bei update.json 0.0.0) suchte `library/` am Site-Root; jetzt `\ckvsoft\Paths::coreRoot()` — funktioniert in beiden Modi
+* **qrkupdates:** bewusst NICHT angefasst — `dirname(__DIR__, 4)`-Datenpfad-Fallback löst im Shared-Split identisch auf wie vorher (modules bleiben im Site-Root), vorbestehendes Verhalten unverändert
+
 ### [0.18.5-260924]
 
 ### Fixes
