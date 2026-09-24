@@ -6,6 +6,7 @@
 * **gallery:** `getAlbumIdByPath()` no longer auto-creates album rows on view counting — albums are created exclusively by the gallery manager (upload/rescan); empty/unrelated `gallery_albums` entries (root-view auto-create, garbage names) can no longer appear
 * **gallery (security):** `getFilePath()` rejects file names with path separators, null bytes or dot-dot — prevents reading outside the album directory via `%2F`/`%5C`/`%00` traversal in the media URL
 * **gallery (umlauts/URLs):** media + thumbnail URLs are built with `rawurlencode()` per path segment (album + file); the media controller urldecodes them again, so umlauts, spaces, `#`, `?` in file/album names survive the round-trip — restores behaviour that was previously present in the file-scan gallery variant
+* **gallery (admin):** manager media URLs (url + thumb) now also `rawurlencode()` the album path segments (file part was already encoded) — consistent with `Gallery_Model`, so album names with spaces/umlauts no longer break links in the management views
 
 ### [0.18.4-260919]
 
