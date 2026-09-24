@@ -30,9 +30,12 @@
 -- and skips files that already ran, so this needs no explicit
 -- existence-check shell -- it gets executed exactly once per DB.
 
-ALTER TABLE `permissions`
-    ADD COLUMN `module` VARCHAR(64) NOT NULL DEFAULT '__core__' AFTER `permKey`,
-    ADD INDEX `permissions_module` (`module`);
+-- NOTE: the `permissions` half of this migration was already rolled out
+-- by 0.18.2.sql (which sorts before this file, SORT_NATURAL). Re-adding
+-- the column here fails with "Duplicate column name 'module'" on every
+-- existing DB -- and because the migration then never gets stamped, the
+-- boot-time updater retries (and errors) forever. Only `roles` is still
+-- missing the column, so THAT is all this file touches.
 
 ALTER TABLE `roles`
     ADD COLUMN `module` VARCHAR(64) NOT NULL DEFAULT '__core__' AFTER `roleName`,
