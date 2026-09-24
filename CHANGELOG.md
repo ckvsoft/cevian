@@ -1,3 +1,12 @@
+### [0.18.5-260924]
+
+### Fixes
+
+* **gallery:** view counter only increments for files that actually exist — bogus 404 requests (bot scanners, truncated names, `*.map` sourcemap probes) no longer pollute `gallery_media_stats`
+* **gallery:** `getAlbumIdByPath()` no longer auto-creates album rows on view counting — albums are created exclusively by the gallery manager (upload/rescan); empty/unrelated `gallery_albums` entries (root-view auto-create, garbage names) can no longer appear
+* **gallery (security):** `getFilePath()` rejects file names with path separators, null bytes or dot-dot — prevents reading outside the album directory via `%2F`/`%5C`/`%00` traversal in the media URL
+* **gallery (umlauts/URLs):** media + thumbnail URLs are built with `rawurlencode()` per path segment (album + file); the media controller urldecodes them again, so umlauts, spaces, `#`, `?` in file/album names survive the round-trip — restores behaviour that was previously present in the file-scan gallery variant
+
 ### [0.18.4-260919]
 
 ### Features

@@ -25,7 +25,6 @@
  */
 
 use ckvsoft\mvc\Model;
-use ckvsoft\CkvException;
 use ckvsoft\DbExpr;
 use ckvsoft\SizeConverter;
 use ckvsoft\Auth;
@@ -84,11 +83,13 @@ class Gallery_Model extends Model
     }
 
     /**
-     * Retrieves the album ID by its path, creating a new entry if none exists.
+     * Retrieves the album ID by its path. Creates NO entries — albums are created
+     * exclusively by the gallery manager (upload/rescan). Without this, bogus 404
+     * requests (bot scanners, truncated names) would pollute gallery_albums with
+     * empty or unrelated rows.
      * @param string $albumPath The path of the album.
-     * @param ?int $currentUserId The ID of the current user for ownership tracking (used on creation).
-     * @return int The album ID.
-     * @throws CkvException If the album ID cannot be determined or created.
+     * @param ?int $currentUserId Kept for API compatibility (no longer used — no creation).
+     * @return int The album ID, or 0 if the album is not registered.
      */
     private function getAlbumIdByPath(string $albumPath, ?int $currentUserId = null): int
     {
@@ -103,26 +104,7 @@ class Gallery_Model extends Model
             return (int) $album['album_id'];
         }
 
-        $data = [
-            'album_path' => $normalizedPath,
-            'permissions_level' => 2, // Default to Private (Owner Only)
-            'owner_user_id' => $currentUserId,
-        ];
-
-        $albumId = $this->db->insertUpdate('gallery_albums', $data);
-        if ($albumId > 0) {
-            return (int) $albumId;
-        }
-
-        $album = $this->db->selectOne(
-                "SELECT `album_id` FROM `gallery_albums` WHERE `album_path` = :path",
-                ['path' => $normalizedPath]
-        );
-        if (!empty($album)) {
-            return (int) $album['album_id'];
-        }
-
-        throw new CkvException("Could not determine or create album_id for path '{$normalizedPath}'.");
+        return 0;
     }
 
     /**
@@ -165,16 +147,16 @@ class Gallery_Model extends Model
 
     /**
      * Increments the view counter for a specific media file within an album.
+     * Albums are never created here (see getAlbumIdByPath) — if the album is not
+     * registered in the DB, nothing is counted.
      * @param string $albumPath The path of the album.
      * @param string $fileName The name of the media file.
-     * @param ?int $currentUserId The ID of the current user (passed to getAlbumIdByPath if creation is needed).
+     * @param ?int $currentUserId Kept for API compatibility.
      */
     public function incrementViewCounter(string $albumPath, string $fileName, ?int $currentUserId = null): void
     {
-        try {
-            $albumId = $this->getAlbumIdByPath($albumPath, $currentUserId);
-        } catch (CkvException $e) {
-            error_log("Database error during album ID retrieval: " . $e->getMessage());
+        $albumId = $this->getAlbumIdByPath($albumPath, $currentUserId);
+        if ($albumId <= 0) {
             return;
         }
 
@@ -187,10 +169,11 @@ class Gallery_Model extends Model
     }
 
     /**
-     * Retrieves the physical file path for a media item after checking permissions and incrementing view count.
+     * Retrieves the physical file path for a media item after checking permissions
+     * and incrementing the view count (only for files that actually exist).
      * @param string $albumName The album path.
      * @param string $fileName The file name.
-     * @return string|null The full file path, or null if not permitted.
+     * @return string|null The full file path, or null if not permitted / invalid.
      */
     public function getFilePath(string $albumName, string $fileName): ?string
     {
@@ -199,16 +182,30 @@ class Gallery_Model extends Model
             return null;
         }
 
+        // Security: accept only plain file names. $fileName reaches this method
+        // urldecoded (from the URL), so reject any path separators, null bytes
+        // and dot-dot — they would otherwise escape the album directory.
+        if ($fileName === '' || $fileName === '.' || $fileName === '..'
+                || str_contains($fileName, '/') || str_contains($fileName, '\\')
+                || str_contains($fileName, "\0")) {
+            return null;
+        }
+
+        $filePath = rtrim($this->basePath, '/') . '/' . trim($albumName, '/') . '/' . $fileName;
+
         $currentUserId = Auth::getUserId();
         $nameNoExt = pathinfo($fileName, PATHINFO_FILENAME);
 
         $isThumbnail = str_ends_with(strtolower($nameNoExt), '_thumb');
 
-        if (!$isThumbnail) {
+        // Only count views for files that actually exist — bogus 404 requests
+        // (bot scanners, truncated or non-existent names) must not pollute
+        // gallery_media_stats.
+        if (!$isThumbnail && file_exists($filePath)) {
             $this->incrementViewCounter($albumName, $fileName, $currentUserId);
         }
 
-        return rtrim($this->basePath, '/') . '/' . trim($albumName, '/') . '/' . $fileName;
+        return $filePath;
     }
 
     public function getFileModifiedTimeFromDB(string $album, string $file): ?int
@@ -224,10 +221,8 @@ class Gallery_Model extends Model
 
         $normalizedFile = $name . $ext;
 
-        try {
-            $albumId = $this->getAlbumIdByPath($album);
-        } catch (CkvException $e) {
-            error_log("DB error retrieving album ID: " . $e->getMessage());
+        $albumId = $this->getAlbumIdByPath($album);
+        if ($albumId <= 0) {
             return null;
         }
 
@@ -543,8 +538,15 @@ class Gallery_Model extends Model
             $fileName = $item['file'];
             $albumPath = $item['album_path'];
 
-            $mediaPath = trim($albumPath, '/') . '/' . $fileName;
-            $item['url'] = BASE_URI . 'gallery/media/' . $mediaPath;
+            // Encode each URL segment (RFC 3986). The media controller urldecodes
+            // them again, so umlauts, spaces, '#' and '?' in file/album names
+            // survive the round-trip instead of breaking the link.
+            $albumSegments = $albumPath === '' ? [] : explode('/', trim($albumPath, '/'));
+            $encodedAlbumPath = implode('/', array_map('rawurlencode', $albumSegments));
+            $mediaBase = BASE_URI . 'gallery/media/'
+                    . ($encodedAlbumPath !== '' ? $encodedAlbumPath . '/' : '');
+
+            $item['url'] = $mediaBase . rawurlencode($fileName);
 
             $fileParts = pathinfo($fileName);
             $baseName = $fileParts['filename'] ?? '';
@@ -555,8 +557,7 @@ class Gallery_Model extends Model
             $thumbFileName = $baseName . '_thumb.' . $thumbExt;
 
             if ($this->_doesThumbnailExist($albumPath, $thumbFileName)) {
-                $thumbPath = trim($albumPath, '/') . '/' . $thumbFileName;
-                $item['thumburl'] = BASE_URI . 'gallery/media/' . $thumbPath;
+                $item['thumburl'] = $mediaBase . rawurlencode($thumbFileName);
             } else {
                 if ($item['type'] === 'video') {
                     $item['thumburl'] = self::DEFAULT_VIDEO_THUMB_URL;
