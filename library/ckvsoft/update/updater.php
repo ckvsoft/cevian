@@ -124,7 +124,15 @@ class Updater extends \ckvsoft\mvc\Config
             $this->sqlDir = $this->resolveModuleSqlDir($module);
         }
 
-        $this->saveConfig();
+        // Initialize the state file ONLY when it does not exist yet.
+        // The unconditional saveConfig() that used to live here wrote
+        // update.json on EVERY request (cevian-installer lesson: the
+        // core installer's lock is read-only per request) -- each of
+        // those writes was a lost-update window that could wipe module
+        // stamps and re-arm the fresh-install path on live installs.
+        if (!file_exists($this->configPath)) {
+            $this->saveConfig();
+        }
     }
 
     /**
@@ -147,9 +155,14 @@ class Updater extends \ckvsoft\mvc\Config
 
     private function saveConfig(): void
     {
+        // LOCK_EX: two concurrent requests (cron collector, double
+        // fetches) must never interleave -- a lost update here used to
+        // wipe module stamps, which re-armed the fresh-install path
+        // (baseline replay + freshly_installed.flag) on LIVE installs.
         @file_put_contents(
                 $this->configPath,
-                json_encode($this->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                json_encode($this->config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+                LOCK_EX
         );
     }
 
